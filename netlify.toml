@@ -1,8 +1,14 @@
 [build]
   command = "npm run build"
   publish = ".netlify/output"
-  functions = ".netlify/functions"
+  functions = "netlify/functions"
   environment = { DIST_DIR = ".netlify/output" }
+
+[[redirects]]
+  from = "/api/checkout"
+  to = "/.netlify/functions/checkout"
+  status = 200
+  force = true
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
