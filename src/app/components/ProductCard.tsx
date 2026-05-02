@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import AppImage from '@/components/ui/AppImage';
 import Icon from '@/components/ui/AppIcon';
 import { useCart } from '@/context/CartContext';
+'use client';
+
 import { useLanguage } from '@/context/LanguageContext';
 
 export interface Product {

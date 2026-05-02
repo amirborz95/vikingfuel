@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import AppImage from '@/components/ui/AppImage';
 import Icon from '@/components/ui/AppIcon';
+'use client';
+
 import { useLanguage } from '@/context/LanguageContext';
 
 const stats = [

@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 
 import Icon from '@/components/ui/AppIcon';
+'use client';
+
 import { useLanguage } from '@/context/LanguageContext';
 
 const trustItemIcons = ['TruckIcon', 'ShieldCheckIcon', 'ArrowPathIcon', 'SparklesIcon', 'BoltIcon'];

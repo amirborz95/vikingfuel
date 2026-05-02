@@ -2,6 +2,8 @@
 
 import React from 'react';
 import Marquee from 'react-fast-marquee';
+'use client';
+
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function AnnouncementBar() {
