@@ -34,13 +34,25 @@ export async function POST(req: NextRequest) {
       }),
     });
 
+    const text = await response.text();
+    console.log('Google Sheets response:', response.status, text);
+
     if (!response.ok) {
-      const text = await response.text();
       console.error('Google Sheets webhook error', response.status, text);
       return NextResponse.json(
         { error: 'Kunde inte spara e-post just nu. Försök igen senare.' },
         { status: 502 }
       );
+    }
+
+    // Försök parsa JSON men ignorera om det misslyckas
+    let result: any = {};
+    if (text) {
+      try {
+        result = JSON.parse(text);
+      } catch (parseError) {
+        console.warn('Could not parse Google Sheets response JSON:', parseError);
+      }
     }
 
     return NextResponse.json({ success: true });

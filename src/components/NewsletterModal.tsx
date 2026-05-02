@@ -51,10 +51,21 @@ export default function NewsletterModal({ open, onClose, onSubmit, savedEmail }:
         body: JSON.stringify({ email: trimmedEmail }),
       });
 
-      const result = await response.json();
+      const text = await response.text();
+      let result: any = {};
+
+      if (text) {
+        try {
+          result = JSON.parse(text);
+        } catch (parseError) {
+          console.warn('Could not parse newsletter response JSON:', parseError, text);
+        }
+      }
 
       if (!response.ok) {
-        setError(result.error || 'Kunde inte skicka e-postadressen. Försök igen senare.');
+        setError(
+          result?.error || 'Kunde inte skicka e-postadressen. Försök igen senare.'
+        );
         return;
       }
 
