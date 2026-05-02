@@ -50,7 +50,7 @@ export default function TermsPage() {
                 <section>
                   <h2 className="text-2xl font-bold text-foreground mb-4">Ångerrätt och retur</h2>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    Du har 30 dagars öppet köp från leveransdatum. Retur ska ske i felfritt skick och i originalförpackning om möjligt.
+                    Du har 15 dagars öppet köp från leveransdatum. Retur ska ske i felfritt skick och i originalförpackning om möjligt.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
                     Returkostnad kan tillkomma, och återbetalning sker när vi mottagit och kontrollerat varan.

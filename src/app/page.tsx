@@ -5,7 +5,6 @@ import HeroSection from './components/HeroSection';
 import CategoryBanners from './components/CategoryBanners';
 import ProductsSection from './components/ProductsSection';
 import TrustBenefits from './components/TrustBenefits';
-import IngredientsSection from './components/IngredientsSection';
 import CTASection from './components/CTASection';
 import Footer from '@/components/Footer';
 
@@ -19,7 +18,6 @@ export default function HomePage() {
         <TrustBenefits />
         <CategoryBanners />
         <ProductsSection />
-        <IngredientsSection />
         <CTASection />
       </main>
       <Footer />
