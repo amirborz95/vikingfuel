@@ -1,8 +1,10 @@
 [build]
   command = "npm run build"
   publish = ".netlify/output"
-  functions = ".netlify/functions"
   environment = { DIST_DIR = ".netlify/output" }
+
+[functions]
+  directory = "netlify/functions"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
