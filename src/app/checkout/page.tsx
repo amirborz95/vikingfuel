@@ -65,17 +65,23 @@ export default function CheckoutPage() {
             price: item.price,
             quantity: item.quantity,
             image: item.image,
+            priceId: item.priceId,
           })),
           customer: {
             name: formData.name,
             email: formData.email,
             phone: formData.phone,
+            address: formData.address,
+            city: formData.city,
+            postalCode: formData.postalCode,
+            country: formData.country,
           },
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create checkout session');
+        const errorBody = await response.json().catch(() => null);
+        throw new Error(errorBody?.error || 'Failed to create checkout session');
       }
 
       const { url } = await response.json();
@@ -102,12 +108,12 @@ export default function CheckoutPage() {
           <div className="lg:col-span-2">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <h2 className="text-xl font-semibold text-foreground mb-4">Personlig information</h2>
+                <h2 className="text-xl font-semibold text-foreground mb-4">
+                  Personlig information
+                </h2>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Namn *
-                    </label>
+                    <label className="block text-sm font-medium text-foreground mb-1">Namn *</label>
                     <input
                       type="text"
                       name="name"
