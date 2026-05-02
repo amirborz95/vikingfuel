@@ -132,12 +132,6 @@ export default function Header() {
             {/* Right Actions */}
             <div className="flex items-center gap-1">
               <button
-                className="p-2 rounded-lg hover:bg-muted transition-colors text-foreground/70 hover:text-foreground"
-              >
-                <Icon name="MagnifyingGlassIcon" size={20} />
-              </button>
-
-              <button
                 onClick={openCart}
                 className="relative p-2 rounded-lg hover:bg-muted transition-colors text-foreground/70 hover:text-foreground"
               >
