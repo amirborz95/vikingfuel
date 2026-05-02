@@ -45,7 +45,6 @@ export default function Header() {
     { label: t?.nav?.home, href: '/' },
     { label: t?.nav?.products, href: '/products', hasMega: true },
     { label: t?.nav?.about, href: '/about' },
-    { label: t?.nav?.reviews, href: '/reviews' },
     { label: t?.nav?.faq, href: '/faq' },
     { label: t?.nav?.contact, href: '/contact' },
   ];
