@@ -4,6 +4,9 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import AppImage from '@/components/ui/AppImage';
+import Icon from '@/components/ui/AppIcon';
+import { useCart } from '@/context/CartContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 export interface Product {
   id: string;
