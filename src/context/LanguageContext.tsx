@@ -156,6 +156,11 @@ interface Translations {
     };
     shippingReturnText: string;
   };
+  faq: {
+    title: string;
+    subtitle: string;
+    items: { question: string; answer: string }[];
+  };
 }
 
 const translations: Record<Lang, Translations> = {
@@ -379,6 +384,28 @@ const translations: Record<Lang, Translations> = {
       },
       shippingReturnText: '14 dagars ångerrätt från mottagningsdatum. Produkten ska vara oöppnad och i originalförpackning.',
     },
+    faq: {
+      title: 'Vanliga frågor',
+      subtitle: 'Här hittar du svar på de vanligaste frågorna om våra produkter.',
+      items: [
+        {
+          question: 'Vad är Viking Fuel?',
+          answer: 'Viking Fuel är ett premiumtillskott från Norden som hjälper dig att prestera bättre varje dag med naturliga ingredienser.'
+        },
+        {
+          question: 'Hur tar jag produkten?',
+          answer: 'Ta 1 kapsel per dag med vatten, helst på morgonen eller innan träning.'
+        },
+        {
+          question: 'Är produkten säker?',
+          answer: 'Ja, alla våra produkter är tillverkade i EU enligt högsta säkerhetsstandarder med naturliga ingredienser.'
+        },
+        {
+          question: 'Kan jag kombinera med andra tillskott?',
+          answer: 'Konsultera alltid en läkare innan du kombinerar tillskott. Våra produkter är designade för dagligt bruk.'
+        }
+      ]
+    },
   },
   en: {
     nav: {
@@ -599,6 +626,28 @@ const translations: Record<Lang, Translations> = {
         shippingReturn: 'Shipping & returns',
       },
       shippingReturnText: '14-day right of withdrawal from receipt date. The product must be unopened and in its original packaging.',
+    },
+    faq: {
+      title: 'Frequently Asked Questions',
+      subtitle: 'Here you will find answers to the most common questions about our products.',
+      items: [
+        {
+          question: 'What is Viking Fuel?',
+          answer: 'Viking Fuel is a premium supplement from the Nordics that helps you perform better every day with natural ingredients.'
+        },
+        {
+          question: 'How do I take the product?',
+          answer: 'Take 1 capsule per day with water, preferably in the morning or before training.'
+        },
+        {
+          question: 'Is the product safe?',
+          answer: 'Yes, all our products are manufactured in the EU according to the highest safety standards with natural ingredients.'
+        },
+        {
+          question: 'Can I combine it with other supplements?',
+          answer: 'Always consult a doctor before combining supplements. Our products are designed for daily use.'
+        }
+      ]
     },
   },
 };
