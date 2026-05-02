@@ -15,7 +15,7 @@ const bundles = [
     id: 'bundle-1',
     label: 'Köp 1',
     sublabel: '60 kapslar',
-    price: 349,
+    price: 10,
     oldPrice: 0,
     image: 'https://cdn.corenexis.com/files/c/2491997720.png',
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_1 || '',
