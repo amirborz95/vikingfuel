@@ -2,12 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import Icon from '@/components/ui/AppIcon';
-import ProductCard, { Product } from './ProductCard';
 'use client';
 
-import { useLanguage } from '@/context/LanguageContext';
+import { motion } from 'framer-motion';
 
 export const allProducts: Product[] = [
   {

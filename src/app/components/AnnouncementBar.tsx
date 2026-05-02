@@ -1,10 +1,8 @@
 'use client';
 
-import React from 'react';
-import Marquee from 'react-fast-marquee';
 'use client';
 
-import { useLanguage } from '@/context/LanguageContext';
+import React from 'react';
 
 export default function AnnouncementBar() {
   const { t } = useLanguage();

@@ -1,12 +1,9 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import Icon from '@/components/ui/AppIcon';
 'use client';
 
-import { useLanguage } from '@/context/LanguageContext';
+import Link from 'next/link';
 
 export default function CTASection() {
   const { t } = useLanguage();
