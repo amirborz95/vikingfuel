@@ -2,6 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
+import Icon from '@/components/ui/AppIcon';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function CTASection() {
   const { t } = useLanguage();

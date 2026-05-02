@@ -1,6 +1,12 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import AppImage from '@/components/ui/AppImage';
+import Icon from '@/components/ui/AppIcon';
+import { useCart } from '@/context/CartContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQuantity, totalPrice } = useCart();

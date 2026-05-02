@@ -1,6 +1,9 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
+import Icon from '@/components/ui/AppIcon';
+import { useLanguage } from '@/context/LanguageContext';
 
 const benefitIcons = ['TruckIcon', 'LockClosedIcon', 'BoltIcon', 'ArrowPathIcon', 'SparklesIcon'];
 

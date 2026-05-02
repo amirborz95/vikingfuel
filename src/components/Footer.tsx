@@ -1,6 +1,10 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
+import AppLogo from '@/components/ui/AppLogo';
+import Icon from '@/components/ui/AppIcon';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Footer() {
   const { t } = useLanguage();

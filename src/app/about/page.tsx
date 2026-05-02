@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { useLanguage } from '@/context/LanguageContext';
 import AnnouncementBar from '../components/AnnouncementBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -40,8 +39,6 @@ const values = [
 ];
 
 export default function AboutPage() {
-  const { t } = useLanguage();
-
   return (        <div className="min-h-screen bg-white">
           <AnnouncementBar />
           <Header />
