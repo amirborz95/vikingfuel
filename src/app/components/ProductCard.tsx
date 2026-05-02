@@ -3,8 +3,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-'use client';
-
 import AppImage from '@/components/ui/AppImage';
 
 export interface Product {

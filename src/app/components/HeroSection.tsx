@@ -3,8 +3,6 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-'use client';
-
 import { motion } from 'framer-motion';
 
 const trustItemIcons = ['TruckIcon', 'ShieldCheckIcon', 'ArrowPathIcon', 'SparklesIcon', 'BoltIcon'];
