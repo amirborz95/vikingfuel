@@ -1,69 +1,72 @@
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import AnnouncementBar from '../components/AnnouncementBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export default function ReturnPolicyPage() {
+  const { t } = useLanguage();
+
   return (        <div className="min-h-screen bg-white">
           <AnnouncementBar />
           <Header />
           <main className="py-20">
             <div className="container-wide">
               <div className="text-center mb-12">
-                <h1 className="text-4xl font-extrabold text-foreground mb-4">Returpolicy</h1>
+                <h1 className="text-4xl font-extrabold text-foreground mb-4">Return Policy</h1>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Vi vill göra retur och återbetalning så enkelt som möjligt. Läs vår kompletta returpolicy här.
+                  We want to make returns and refunds as easy as possible. Read our complete return policy here.
                 </p>
               </div>
 
               <div className="max-w-4xl mx-auto space-y-10">
                 <section>
-                  <h2 className="text-2xl font-bold text-foreground mb-4">Öppet köp i 30 dagar</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">30-day returns</h2>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    Vi erbjuder 30 dagars öppet köp från den dag du mottagit din beställning. Om du av någon anledning vill returnera en produkt, ber vi dig kontakta vår kundtjänst för att påbörja returprocessen.
+                    We offer 30 days to change your mind from the date you receive your order. If for any reason you want to return a product, please contact our customer service to initiate the return process.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Returavgiften kan bero på vilken leveransmetod du väljer. Återbetalning sker när vi mottagit och kontrollerat varan.
+                    Return fees may vary depending on the shipping method you choose. Refunds are made when we have received and checked the item.
                   </p>
                 </section>
 
                 <section>
-                  <h2 className="text-2xl font-bold text-foreground mb-4">Hur du returnerar</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">How to return</h2>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    För att returnera en order, kontakta oss på info@vikingfuel.se. Ange ditt ordernummer och vilken vara du vill returnera.
+                    To return an order, contact us at info@vikingfuel.se. Provide your order number and which item you want to return.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Vi skickar instruktioner om returetikett och adress. Var noga med att produkten returneras i oskadat skick och i originalförpackning om möjligt.
+                    We will send you instructions for the return label and address. Make sure the product is returned in undamaged condition and in original packaging if possible.
                   </p>
                 </section>
 
                 <section>
-                  <h2 className="text-2xl font-bold text-foreground mb-4">Villkor för retur</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">Return conditions</h2>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    För att godkännas som retur måste produkten vara oanvänd och i samma skick som vid mottagandet. Produkt med tydliga tecken på användning kan nekas retur eller återbetalning.
+                    For a return to be accepted, the product must be unused and in the same condition as when received. Products showing clear signs of use may be denied return or refund.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Dock ersätter vi självklart produkter som är felaktiga, skadade eller levereras felaktigt.
+                    However, we of course replace products that are faulty, damaged, or delivered incorrectly.
                   </p>
                 </section>
 
                 <section>
-                  <h2 className="text-2xl font-bold text-foreground mb-4">Återbetalningstid</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">Refund time</h2>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    När vi mottagit och granskat din retur återbetalar vi summan till samma betalningsmetod som användes vid köpet. Detta sker normalt inom 7–14 dagar.
+                    When we receive and review your return, we refund the amount to the same payment method used at purchase. This normally takes 7–14 days.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Eventuella fraktkostnader för returen täcks av dig om det inte rör sig om felaktig eller skadad leverans.
+                    Any return shipping costs are covered by you unless it is due to faulty or damaged delivery.
                   </p>
                 </section>
 
                 <section>
-                  <h2 className="text-2xl font-bold text-foreground mb-4">Skadade eller felaktiga varor</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">Damaged or incorrect items</h2>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    Om du fått en vara som är skadad, felaktig eller inte motsvarar beskrivningen, kontakta oss direkt så löser vi det utan dröjsmål.
+                    If you receive an item that is damaged, incorrect, or does not match the description, contact us immediately and we will resolve it without delay.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Vi ersätter eller byter ut produkten och hjälper dig med returfrakten om det behövs.
+                    We will replace or exchange the product and help you with return shipping if needed.
                   </p>
                 </section>
               </div>

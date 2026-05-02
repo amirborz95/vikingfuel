@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import AnnouncementBar from '../components/AnnouncementBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -7,36 +8,38 @@ import AppImage from '@/components/ui/AppImage';
 import Icon from '@/components/ui/AppIcon';
 
 const stats = [
-  { value: '200+', label: 'Nöjda kunder' },
-  { value: '8', label: 'Aktiva ingredienser' },
-  { value: 'EU', label: 'Tillverkning' },
-  { value: '2024', label: 'Grundat' },
+  { value: '200+', label: 'Happy customers' },
+  { value: '8', label: 'Active ingredients' },
+  { value: 'EU', label: 'Manufacturing' },
+  { value: '2024', label: 'Founded' },
 ];
 
 const values = [
   {
     icon: 'ShieldCheckIcon',
-    title: 'Kvalitet först',
-    description: 'Vi väljer endast de bästa naturliga ingredienserna och tillverkar enligt högsta standarder.'
+    title: 'Quality first',
+    description: 'We only choose the best natural ingredients and manufacture according to the highest standards.'
   },
   {
     icon: 'GlobeAltIcon',
-    title: 'Nordisk identitet',
-    description: 'Vårt arv från Norden genomsyrar allt vi gör - från design till våra värderingar.'
+    title: 'Nordic identity',
+    description: 'Our Nordic heritage runs through everything we do - from design to our values.'
   },
   {
     icon: 'BeakerIcon',
-    title: 'Vetenskap & natur',
-    description: 'Vi kombinerar traditionell kunskap med modern forskning för optimala resultat.'
+    title: 'Science & nature',
+    description: 'We combine traditional knowledge with modern research for optimal results.'
   },
   {
     icon: 'HeartIcon',
-    title: 'Hälsa & prestation',
-    description: 'Vi hjälper människor att leva hälsosammare och prestera bättre varje dag.'
+    title: 'Health & performance',
+    description: 'We help people live healthier and perform better every day.'
   }
 ];
 
 export default function AboutPage() {
+  const { t } = useLanguage();
+
   return (        <div className="min-h-screen bg-white">
           <AnnouncementBar />
           <Header />
@@ -49,11 +52,11 @@ export default function AboutPage() {
                     <AppLogo size={80} />
                   </div>
                   <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground mb-6">
-                    Om Viking Fuel
+                    About Viking Fuel
                   </h1>
                   <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                    Vi är ett nordiskt premiumvarumärke inom kosttillskott som hjälper människor att leva hälsosammare,
-                    starkare och mer energiska liv genom naturliga, effektiva produkter.
+                    We are a Nordic premium brand in dietary supplements that helps people live healthier,
+                    stronger, and more energetic lives through natural, effective products.
                   </p>
                 </div>
               </div>
@@ -87,30 +90,30 @@ export default function AboutPage() {
 
                   {/* Right — Text */}
                   <div>
-                    <span className="section-label block mb-4">Vår historia</span>
+                    <span className="section-label block mb-4">Our story</span>
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-6 leading-tight text-balance">
-                      Byggt för daglig prestation
+                      Built for daily performance
                     </h2>
                     <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-                      Viking Fuel grundades 2024 med visionen att skapa kosttillskott som verkligen fungerar.
-                      Vi såg att marknaden var fylld av produkter med vaga ingredienslistor och överdrivna påståenden.
-                      Därför bestämde vi oss för att göra något annorlunda.
+                      Viking Fuel was founded in 2024 with the vision of creating supplements that really work.
+                      We saw that the market was filled with products with vague ingredient lists and exaggerated claims.
+                      So we decided to do something different.
                     </p>
                     <p className="text-base text-muted-foreground leading-relaxed mb-6">
-                      Vi kombinerar stark nordisk identitet med tydliga, naturliga ingredienser och modern design.
-                      Varje produkt är noggrant utvecklad för att ge verkliga resultat - inte bara fina förpackningar.
+                      We combine strong Nordic identity with clear, natural ingredients and modern design.
+                      Every product is carefully developed to deliver real results - not just nice packaging.
                     </p>
                     <p className="text-base text-muted-foreground leading-relaxed mb-8">
-                      Idag hjälper vi hundratals människor att leva mer energiska, hälsosamma och produktiva liv.
-                      Och vi är bara i början av vår resa.
+                      Today we help hundreds of people live more energetic, healthy, and productive lives.
+                      And we're just getting started.
                     </p>
 
                     <ul className="space-y-3 mb-10">
                       {[
-                        'Naturliga ingredienser utan onödiga tillsatser',
-                        'Tillverkat i EU enligt GMP-standard',
-                        'Transparenta ingredienslistor',
-                        'Fri från gluten och laktos',
+                        'Natural ingredients without unnecessary additives',
+                        'Manufactured in the EU according to GMP standards',
+                        'Transparent ingredient lists',
+                        'Free from gluten and lactose',
                       ]?.map((item) => (
                         <li key={item} className="flex items-center gap-3">
                           <span className="w-5 h-5 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
@@ -129,12 +132,12 @@ export default function AboutPage() {
             <section className="py-20 bg-muted/30">
               <div className="container-wide">
                 <div className="text-center mb-16">
-                  <span className="section-label block mb-4">Våra värderingar</span>
+                  <span className="section-label block mb-4">Our values</span>
                   <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-6">
-                    Vad vi står för
+                    What we stand for
                   </h2>
                   <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                    Våra värderingar genomsyrar allt vi gör - från produktutveckling till kundservice.
+                    Our values run through everything we do - from product development to customer service.
                   </p>
                 </div>
 
@@ -156,13 +159,13 @@ export default function AboutPage() {
             <section className="py-20 bg-white">
               <div className="container-wide">
                 <div className="text-center max-w-4xl mx-auto">
-                  <span className="section-label block mb-4">Vårt uppdrag</span>
+                  <span className="section-label block mb-4">Our mission</span>
                   <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-8">
-                    Hjälpa människor att leva bättre liv
+                    Help people live better lives
                   </h2>
                   <p className="text-xl text-muted-foreground leading-relaxed mb-8">
-                    Vi tror att små förändringar kan göra stora skillnader. Genom att erbjuda högkvalitativa,
-                    naturliga kosttillskott hjälper vi människor att:
+                    We believe that small changes can make big differences. By offering high-quality,
+                    natural supplements we help people to:
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
@@ -170,33 +173,33 @@ export default function AboutPage() {
                       <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Icon name="BoltIcon" size={32} className="text-primary" />
                       </div>
-                      <h3 className="text-lg font-bold text-foreground mb-2">Få mer energi</h3>
-                      <p className="text-muted-foreground">Starta dagen stark och bibehålla energin genom hela dagen</p>
+                      <h3 className="text-lg font-bold text-foreground mb-2">Get more energy</h3>
+                      <p className="text-muted-foreground">Start the day strong and maintain energy all day long</p>
                     </div>
                     <div className="text-center">
                       <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Icon name="ClockIcon" size={32} className="text-primary" />
                       </div>
-                      <h3 className="text-lg font-bold text-foreground mb-2">Öka uthålligheten</h3>
-                      <p className="text-muted-foreground">Prestera bättre under längre perioder, oavsett aktivitet</p>
+                      <h3 className="text-lg font-bold text-foreground mb-2">Increase endurance</h3>
+                      <p className="text-muted-foreground">Perform better over longer periods, regardless of activity</p>
                     </div>
                     <div className="text-center">
                       <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Icon name="SparklesIcon" size={32} className="text-primary" />
                       </div>
-                      <h3 className="text-lg font-bold text-foreground mb-2">Förbättra välbefinnandet</h3>
-                      <p className="text-muted-foreground">Känna sig friskare, starkare och mer balanserad</p>
+                      <h3 className="text-lg font-bold text-foreground mb-2">Improve wellbeing</h3>
+                      <p className="text-muted-foreground">Feel healthier, stronger, and more balanced</p>
                     </div>
                   </div>
 
                   <div className="bg-primary/5 rounded-3xl p-8 md:p-12">
-                    <h3 className="text-2xl font-bold text-foreground mb-4">Vill du vara med på resan?</h3>
+                    <h3 className="text-2xl font-bold text-foreground mb-4">Want to join the journey?</h3>
                     <p className="text-lg text-muted-foreground mb-6">
-                      Vi är stolta över våra produkter och ännu stoltare över våra kunder.
-                      Varje dag får vi höra från människor vars liv har förbättrats tack vare våra tillskott.
+                      We are proud of our products and even prouder of our customers.
+                      Every day we hear from people whose lives have improved thanks to our supplements.
                     </p>
                     <p className="text-base text-muted-foreground">
-                      Och vi är bara i början. Tillsammans bygger vi framtiden för naturliga kosttillskott i Norden.
+                      And we're just getting started. Together we're building the future for natural dietary supplements in the Nordics.
                     </p>
                   </div>
                 </div>

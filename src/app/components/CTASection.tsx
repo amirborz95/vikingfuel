@@ -28,7 +28,7 @@ export default function CTASection() {
           <div className="relative z-10">
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 text-primary text-xs font-bold uppercase tracking-wide mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-              Begränsat erbjudande
+              {t.cta.badge}
             </span>
 
             <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white mb-4 text-balance">

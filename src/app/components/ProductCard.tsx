@@ -123,7 +123,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
           {added ? (
             <>
               <Icon name="CheckIcon" size={16} />
-              Tillagd!
+              {t.productCard.added}
             </>
           ) : (
             <>

@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function CheckoutPage() {
   const { items, totalPrice } = useCart();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
   const [formData, setFormData] = useState({
@@ -31,10 +33,10 @@ export default function CheckoutPage() {
       <div className="min-h-screen bg-white pt-24">
         <div className="container-wide">
           <div className="text-center py-12">
-            <h1 className="text-3xl font-bold text-foreground mb-4">Din varukorg är tom</h1>
-            <p className="text-muted-foreground mb-8">Lägg till produkter innan du checkar ut</p>
+            <h1 className="text-3xl font-bold text-foreground mb-4">{t.cart.empty}</h1>
+            <p className="text-muted-foreground mb-8">{t.checkout.emptyCartSubtitle}</p>
             <Link href="/products" className="btn-primary inline-flex">
-              Tillbaka till produkter
+              {t.buttons.shopNow}
             </Link>
           </div>
         </div>
@@ -87,7 +89,7 @@ export default function CheckoutPage() {
       }
     } catch (error: any) {
       console.error('Checkout error:', error);
-      alert('Ett fel uppstod vid checkout - försök igen senare');
+      alert(t.checkout.errorMessage);
       setLoading(false);
     }
   };
@@ -95,18 +97,18 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-white pt-24 pb-12">
       <div className="container-wide">
-        <h1 className="text-3xl font-bold text-foreground mb-8">Kassa</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-8">{t.checkout.title}</h1>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Form */}
           <div className="lg:col-span-2">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <h2 className="text-xl font-semibold text-foreground mb-4">Personlig information</h2>
+                <h2 className="text-xl font-semibold text-foreground mb-4">{t.checkout.personalInfo}</h2>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
-                      Namn *
+                      {t.checkout.nameLabel}
                     </label>
                     <input
                       type="text"
@@ -121,7 +123,7 @@ export default function CheckoutPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">
-                        E-mail *
+                        {t.checkout.emailLabel}
                       </label>
                       <input
                         type="email"
@@ -134,7 +136,7 @@ export default function CheckoutPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">
-                        Telefon *
+                        {t.checkout.phoneLabel}
                       </label>
                       <input
                         type="tel"
@@ -150,11 +152,11 @@ export default function CheckoutPage() {
               </div>
 
               <div>
-                <h2 className="text-xl font-semibold text-foreground mb-4">Leveransadress</h2>
+                <h2 className="text-xl font-semibold text-foreground mb-4">{t.checkout.shippingAddress}</h2>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
-                      Adress *
+                      {t.checkout.addressLabel}
                     </label>
                     <input
                       type="text"
@@ -162,7 +164,7 @@ export default function CheckoutPage() {
                       required
                       value={formData.address}
                       onChange={handleChange}
-                      placeholder="Gatunamn och husnummer"
+                      placeholder={t.checkout.addressPlaceholder}
                       className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
@@ -170,7 +172,7 @@ export default function CheckoutPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">
-                        Stad *
+                        {t.checkout.cityLabel}
                       </label>
                       <input
                         type="text"
@@ -183,7 +185,7 @@ export default function CheckoutPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-1">
-                        Postnummer *
+                        {t.checkout.postalCodeLabel}
                       </label>
                       <input
                         type="text"
@@ -197,7 +199,7 @@ export default function CheckoutPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">Land *</label>
+                    <label className="block text-sm font-medium text-foreground mb-1">{t.checkout.countryLabel}</label>
                     <select
                       name="country"
                       required
@@ -205,10 +207,10 @@ export default function CheckoutPage() {
                       onChange={handleChange}
                       className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     >
-                      <option value="SE">Sverige</option>
-                      <option value="NO">Norge</option>
-                      <option value="DK">Danmark</option>
-                      <option value="FI">Finland</option>
+                      <option value="SE">{t.checkout.countryOptionSE}</option>
+                      <option value="NO">{t.checkout.countryOptionNO}</option>
+                      <option value="DK">{t.checkout.countryOptionDK}</option>
+                      <option value="FI">{t.checkout.countryOptionFI}</option>
                     </select>
                   </div>
                 </div>
@@ -219,7 +221,7 @@ export default function CheckoutPage() {
                 disabled={loading}
                 className="w-full btn-primary py-3 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Behandlar...' : 'Gå till betalning'}
+                {loading ? t.checkout.processing : t.checkout.payButton}
               </button>
             </form>
           </div>
@@ -227,8 +229,7 @@ export default function CheckoutPage() {
           {/* Order Summary */}
           <div className="lg:col-span-1">
             <div className="bg-muted rounded-lg p-6 sticky top-24">
-              <h2 className="text-xl font-semibold text-foreground mb-4">Ordersammanfattning</h2>
-
+              <h2 className="text-xl font-semibold text-foreground mb-4">{t.checkout.orderSummary}</h2>
               <div className="space-y-3 mb-4 pb-4 border-b border-border">
                 {items.map((item) => (
                   <div key={item.id} className="flex justify-between text-sm">
@@ -243,14 +244,14 @@ export default function CheckoutPage() {
               </div>
 
               <div className="flex justify-between items-center mb-4">
-                <span className="font-semibold text-foreground">Totalt:</span>
+                <span className="font-semibold text-foreground">{t.checkout.totalLabel}</span>
                 <span className="text-2xl font-bold text-primary">
                   {totalPrice.toLocaleString('sv-SE')} kr
                 </span>
               </div>
 
               <p className="text-xs text-muted-foreground">
-                Fri frakt på beställningar över 500 kr. Under 500 kr tillkommer 49 kr fraktkostnad.
+                {t.checkout.shippingNote}
               </p>
             </div>
           </div>

@@ -8,16 +8,14 @@ import { motion } from 'framer-motion';
 import Icon from '@/components/ui/AppIcon';
 import { useLanguage } from '@/context/LanguageContext';
 
-const trustItems = [
-  { icon: 'TruckIcon', label: 'Fri frakt', sub: 'Över 500 kr' },
-  { icon: 'ShieldCheckIcon', label: 'Säker betalning', sub: 'Krypterad checkout' },
-  { icon: 'ArrowPathIcon', label: '14 dagars retur', sub: 'Enkel returprocess' },
-  { icon: 'SparklesIcon', label: 'Premium kvalitet', sub: 'Tillverkad i EU' },
-  { icon: 'BoltIcon', label: 'Snabb leverans', sub: '1–3 arbetsdagar' },
-];
+const trustItemIcons = ['TruckIcon', 'ShieldCheckIcon', 'ArrowPathIcon', 'SparklesIcon', 'BoltIcon'];
 
 export default function HeroSection() {
   const { t } = useLanguage();
+  const trustItems = t.trustBenefits.items.map((item, index) => ({
+    ...item,
+    icon: trustItemIcons[index] as any,
+  }));
 
   return (
     <>
@@ -86,7 +84,7 @@ export default function HeroSection() {
               transition={{ duration: 0.6, delay: 0.35 }}
               className="text-[11px] font-bold tracking-[0.18em] uppercase text-[#16a34a] mb-3"
             >
-              Premium Kosttillskott
+              {t.hero.premiumTag}
             </motion.p>
 
             <motion.h2
@@ -95,7 +93,7 @@ export default function HeroSection() {
               transition={{ duration: 0.7, delay: 0.42, ease: [0.16, 1, 0.3, 1] }}
               className="text-white font-bold text-xl sm:text-2xl lg:text-3xl leading-[1.2] tracking-[-0.01em] mb-3"
             >
-              BYGGD FÖR DAGLIG PRESTATION.
+              {t.hero.headline}
             </motion.h2>
 
             <motion.p
@@ -104,7 +102,7 @@ export default function HeroSection() {
               transition={{ duration: 0.7, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
               className="text-[#e2e8f0] text-sm sm:text-base leading-relaxed mb-7"
             >
-              Utforska Viking Fuel – kosttillskott för energi, uthållighet och vitalitet.
+              {t.hero.description}
             </motion.p>
 
             <motion.div

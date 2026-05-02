@@ -10,127 +10,126 @@ import { useLanguage } from '@/context/LanguageContext';
 import ProductCard from '@/app/components/ProductCard';
 import { allProducts } from '@/app/components/ProductsSection';
 
-const bundles = [
-  {
-    id: 'bundle-1',
-    label: 'Köp 1',
-    sublabel: '60 kapslar',
-    price: 10,
-    oldPrice: 0,
-    image: 'https://cdn.corenexis.com/files/c/2491997720.png',
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_1 || '',
-    imageAlt: 'Single Viking Fuel Energy supplement bottle on white clean background',
-    tag: null,
-  },
-  {
-    id: 'bundle-2',
-    label: 'Köp 3',
-    sublabel: '180 kapslar',
-    price: 942,
-    oldPrice: 1047,
-    image: 'https://cdn.corenexis.com/files/c/1977886720.png',
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_3 || '',
-    imageAlt: 'Three Viking Fuel Energy supplement bottles arranged together on white background',
-    tag: '10% rabatt',
-  },
-  {
-    id: 'bundle-3',
-    label: 'Köp 6',
-    sublabel: '360 kapslar',
-    price: 1675,
-    oldPrice: 2094,
-    image: 'https://cdn.corenexis.com/files/c/8571187720.png',
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_6 || '',
-    imageAlt: 'Six Viking Fuel Energy supplement bottles arranged in rows on white background',
-    tag: '20% rabatt',
-  },
-];
-
-const tabs = ['Beskrivning', 'Ingredienser', 'Användning', 'Frakt & retur'];
-
-const tabContent: Record<string, React.ReactNode> = {
-  Beskrivning: (
-    <div className="prose prose-sm max-w-none text-muted-foreground">
-      <p className="mb-4">
-        Viking Energy är ett premium energitillskott utvecklat för männen som vill prestera på topp
-        varje dag. Formuleringen kombinerar beprövade adaptogener med essentiella mineraler för att
-        stödja naturlig energiproduktion, mental skärpa och fysisk uthållighet.
-      </p>
-      <p>
-        Varje kapsel är noggrant doserad för maximal effekt utan onödiga tillsatser. Tillverkat i EU
-        enligt GMP-standard med fullt transparenta ingredienslistor.
-      </p>
-    </div>
-  ),
-
-  Ingredienser: (
-    <div className="space-y-3">
-      {[
-        { name: 'Maca-extrakt', amount: '500 mg' },
-        { name: 'Ashwagandha (KSM-66)', amount: '300 mg' },
-        { name: 'Tribulus Terrestris', amount: '250 mg' },
-        { name: 'Panax Ginseng', amount: '200 mg' },
-        { name: 'Ingefäraextrakt', amount: '100 mg' },
-        { name: 'Zink', amount: '10 mg' },
-        { name: 'Selen', amount: '55 µg' },
-        { name: 'Piperin (BioPerine)', amount: '5 mg' },
-      ].map((ing) => (
-        <div
-          key={ing.name}
-          className="flex justify-between items-center py-2.5 border-b border-border last:border-0"
-        >
-          <span className="text-sm font-medium text-foreground">{ing.name}</span>
-          <span className="text-sm font-bold text-primary">{ing.amount}</span>
-        </div>
-      ))}
-    </div>
-  ),
-
-  Användning: (
-    <div className="space-y-4 text-sm text-muted-foreground">
-      <p>
-        <strong className="text-foreground">Rekommenderad dosering:</strong> 2 kapslar dagligen med
-        vatten, helst på morgonen med eller utan mat.
-      </p>
-      <p>
-        <strong className="text-foreground">Kur:</strong> Bäst resultat uppnås vid kontinuerlig
-        användning i minst 4–6 veckor.
-      </p>
-      <p>
-        <strong className="text-foreground">Observera:</strong> Kosttillskott ersätter inte en
-        varierad och balanserad kost. Förvaras utom räckhåll för barn.
-      </p>
-    </div>
-  ),
-
-  'Frakt & retur': (
-    <div className="space-y-4 text-sm text-muted-foreground">
-      <div>
-        <p className="font-semibold text-foreground mb-1">Leveranstid</p>
-        <p>1–3 vardagar inom Sverige. Expressleveras via PostNord eller DHL.</p>
-      </div>
-      <div>
-        <p className="font-semibold text-foreground mb-1">Fri frakt</p>
-        <p>Fri frakt på alla ordrar över 500 kr. Under 500 kr tillkommer 49 kr fraktkostnad.</p>
-      </div>
-      <div>
-        <p className="font-semibold text-foreground mb-1">Retur</p>
-        <p>
-          14 dagars ångerrätt från mottagningsdatum. Produkten ska vara oöppnad och i
-          originalförpackning.
-        </p>
-      </div>
-    </div>
-  ),
-};
-
 export default function ProductDetailView() {
+  const { t } = useLanguage();
   const [selectedBundle, setSelectedBundle] = useState(0);
-  const [activeTab, setActiveTab] = useState('Beskrivning');
+  const [activeTab, setActiveTab] = useState(t.productDetail.sectionTitles.description);
   const [quantity, setQuantity] = useState(1);
   const [addedMsg, setAddedMsg] = useState(false);
   const { addItem } = useCart();
-  const { t } = useLanguage();
+
+  const bundles = [
+    {
+      id: 'bundle-1',
+      label: 'Buy 1',
+      sublabel: '60 capsules',
+      price: 349,
+      oldPrice: 0,
+      image: 'https://cdn.corenexis.com/files/c/2491997720.png',
+      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_1 || '',
+      imageAlt: 'Single Viking Fuel Energy supplement bottle on white clean background',
+      tag: null,
+    },
+    {
+      id: 'bundle-2',
+      label: 'Buy 3',
+      sublabel: '180 capsules',
+      price: 942,
+      oldPrice: 1047,
+      image: 'https://cdn.corenexis.com/files/c/1977886720.png',
+      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_3 || '',
+      imageAlt: 'Three Viking Fuel Energy supplement bottles arranged together on white background',
+      tag: '10% discount',
+    },
+    {
+      id: 'bundle-3',
+      label: 'Buy 6',
+      sublabel: '360 capsules',
+      price: 1675,
+      oldPrice: 2094,
+      image: 'https://cdn.corenexis.com/files/c/8571187720.png',
+      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_6 || '',
+      imageAlt: 'Six Viking Fuel Energy supplement bottles arranged in rows on white background',
+      tag: '20% discount',
+    },
+  ];
+
+  const tabs = [
+    t.productDetail.sectionTitles.description,
+    t.productDetail.sectionTitles.ingredients,
+    t.productDetail.sectionTitles.usage,
+    t.productDetail.sectionTitles.shippingReturn,
+  ];
+
+  const tabContent: Record<string, React.ReactNode> = {
+    [t.productDetail.sectionTitles.description]: (
+      <div className="prose prose-sm max-w-none text-muted-foreground">
+        <p className="mb-4">
+          Viking Energy is a premium energy supplement developed for those who want to perform at their best every day. The formula combines proven adaptogens with essential minerals to support natural energy production, mental sharpness, and physical endurance.
+        </p>
+        <p>
+          Each capsule is carefully dosed for maximum effect without unnecessary additives. Manufactured in the EU according to GMP standards with fully transparent ingredient lists.
+        </p>
+      </div>
+    ),
+
+    [t.productDetail.sectionTitles.ingredients]: (
+      <div className="space-y-3">
+        {[
+          { name: 'Maca extract', amount: '500 mg' },
+          { name: 'Ashwagandha (KSM-66)', amount: '300 mg' },
+          { name: 'Tribulus Terrestris', amount: '250 mg' },
+          { name: 'Panax Ginseng', amount: '200 mg' },
+          { name: 'Ginger extract', amount: '100 mg' },
+          { name: 'Zinc', amount: '10 mg' },
+          { name: 'Selenium', amount: '55 µg' },
+          { name: 'Piperine (BioPerine)', amount: '5 mg' },
+        ].map((ing) => (
+          <div
+            key={ing.name}
+            className="flex justify-between items-center py-2.5 border-b border-border last:border-0"
+          >
+            <span className="text-sm font-medium text-foreground">{ing.name}</span>
+            <span className="text-sm font-bold text-primary">{ing.amount}</span>
+          </div>
+        ))}
+      </div>
+    ),
+
+    [t.productDetail.sectionTitles.usage]: (
+      <div className="space-y-4 text-sm text-muted-foreground">
+        <p>
+          <strong className="text-foreground">Recommended dosage:</strong> 2 capsules daily with
+          water, preferably in the morning with or without food.
+        </p>
+        <p>
+          <strong className="text-foreground">Duration:</strong> Best results are achieved with continuous
+          use for at least 4–6 weeks.
+        </p>
+        <p>
+          <strong className="text-foreground">Note:</strong> Dietary supplements do not replace a
+          varied and balanced diet. Keep out of reach of children.
+        </p>
+      </div>
+    ),
+
+    [t.productDetail.sectionTitles.shippingReturn]: (
+      <div className="space-y-4 text-sm text-muted-foreground">
+        <div>
+          <p className="font-semibold text-foreground mb-1">Delivery time</p>
+          <p>1–3 business days in Sweden. Express shipping via PostNord or DHL.</p>
+        </div>
+        <div>
+          <p className="font-semibold text-foreground mb-1">Free shipping</p>
+          <p>Free shipping on all orders over 500 SEK. Orders under 500 SEK incur a 49 SEK shipping fee.</p>
+        </div>
+        <div>
+          <p className="font-semibold text-foreground mb-1">Returns</p>
+          <p>{t.productDetail.shippingReturnText}</p>
+        </div>
+      </div>
+    ),
+  };
 
   const bundle = bundles[selectedBundle];
   const discount = bundle.oldPrice > 0 ? Math.round((1 - bundle.price / bundle.oldPrice) * 100) : 0;
@@ -148,6 +147,7 @@ export default function ProductDetailView() {
     setTimeout(() => setAddedMsg(false), 2000);
   };
 
+
   return (
     <>
       {/* Breadcrumb */}
@@ -155,14 +155,14 @@ export default function ProductDetailView() {
         <div className="container-wide">
           <nav className="flex items-center gap-2 text-xs text-muted-foreground">
             <Link href="/" className="hover:text-primary transition-colors">
-              Hem
+              {t.productDetail.breadcrumbHome}
             </Link>
             <Icon name="ChevronRightIcon" size={12} />
             <Link href="/products" className="hover:text-primary transition-colors">
-              Produkter
+              {t.productDetail.breadcrumbProducts}
             </Link>
             <Icon name="ChevronRightIcon" size={12} />
-            <span className="text-foreground font-medium">Viking Energy</span>
+            <span className="text-foreground font-medium">{t.productDetail.productName}</span>
           </nav>
         </div>
       </div>
@@ -202,18 +202,17 @@ export default function ProductDetailView() {
 
               {/* Trust badges below image */}
               <div className="grid grid-cols-3 gap-3 mt-4">
-                {[
-                  { icon: 'GlobeEuropeAfricaIcon', label: 'Tillverkat i EU' },
-                  { icon: 'ShieldCheckIcon', label: 'GMP-certifierat' },
-                  { icon: 'TruckIcon', label: 'Fri frakt >500kr' },
-                ].map((b) => (
+                {t.productDetail.trustBadges.map((b) => (
                   <div
                     key={b.label}
                     className="flex flex-col items-center gap-1.5 p-3 bg-muted rounded-xl text-center"
                   >
-                    <Icon name={b.icon as any} size={18} className="text-primary" />
+                    <Icon name="SparklesIcon" size={18} className="text-primary" />
                     <span className="text-[10px] font-semibold text-foreground leading-tight">
                       {b.label}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground leading-tight">
+                      {b.description}
                     </span>
                   </div>
                 ))}
@@ -225,7 +224,7 @@ export default function ProductDetailView() {
               {/* Badge */}
               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-accent rounded-full text-xs font-bold text-primary mb-4">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                Nyhet
+                New
               </span>
 
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-3 leading-tight">
@@ -240,19 +239,19 @@ export default function ProductDetailView() {
                   ))}
                 </div>
                 <span className="text-sm font-bold text-foreground">4.9</span>
-                <span className="text-sm text-muted-foreground">(45 recensioner)</span>
+                <span className="text-sm text-muted-foreground">(45 {t.productDetail.reviewsLabel})</span>
               </div>
 
-              {/* Price */}
-              <div className="flex items-baseline gap-3 mb-8 pb-8 border-b border-border">
-                <span className="text-4xl font-extrabold text-foreground">{bundle.price} kr</span>
+              {/* Price section */}
+              <div className="mb-6">
+                <p className="text-4xl font-extrabold text-foreground mb-2">{bundle.price} SEK</p>
                 {bundle.oldPrice > 0 && (
                   <>
                     <span className="text-xl text-muted-foreground line-through">
-                      {bundle.oldPrice} kr
+                      {bundle.oldPrice} SEK
                     </span>
-                    <span className="text-sm font-bold text-primary bg-accent px-2.5 py-1 rounded-full">
-                      Spara {bundle.oldPrice - bundle.price} kr
+                    <span className="text-sm font-bold text-primary bg-accent px-2.5 py-1 rounded-full ml-2">
+                      Save {bundle.oldPrice - bundle.price} SEK
                     </span>
                   </>
                 )}
@@ -260,7 +259,7 @@ export default function ProductDetailView() {
 
               {/* Bundle selector */}
               <div className="mb-8">
-                <p className="text-sm font-bold text-foreground mb-3">Välj paket:</p>
+                <p className="text-sm font-bold text-foreground mb-3">Select bundle:</p>
                 <div className="space-y-3">
                   {bundles.map((b, i) => (
                     <button
@@ -294,10 +293,10 @@ export default function ProductDetailView() {
                           </span>
                         )}
                         <div className="text-right">
-                          <p className="text-sm font-extrabold text-foreground">{b.price} kr</p>
+                          <p className="text-sm font-bold text-foreground">{b.price} SEK</p>
                           {b.oldPrice > 0 && (
                             <p className="text-[10px] text-muted-foreground line-through">
-                              {b.oldPrice} kr
+                              {b.oldPrice} SEK
                             </p>
                           )}
                         </div>
@@ -337,7 +336,7 @@ export default function ProductDetailView() {
                 >
                   {addedMsg ? (
                     <>
-                      <Icon name="CheckIcon" size={16} /> Tillagd i varukorgen!
+                      <Icon name="CheckIcon" size={16} /> Added to cart!
                     </>
                   ) : (
                     <>
@@ -357,15 +356,13 @@ export default function ProductDetailView() {
 
               {/* Benefits */}
               <div className="mt-6 pt-6 border-t border-border grid grid-cols-2 gap-3">
-                {[
-                  { icon: 'TruckIcon', label: 'Fri frakt över 500 kr' },
-                  { icon: 'ArrowPathIcon', label: '14 dagars retur' },
-                  { icon: 'ShieldCheckIcon', label: 'Säker betalning' },
-                  { icon: 'SparklesIcon', label: 'Premium kvalitet' },
-                ].map((b) => (
-                  <div key={b.label} className="flex items-center gap-2">
-                    <Icon name={b.icon as any} size={15} className="text-primary flex-shrink-0" />
-                    <span className="text-xs text-muted-foreground">{b.label}</span>
+                {t.trustBenefits.items.map((b) => (
+                  <div key={b.title} className="flex items-center gap-2">
+                    <Icon name="TruckIcon" size={15} className="text-primary flex-shrink-0" />
+                    <div>
+                      <p className="text-xs font-bold text-foreground">{b.title}</p>
+                      <p className="text-xs text-muted-foreground">{b.subtitle}</p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -414,7 +411,7 @@ export default function ProductDetailView() {
       <section className="py-16 bg-muted/30">
         <div className="container-wide">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-8">
-            Relaterade produkter
+            Related products
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {allProducts.map((product, i) => (

@@ -1,24 +1,27 @@
 import React from 'react';
 import Link from 'next/link';
+import { useLanguage } from '@/context/LanguageContext';
 import AnnouncementBar from '../components/AnnouncementBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export default function ContactPage() {
+  const { t } = useLanguage();
+
   return (        <div className="min-h-screen bg-white">
           <AnnouncementBar />
           <Header />
           <main className="py-20">
             <div className="container-wide">
               <div className="text-center mb-12">
-                <h1 className="text-4xl font-extrabold text-foreground mb-4">Kontakt</h1>
-                <p className="text-lg text-muted-foreground">Har du frågor? Kontakta oss så hjälper vi dig.</p>
+                <h1 className="text-4xl font-extrabold text-foreground mb-4">{t.nav.contact}</h1>
+                <p className="text-lg text-muted-foreground">Do you have questions? Contact us and we'll help you.</p>
               </div>
               <div className="max-w-2xl mx-auto">
                 <div className="bg-muted/30 rounded-2xl p-8">
                   <div className="space-y-6">
                     <div>
-                      <h3 className="text-lg font-bold text-foreground mb-2">E-post</h3>
+                      <h3 className="text-lg font-bold text-foreground mb-2">Email</h3>
                       <p className="text-muted-foreground">
                         <a href="mailto:info@vikingfuel.se" className="hover:text-primary transition-colors">
                           info@vikingfuel.se
@@ -28,24 +31,24 @@ export default function ContactPage() {
                     <div>
                       <h3 className="text-lg font-bold text-foreground mb-2">Support</h3>
                       <p className="text-muted-foreground">
-                        Vår kundtjänst svarar snabbt på frågor om beställningar, produkter och leverans.
+                        Our customer service responds quickly to questions about orders, products, and shipping.
                       </p>
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-foreground mb-2">Frakt & leverans</h3>
+                      <h3 className="text-lg font-bold text-foreground mb-2">Shipping & delivery</h3>
                       <p className="text-muted-foreground">
-                        Läs mer om leveranstider och fraktkostnader på{' '}
+                        Learn more about delivery times and shipping costs at{' '}
                         <Link href="/frakt-leverans" className="hover:text-primary transition-colors">
-                          Frakt & leverans
+                          Shipping & delivery
                         </Link>.
                       </p>
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-foreground mb-2">Returpolicy</h3>
+                      <h3 className="text-lg font-bold text-foreground mb-2">Return policy</h3>
                       <p className="text-muted-foreground">
-                        Se vår fullständiga returpolicy för information om öppet köp, returer och återbetalningar på{' '}
+                        See our complete return policy for information about returns, refunds, and more at{' '}
                         <Link href="/returpolicy" className="hover:text-primary transition-colors">
-                          Returpolicy
+                          Return policy
                         </Link>.
                       </p>
                     </div>

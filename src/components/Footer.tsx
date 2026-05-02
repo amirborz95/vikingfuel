@@ -2,43 +2,11 @@ import React from 'react';
 import Link from 'next/link';
 import AppLogo from '@/components/ui/AppLogo';
 import Icon from '@/components/ui/AppIcon';
-
-const footerLinks = {
-  shop: {
-    title: 'Butik',
-    links: [
-      { label: 'Alla produkter', href: '/products' },
-      { label: 'Viking Energy', href: '/product-detail' },
-      { label: 'Paket', href: '/products' },
-    ],
-  },
-  info: {
-    title: 'Information',
-    links: [
-      { label: 'Om oss', href: '/about' },
-      { label: 'Ingredienser', href: '/#ingredients' },
-      { label: 'Vanliga frågor', href: '/faq' },
-      { label: 'Recensioner', href: '/reviews' },
-    ],
-  },
-  service: {
-    title: 'Kundservice',
-    links: [
-      { label: 'Kontakt', href: '/contact' },
-      { label: 'Frakt & leverans', href: '/frakt-leverans' },
-      { label: 'Returpolicy', href: '/returpolicy' },
-    ],
-  },
-  legal: {
-    title: 'Juridik',
-    links: [
-      { label: 'Köpvillkor', href: '/kopvillkor' },
-      { label: 'Integritetspolicy', href: '/integritetspolicy' },
-    ],
-  },
-};
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Footer() {
+  const { t } = useLanguage();
+
   return (
     <footer className="bg-white border-t border-border pt-16 pb-8">
       <div className="container-wide">
@@ -53,12 +21,11 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-[240px]">
-              Nordiska premiumtillskott för daglig prestation. Tillverkat i EU med naturliga
-              ingredienser.
+              {t.footer.brandDescription}
             </p>
             <p className="text-sm text-muted-foreground mt-3">
-              <a href="mailto:info@vikingfuel.se" className="hover:text-primary transition-colors">
-                info@vikingfuel.se
+              <a href={`mailto:${t.footer.email}`} className="hover:text-primary transition-colors">
+                {t.footer.email}
               </a>
             </p>
             <div className="flex gap-3 mt-4">
@@ -76,7 +43,7 @@ export default function Footer() {
           </div>
 
           {/* Link columns */}
-          {Object.values(footerLinks).map((col) => (
+          {Object.values(t.footer.links).map((col) => (
             <div key={col.title}>
               <h4 className="text-sm font-bold text-foreground mb-4">{col.title}</h4>
               <ul className="space-y-2.5">
@@ -98,10 +65,10 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-border">
           <p className="text-xs text-muted-foreground">
-            © 2026 Viking Fuel AB. Alla rättigheter förbehållna.
+            {t.footer.bottomText}
           </p>
           <div className="flex items-center gap-2 flex-wrap justify-center">
-            {['Visa', 'Mastercard', 'Klarna', 'Swish'].map((pay) => (
+            {t.footer.paymentMethods.map((pay) => (
               <span
                 key={pay}
                 className="px-3 py-1 text-[10px] font-bold rounded border border-border text-muted-foreground uppercase tracking-wide"

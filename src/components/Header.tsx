@@ -147,7 +147,7 @@ export default function Header() {
 
               <button
                 className="p-2 rounded-lg hover:bg-muted transition-colors text-foreground/70 hover:text-foreground"
-                aria-label="Sök"
+                aria-label={t.header.search}
               >
                 <Icon name="MagnifyingGlassIcon" size={20} />
               </button>
@@ -157,7 +157,7 @@ export default function Header() {
                   <Link
                     href="/account"
                     className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium text-foreground/70 hover:text-foreground"
-                    aria-label="Mitt konto"
+                    aria-label={t.header.account}
                   >
                     <Icon name="UserIcon" size={20} />
                     <span>{user.name}</span>
@@ -165,7 +165,7 @@ export default function Header() {
                   <button
                     onClick={logout}
                     className="p-2 rounded-lg hover:bg-muted transition-colors text-foreground/70 hover:text-foreground"
-                    aria-label="Logga ut"
+                    aria-label={t.header.logout}
                   >
                     <Icon name="ArrowRightOnRectangleIcon" size={20} />
                   </button>
@@ -174,17 +174,17 @@ export default function Header() {
                 <Link
                   href="/login"
                   className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium text-foreground/70 hover:text-foreground"
-                  aria-label="Konto"
+                  aria-label={t.header.account}
                 >
                   <Icon name="UserIcon" size={20} />
-                  <span>Logga in</span>
+                  <span>{t.header.signIn}</span>
                 </Link>
               )}
 
               <button
                 onClick={openCart}
                 className="relative p-2 rounded-lg hover:bg-muted transition-colors text-foreground/70 hover:text-foreground"
-                aria-label="Varukorg"
+                aria-label={t.header.cart}
               >
                 <Icon name="ShoppingCartIcon" size={20} />
                 {totalItems > 0 && (
@@ -198,7 +198,7 @@ export default function Header() {
               <button
                 className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors ml-1"
                 onClick={() => setMobileOpen(true)}
-                aria-label="Öppna meny"
+                aria-label={t.header.openMenu}
               >
                 <Icon name="Bars3Icon" size={22} />
               </button>
@@ -222,7 +222,7 @@ export default function Header() {
               <button
                 onClick={() => setMobileOpen(false)}
                 className="p-2 rounded-lg hover:bg-muted"
-                aria-label="Stäng meny"
+                aria-label={t.header.closeMenu}
               >
                 <Icon name="XMarkIcon" size={22} />
               </button>
@@ -256,7 +256,7 @@ export default function Header() {
                     }}
                     className="w-full px-4 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-muted rounded-xl transition-colors text-left"
                   >
-                    Logga ut
+                    {t.header.logout}
                   </button>
                 </>
               ) : (
@@ -266,14 +266,14 @@ export default function Header() {
                     onClick={() => setMobileOpen(false)}
                     className="block px-4 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-muted rounded-xl transition-colors"
                   >
-                    Logga in
+                    {t.header.signIn}
                   </Link>
                   <Link
                     href="/register"
                     onClick={() => setMobileOpen(false)}
                     className="block px-4 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-muted rounded-xl transition-colors"
                   >
-                    Skapa konto
+                    {t.header.register}
                   </Link>
                 </>
               )}

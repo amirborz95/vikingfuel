@@ -1,79 +1,82 @@
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import AnnouncementBar from '../components/AnnouncementBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export default function PrivacyPolicyPage() {
+  const { t } = useLanguage();
+
   return (        <div className="min-h-screen bg-white">
           <AnnouncementBar />
           <Header />
           <main className="py-20">
             <div className="container-wide">
               <div className="text-center mb-12">
-                <h1 className="text-4xl font-extrabold text-foreground mb-4">Integritetspolicy</h1>
+                <h1 className="text-4xl font-extrabold text-foreground mb-4">Privacy Policy</h1>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Vi värnar om din integritet och beskriver här hur vi samlar in och behandlar personuppgifter.
+                  We care about your privacy and describe how we collect and process personal data.
                 </p>
               </div>
 
               <div className="max-w-4xl mx-auto space-y-10">
                 <section>
-                  <h2 className="text-2xl font-bold text-foreground mb-4">Personuppgifter vi samlar in</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">Personal data we collect</h2>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    Vi samlar in uppgifter som namn, e-postadress, adress och telefonnummer när du lägger en order eller kontaktar oss.
+                    We collect information such as name, email address, address, and phone number when you place an order or contact us.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Dessa uppgifter används för att hantera din beställning, ge kundservice och skicka viktig information om din leverans.
+                    This information is used to process your order, provide customer service, and send important information about your delivery.
                   </p>
                 </section>
 
                 <section>
-                  <h2 className="text-2xl font-bold text-foreground mb-4">Ändamål med behandlingen</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">Purpose of processing</h2>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    Vi använder dina uppgifter för att fullgöra köpeavtal, administrera leverans, svara på förfrågningar och skicka orderbekräftelser.
+                    We use your data to fulfill purchase agreements, administer delivery, respond to inquiries, and send order confirmations.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Information kan även användas för att förbättra vår service och kommunikation, alltid med respekt för din integritet.
+                    Data may also be used to improve our service and communication, always with respect for your privacy.
                   </p>
                 </section>
 
                 <section>
-                  <h2 className="text-2xl font-bold text-foreground mb-4">Rättslig grund</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">Legal basis</h2>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    Behandlingen baseras på att det är nödvändigt för att fullgöra ett avtal med dig, samt på vårt berättigade intresse av att driva verksamheten.
+                    Processing is based on the necessity to fulfill an agreement with you and our legitimate interest in operating the business.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Vi behandlar endast personuppgifter i den omfattning som krävs för att leverera produkter och hantera kundrelationer.
+                    We only process personal data to the extent necessary to deliver products and manage customer relationships.
                   </p>
                 </section>
 
                 <section>
-                  <h2 className="text-2xl font-bold text-foreground mb-4">Lagring och säkerhet</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">Storage and security</h2>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    Vi förvarar dina uppgifter så länge som det behövs för att uppfylla avtal och lagkrav. Uppgifter som inte längre är nödvändiga raderas eller anonymiseras.
+                    We store your data as long as necessary to fulfill agreements and legal requirements. Data no longer needed is deleted or anonymized.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Vi har tekniska och organisatoriska åtgärder för att skydda dina uppgifter mot obehörig åtkomst och förlust.
+                    We have technical and organizational measures in place to protect your data from unauthorized access and loss.
                   </p>
                 </section>
 
                 <section>
-                  <h2 className="text-2xl font-bold text-foreground mb-4">Dina rättigheter</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">Your rights</h2>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    Du har rätt att begära information om vilka uppgifter vi behandlar om dig, begära rättelse eller radering och invända mot behandling.
+                    You have the right to request information about what data we process about you, request correction or deletion, and object to processing.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Kontakta oss på info@vikingfuel.se för att använda dina rättigheter eller om du har frågor om hur vi hanterar dina uppgifter.
+                    Contact us at info@vikingfuel.se to exercise your rights or if you have questions about how we handle your data.
                   </p>
                 </section>
 
                 <section>
-                  <h2 className="text-2xl font-bold text-foreground mb-4">Tredjepartsleverantörer</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">Third-party providers</h2>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    Vi samarbetar med betrodda leverantörer som hanterar betalningar, leveransinformation och drift av webbplatsen.
+                    We work with trusted providers who handle payments, shipping information, and website operations.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Dessa leverantörer har endast tillgång till uppgifter som behövs för deras uppdrag och får inte använda dem för andra ändamål.
+                    These providers only have access to data necessary for their tasks and may not use it for other purposes.
                   </p>
                 </section>
               </div>

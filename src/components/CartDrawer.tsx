@@ -39,7 +39,7 @@ export default function CartDrawer() {
               <button
                 onClick={closeCart}
                 className="p-2 rounded-lg hover:bg-muted transition-colors"
-                aria-label="Stäng varukorg"
+                aria-label={t.cart.close}
               >
                 <Icon name="XMarkIcon" size={20} />
               </button>
@@ -84,7 +84,7 @@ export default function CartDrawer() {
                         <button
                           onClick={() => updateQuantity(item?.id, item?.quantity - 1)}
                           className="w-7 h-7 rounded-full border border-border flex items-center justify-center hover:bg-white transition-colors"
-                          aria-label="Minska antal"
+                          aria-label={t.cart.decrementQuantity}
                         >
                           <Icon name="MinusIcon" size={12} />
                         </button>
@@ -94,7 +94,7 @@ export default function CartDrawer() {
                         <button
                           onClick={() => updateQuantity(item?.id, item?.quantity + 1)}
                           className="w-7 h-7 rounded-full border border-border flex items-center justify-center hover:bg-white transition-colors"
-                          aria-label="Öka antal"
+                          aria-label={t.cart.incrementQuantity}
                         >
                           <Icon name="PlusIcon" size={12} />
                         </button>
@@ -121,7 +121,7 @@ export default function CartDrawer() {
                 </div>
                 {totalPrice < 500 && (
                   <p className="text-xs text-muted-foreground bg-accent rounded-lg px-3 py-2">
-                    Lägg till {500 - totalPrice} kr för fri frakt
+                    {t.cart.freeShipping.replace('{amount}', String(500 - totalPrice))}
                   </p>
                 )}
                 <Link
@@ -129,7 +129,7 @@ export default function CartDrawer() {
                   onClick={closeCart}
                   className="btn-primary w-full justify-center text-base py-4"
                 >
-                  Gå till kassa
+                  {t.cart.goToCheckout}
                   <Icon name="ArrowRightIcon" size={18} />
                 </Link>
               </div>

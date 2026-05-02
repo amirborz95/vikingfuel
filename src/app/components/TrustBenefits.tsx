@@ -3,16 +3,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Icon from '@/components/ui/AppIcon';
+import { useLanguage } from '@/context/LanguageContext';
 
-const benefits = [
-  { icon: 'TruckIcon', title: 'Fri frakt', subtitle: 'Över 500 kr' },
-  { icon: 'LockClosedIcon', title: 'Säker betalning', subtitle: 'Krypterad SSL' },
-  { icon: 'BoltIcon', title: 'Snabb leverans', subtitle: '1–3 vardagar' },
-  { icon: 'ArrowPathIcon', title: '14 dagars retur', subtitle: 'Enkel process' },
-  { icon: 'SparklesIcon', title: 'Premium kvalitet', subtitle: 'Tillverkat i EU' },
-];
+const benefitIcons = ['TruckIcon', 'LockClosedIcon', 'BoltIcon', 'ArrowPathIcon', 'SparklesIcon'];
 
 export default function TrustBenefits() {
+  const { t } = useLanguage();
+  const benefits = t.trustBenefits.items.map((item, index) => ({
+    ...item,
+    icon: benefitIcons[index] as any,
+  }));
+
   return (
     <section className="py-10 border-y border-border bg-white">
       <div className="container-wide">
