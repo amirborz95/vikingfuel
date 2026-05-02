@@ -4,12 +4,10 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AppLogo from '@/components/ui/AppLogo';
 import Icon from '@/components/ui/AppIcon';
-import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import CartDrawer from '@/components/CartDrawer';
 
 const megaCategories = [
-  { label: 'Energi', href: '#', disabled: true },
   { label: 'Testo-support', href: '/products', disabled: false },
   { label: 'Vitalitet', href: '#', disabled: true },
   { label: 'Tillbehör', href: '#', disabled: true },
@@ -17,7 +15,6 @@ const megaCategories = [
 
 export default function Header() {
   const { totalItems, openCart } = useCart();
-  const { user, logout } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -140,32 +137,6 @@ export default function Header() {
                 <Icon name="MagnifyingGlassIcon" size={20} />
               </button>
 
-              {user ? (
-                <>
-                  <Link
-                    href="/account"
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium text-foreground/70 hover:text-foreground"
-                  >
-                    <Icon name="UserIcon" size={20} />
-                    <span>{user.name}</span>
-                  </Link>
-                  <button
-                    onClick={logout}
-                    className="p-2 rounded-lg hover:bg-muted transition-colors text-foreground/70 hover:text-foreground"
-                  >
-                    <Icon name="ArrowRightOnRectangleIcon" size={20} />
-                  </button>
-                </>
-              ) : (
-                <Link
-                  href="/login"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium text-foreground/70 hover:text-foreground"
-                >
-                  <Icon name="UserIcon" size={20} />
-                  <span>Logga in</span>
-                </Link>
-              )}
-
               <button
                 onClick={openCart}
                 className="relative p-2 rounded-lg hover:bg-muted transition-colors text-foreground/70 hover:text-foreground"
@@ -222,44 +193,10 @@ export default function Header() {
                 </Link>
               ))}
             </nav>
-            <div className="mt-6 space-y-3">
-              {user ? (
-                <>
-                  <Link
-                    href="/account"
-                    onClick={() => setMobileOpen(false)}
-                    className="block px-4 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-muted rounded-xl transition-colors"
-                  >
-                    {user.name}
-                  </Link>
-                  <button
-                    onClick={() => {
-                      logout();
-                      setMobileOpen(false);
-                    }}
-                    className="w-full px-4 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-muted rounded-xl transition-colors text-left"
-                  >
-                    Logga ut
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileOpen(false)}
-                    className="block px-4 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-muted rounded-xl transition-colors"
-                  >
-                    Logga in
-                  </Link>
-                  <Link
-                    href="/register"
-                    onClick={() => setMobileOpen(false)}
-                    className="block px-4 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-muted rounded-xl transition-colors"
-                  >
-                    Registrera dig
-                  </Link>
-                </>
-              )}
+            <div className="mt-6">
+              <p className="text-sm text-muted-foreground">
+                Hitta våra produkter, läs mer om oss och kontakta oss direkt.
+              </p>
             </div>
           </div>
         </div>

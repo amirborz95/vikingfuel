@@ -21,7 +21,6 @@ export default function Footer() {
       title: 'Butik',
       links: [
         { label: 'Alla produkter', href: '/products' },
-        { label: 'Viking Energy', href: '/product-detail' },
         { label: 'Paket', href: '/products' },
       ],
     },
@@ -29,7 +28,6 @@ export default function Footer() {
       title: 'Information',
       links: [
         { label: 'Om oss', href: '/about' },
-        { label: 'Ingredienser', href: '/#ingredients' },
         { label: 'Vanliga frågor', href: '/faq' },
         { label: 'Recensioner', href: '/reviews' },
       ],

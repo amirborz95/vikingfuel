@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import Icon from '@/components/ui/AppIcon';
 
@@ -26,14 +25,11 @@ export default function HeroSection() {
       <section className="relative overflow-hidden min-h-[88vh] flex flex-col justify-between">
         {/* Full-width background image */}
         <div className="absolute inset-0 z-0">
-          <Image
-            src="/assets/images/70d535ec-5470-4338-9e8a-268edfc167ce-1777151317296.png"
+          <img
+            src="https://cdn.corenexis.com/files/c/2479558720.png"
             alt="Viking Fuel hero background"
-            fill
-            priority
-            className="object-cover object-center"
-            sizes="100vw"
-            unoptimized
+            className="w-full h-full object-cover object-center"
+            loading="eager"
           />
           {/* Dark overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/20" />

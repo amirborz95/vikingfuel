@@ -9,7 +9,6 @@ import { allProducts } from '@/app/components/ProductsSection';
 
 const categories = [
   { value: 'all', label: 'Alla produkter' },
-  { value: 'energy', label: 'Energi' },
   { value: 'testo-support', label: 'Testo-support' },
 ];
 
@@ -34,7 +33,6 @@ export default function ProductCatalog() {
   const filtered = allProducts
     .filter((p) => {
       if (activeCategory === 'all') return true;
-      if (activeCategory === 'energy') return p.id.startsWith('viking-energy');
       if (activeCategory === 'testo-support') return p.name.includes('Testo-support');
       return true;
     })
