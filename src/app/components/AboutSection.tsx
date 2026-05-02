@@ -1,17 +1,19 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import AppImage from '@/components/ui/AppImage';
+import Icon from '@/components/ui/AppIcon';
 
 const stats = [
-  { value: '200+', label: 'Nöjda kunder' },
-  { value: '8', label: 'Aktiva ingredienser' },
-  { value: 'EU', label: 'Tillverkning' },
-  { value: '2024', label: 'Grundat' },
+  { label: 'Nöjda kunder', value: '20K+' },
+  { label: 'Naturliga ingredienser', value: '100%' },
+  { label: 'EU-tillverkning', value: 'GMP' },
+  { label: 'Snabb leverans', value: 'Inom 1–3 dagar' },
 ];
 
 export default function AboutSection() {
-  const { t } = useLanguage();
-
   return (
     <section id="about" className="py-20 bg-white">
       <div className="container-wide">
@@ -27,18 +29,17 @@ export default function AboutSection() {
             <div className="aspect-[4/5] rounded-3xl overflow-hidden bg-muted">
               <AppImage
                 src="https://img.rocket.new/generatedImages/rocket_gen_img_1c8cf3b77-1773878735596.png"
-                alt="Athletic man training in well-lit modern gym, bright airy environment, open space"
+                alt="Träningsanläggning med ljus och modern atmosfär"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
               />
             </div>
-            {/* Stats overlay card */}
             <div className="absolute -bottom-6 -right-6 bg-white rounded-2xl shadow-xl border border-border p-6 grid grid-cols-2 gap-4 max-w-[240px]">
-              {stats?.map((stat) => (
-                <div key={stat?.label} className="text-center">
-                  <p className="text-xl font-extrabold text-primary">{stat?.value}</p>
-                  <p className="text-[10px] text-muted-foreground leading-tight">{stat?.label}</p>
+              {stats.map((stat) => (
+                <div key={stat.label} className="text-center">
+                  <p className="text-xl font-extrabold text-primary">{stat.value}</p>
+                  <p className="text-[10px] text-muted-foreground leading-tight">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -53,25 +54,22 @@ export default function AboutSection() {
           >
             <span className="section-label block mb-4">Om Viking Fuel</span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-6 leading-tight text-balance">
-              Byggt för daglig prestation
+              Byggt för daglig prestanda
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-              Viking Fuel är ett nordiskt premiumvarumärke inom kosttillskott. Vi kombinerar stark
-              identitet, tydliga ingredienser och modern design för människor som vill ha mer
-              energi, uthållighet och vitalitet i vardagen.
+              Viking Fuel är ett nordiskt premiumtillskottsmärke. Vi kombinerar stark identitet, tydliga ingredienser och modern design för människor som vill ha mer energi, uthållighet och vitalitet i vardagen.
             </p>
             <p className="text-base text-muted-foreground leading-relaxed mb-8">
-              Varje kapsel innehåller noggrant utvalda naturliga ingredienser i rätt dosering — utan
-              onödiga tillsatser. Tillverkat i EU enligt GMP-standard.
+              Varje kapsel innehåller noggrant utvalda naturliga ingredienser i rätt dos — utan onödiga tillsatser. Tillverkad i EU enligt GMP-standard.
             </p>
 
             <ul className="space-y-3 mb-10">
               {[
-                'Naturliga ingredienser utan onödiga tillsatser',
-                'Tillverkat i EU enligt GMP-standard',
-                'Transparenta ingredienslistor',
-                'Fri från gluten och laktos',
-              ]?.map((item) => (
+                'Naturliga ingredienser',
+                'Tillverkad i EU',
+                'Fri från onödiga tillsatser',
+                'Stödjer daglig återhämtning',
+              ].map((item) => (
                 <li key={item} className="flex items-center gap-3">
                   <span className="w-5 h-5 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
                     <Icon name="CheckIcon" size={12} className="text-primary" />
@@ -82,7 +80,7 @@ export default function AboutSection() {
             </ul>
 
             <Link href="/#about" className="btn-primary">
-              {t?.buttons?.readMore} om oss
+              Läs mer
               <Icon name="ArrowRightIcon" size={16} />
             </Link>
           </motion.div>

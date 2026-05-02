@@ -1,12 +1,19 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
+import Icon from '@/components/ui/AppIcon';
 
 const benefitIcons = ['TruckIcon', 'LockClosedIcon', 'BoltIcon', 'ArrowPathIcon', 'SparklesIcon'];
 
 export default function TrustBenefits() {
-  const { t } = useLanguage();
-  const benefits = t.trustBenefits.items.map((item, index) => ({
+  const benefits = [
+    { title: 'Snabb leverans', subtitle: '1-3 arbetsdagar' },
+    { title: 'Fri frakt', subtitle: 'Över 500 kr' },
+    { title: '14 dagar ångerrätt', subtitle: 'Full återbetalning' },
+    { title: 'Säker betalning', subtitle: 'SSL-krypterad' },
+    { title: 'Naturliga ingredienser', subtitle: 'Inga tillsatser' },
+  ].map((item, index) => ({
     ...item,
     icon: benefitIcons[index] as any,
   }));

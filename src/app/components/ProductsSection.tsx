@@ -3,6 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import ProductCard, { Product } from './ProductCard';
+import Icon from '@/components/ui/AppIcon';
 
 export const allProducts: Product[] = [
   {
@@ -44,8 +46,6 @@ export const allProducts: Product[] = [
 ];
 
 export default function ProductsSection() {
-  const { t } = useLanguage();
-
   return (
     <section id="products" className="py-20 bg-white">
       <div className="container-wide">
@@ -56,12 +56,12 @@ export default function ProductsSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <span className="section-label block mb-3">{t.productSection.label}</span>
+          <span className="section-label block mb-3">Våra produkter</span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4 text-balance">
-            {t.productSection.heading}
+            Premium kosttillskott för bättre prestation
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {t.productSection.subtitle}
+            Välj det paket som passar dina behov. Alla våra produkter är naturliga och vetenskapligt utformade.
           </p>
         </motion.div>
 
@@ -79,7 +79,7 @@ export default function ProductsSection() {
           className="text-center mt-10"
         >
           <Link href="/products" className="btn-outline inline-flex">
-            {t.buttons.viewAllProducts}
+            Se alla produkter
             <Icon name="ArrowRightIcon" size={16} />
           </Link>
         </motion.div>

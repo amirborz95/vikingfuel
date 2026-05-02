@@ -6,19 +6,17 @@ import AppLogo from '@/components/ui/AppLogo';
 import Icon from '@/components/ui/AppIcon';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
-import { useLanguage } from '@/context/LanguageContext';
 import CartDrawer from '@/components/CartDrawer';
 
 const megaCategories = [
-  { sv: 'Energi', en: 'Energy', href: '#', disabled: true },
-  { sv: 'Testo-support', en: 'Testo-support', href: '/products', disabled: false },
-  { sv: 'Vitalitet', en: 'Vitality', href: '#', disabled: true },
-  { sv: 'Tillbehör', en: 'Accessories', href: '#', disabled: true },
+  { label: 'Energi', href: '#', disabled: true },
+  { label: 'Testo-support', href: '/products', disabled: false },
+  { label: 'Vitalitet', href: '#', disabled: true },
+  { label: 'Tillbehör', href: '#', disabled: true },
 ];
 
 export default function Header() {
   const { totalItems, openCart } = useCart();
-  const { lang, setLang, t } = useLanguage();
   const { user, logout } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
@@ -42,11 +40,11 @@ export default function Header() {
   }, [mobileOpen]);
 
   const navItems = [
-    { label: t?.nav?.home, href: '/' },
-    { label: t?.nav?.products, href: '/products', hasMega: true },
-    { label: t?.nav?.about, href: '/about' },
-    { label: t?.nav?.faq, href: '/faq' },
-    { label: t?.nav?.contact, href: '/contact' },
+    { label: 'Hem', href: '/' },
+    { label: 'Produkter', href: '/products', hasMega: true },
+    { label: 'Om oss', href: '/about' },
+    { label: 'Vanliga frågor', href: '/faq' },
+    { label: 'Kontakt', href: '/contact' },
   ];
 
   return (
@@ -91,7 +89,7 @@ export default function Header() {
                       {megaCategories?.map((cat) => (
                         cat.disabled ? (
                           <div
-                            key={cat?.sv}
+                            key={cat?.label}
                             className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 cursor-not-allowed"
                           >
                             <span className="w-8 h-8 rounded-lg bg-accent/50 flex items-center justify-center flex-shrink-0">
@@ -99,14 +97,14 @@ export default function Header() {
                             </span>
                             <div>
                               <span className="text-sm font-medium text-muted-foreground">
-                                {lang === 'sv' ? cat?.sv : cat?.en}
+                                {cat?.label}
                               </span>
                               <span className="text-xs text-muted-foreground block">Kommer snart</span>
                             </div>
                           </div>
                         ) : cat.href && cat.href !== '#' ? (
                           <Link
-                            key={cat?.sv}
+                            key={cat?.label}
                             href={cat.href}
                             className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors group"
                           >
@@ -114,7 +112,7 @@ export default function Header() {
                               <Icon name="SparklesIcon" size={16} className="text-primary" />
                             </span>
                             <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                              {lang === 'sv' ? cat?.sv : cat?.en}
+                              {cat?.label}
                             </span>
                           </Link>
                         ) : (
@@ -123,7 +121,7 @@ export default function Header() {
                               <Icon name="SparklesIcon" size={16} className="text-muted-foreground" />
                             </span>
                             <span className="text-sm font-medium text-muted-foreground">
-                              {lang === 'sv' ? cat?.sv : cat?.en}
+                              {cat?.label}
                             </span>
                           </div>
                         )
@@ -136,18 +134,8 @@ export default function Header() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-1">
-              {/* Language Toggle */}
-              <button
-                onClick={() => setLang(lang === 'sv' ? 'en' : 'sv')}
-                className="hidden sm:flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg border border-border hover:bg-muted transition-colors text-foreground/70 hover:text-foreground"
-              >
-                {lang?.toUpperCase()}
-                <Icon name="ChevronDownIcon" size={12} />
-              </button>
-
               <button
                 className="p-2 rounded-lg hover:bg-muted transition-colors text-foreground/70 hover:text-foreground"
-                aria-label={t.header.search}
               >
                 <Icon name="MagnifyingGlassIcon" size={20} />
               </button>
@@ -157,7 +145,6 @@ export default function Header() {
                   <Link
                     href="/account"
                     className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium text-foreground/70 hover:text-foreground"
-                    aria-label={t.header.account}
                   >
                     <Icon name="UserIcon" size={20} />
                     <span>{user.name}</span>
@@ -165,7 +152,6 @@ export default function Header() {
                   <button
                     onClick={logout}
                     className="p-2 rounded-lg hover:bg-muted transition-colors text-foreground/70 hover:text-foreground"
-                    aria-label={t.header.logout}
                   >
                     <Icon name="ArrowRightOnRectangleIcon" size={20} />
                   </button>
@@ -174,17 +160,15 @@ export default function Header() {
                 <Link
                   href="/login"
                   className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium text-foreground/70 hover:text-foreground"
-                  aria-label={t.header.account}
                 >
                   <Icon name="UserIcon" size={20} />
-                  <span>{t.header.signIn}</span>
+                  <span>Logga in</span>
                 </Link>
               )}
 
               <button
                 onClick={openCart}
                 className="relative p-2 rounded-lg hover:bg-muted transition-colors text-foreground/70 hover:text-foreground"
-                aria-label={t.header.cart}
               >
                 <Icon name="ShoppingCartIcon" size={20} />
                 {totalItems > 0 && (
@@ -198,7 +182,6 @@ export default function Header() {
               <button
                 className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors ml-1"
                 onClick={() => setMobileOpen(true)}
-                aria-label={t.header.openMenu}
               >
                 <Icon name="Bars3Icon" size={22} />
               </button>
@@ -222,7 +205,7 @@ export default function Header() {
               <button
                 onClick={() => setMobileOpen(false)}
                 className="p-2 rounded-lg hover:bg-muted"
-                aria-label={t.header.closeMenu}
+                aria-label="Stäng meny"
               >
                 <Icon name="XMarkIcon" size={22} />
               </button>
@@ -256,7 +239,7 @@ export default function Header() {
                     }}
                     className="w-full px-4 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-muted rounded-xl transition-colors text-left"
                   >
-                    {t.header.logout}
+                    Logga ut
                   </button>
                 </>
               ) : (
@@ -266,26 +249,17 @@ export default function Header() {
                     onClick={() => setMobileOpen(false)}
                     className="block px-4 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-muted rounded-xl transition-colors"
                   >
-                    {t.header.signIn}
+                    Logga in
                   </Link>
                   <Link
                     href="/register"
                     onClick={() => setMobileOpen(false)}
                     className="block px-4 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-muted rounded-xl transition-colors"
                   >
-                    {t.header.register}
+                    Registrera dig
                   </Link>
                 </>
               )}
-              <button
-                onClick={() => {
-                  setLang(lang === 'sv' ? 'en' : 'sv');
-                  setMobileOpen(false);
-                }}
-                className="w-full px-4 py-2 text-sm font-bold rounded-lg border border-border hover:bg-muted"
-              >
-                {lang === 'sv' ? 'Switch to EN' : 'Byt till SV'}
-              </button>
             </div>
           </div>
         </div>

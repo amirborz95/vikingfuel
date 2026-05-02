@@ -1,10 +1,14 @@
 'use client';
 
+import { useCart } from '@/context/CartContext';
+import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
+import Link from 'next/link';
+import Icon from './ui/AppIcon';
+import AppImage from './ui/AppImage';
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQuantity, totalPrice } = useCart();
-  const { t } = useLanguage();
 
   return (
     <AnimatePresence>
@@ -29,11 +33,10 @@ export default function CartDrawer() {
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-border">
-              <h2 className="text-lg font-bold text-foreground">{t?.cart?.title}</h2>
+              <h2 className="text-lg font-bold text-foreground">Din varukorg</h2>
               <button
                 onClick={closeCart}
                 className="p-2 rounded-lg hover:bg-muted transition-colors"
-                aria-label={t.cart.close}
               >
                 <Icon name="XMarkIcon" size={20} />
               </button>
@@ -44,9 +47,9 @@ export default function CartDrawer() {
               {items?.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4 text-muted-foreground">
                   <Icon name="ShoppingCartIcon" size={48} className="opacity-20" />
-                  <p className="text-sm">{t?.cart?.empty}</p>
+                  <p className="text-sm">Din varukorg är tom</p>
                   <button onClick={closeCart} className="btn-primary text-sm">
-                    {t?.buttons?.shopNow}
+                    Handla nu
                   </button>
                 </div>
               ) : (
@@ -78,7 +81,6 @@ export default function CartDrawer() {
                         <button
                           onClick={() => updateQuantity(item?.id, item?.quantity - 1)}
                           className="w-7 h-7 rounded-full border border-border flex items-center justify-center hover:bg-white transition-colors"
-                          aria-label={t.cart.decrementQuantity}
                         >
                           <Icon name="MinusIcon" size={12} />
                         </button>
@@ -88,14 +90,12 @@ export default function CartDrawer() {
                         <button
                           onClick={() => updateQuantity(item?.id, item?.quantity + 1)}
                           className="w-7 h-7 rounded-full border border-border flex items-center justify-center hover:bg-white transition-colors"
-                          aria-label={t.cart.incrementQuantity}
                         >
                           <Icon name="PlusIcon" size={12} />
                         </button>
                         <button
                           onClick={() => removeItem(item?.id)}
                           className="ml-auto p-1.5 rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors text-muted-foreground"
-                          aria-label={t?.cart?.remove}
                         >
                           <Icon name="TrashIcon" size={14} />
                         </button>
@@ -110,12 +110,12 @@ export default function CartDrawer() {
             {items?.length > 0 && (
               <div className="px-6 py-5 border-t border-border space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">{t?.cart?.total}</span>
+                  <span className="text-sm text-muted-foreground">Totalt</span>
                   <span className="text-xl font-bold text-foreground">{totalPrice} kr</span>
                 </div>
                 {totalPrice < 500 && (
                   <p className="text-xs text-muted-foreground bg-accent rounded-lg px-3 py-2">
-                    {t.cart.freeShipping.replace('{amount}', String(500 - totalPrice))}
+                    Lägg till {500 - totalPrice} kr för fri frakt
                   </p>
                 )}
                 <Link
@@ -123,7 +123,7 @@ export default function CartDrawer() {
                   onClick={closeCart}
                   className="btn-primary w-full justify-center text-base py-4"
                 >
-                  {t.cart.goToCheckout}
+                  Gå till kassa
                   <Icon name="ArrowRightIcon" size={18} />
                 </Link>
               </div>

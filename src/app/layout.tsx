@@ -5,7 +5,6 @@ declare module '../styles/tailwind.css';
 import '../styles/tailwind.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
-import { LanguageProvider } from '@/context/LanguageContext';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -43,9 +42,7 @@ export default function RootLayout({
     <html lang="sv" className={plusJakartaSans.variable}>
       <body className={plusJakartaSans.className}>
         <AuthProvider>
-          <LanguageProvider>
-            <CartProvider>{children}</CartProvider>
-          </LanguageProvider>
+          <CartProvider>{children}</CartProvider>
         </AuthProvider>
       </body>
     </html>

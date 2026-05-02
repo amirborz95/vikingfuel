@@ -8,29 +8,34 @@ import ProductCard from '@/app/components/ProductCard';
 import { allProducts } from '@/app/components/ProductsSection';
 
 const categories = [
-  { label: 'Alla', disabled: false },
-  { label: 'Energi', disabled: true, comingSoon: true },
-  { label: 'Testo-support', disabled: false },
-  { label: 'Vitalitet', disabled: true, comingSoon: true },
-  { label: 'Tillbehör', disabled: true, comingSoon: true },
+  { value: 'all', label: 'Alla produkter' },
+  { value: 'energy', label: 'Energi' },
+  { value: 'testo-support', label: 'Testo-support' },
 ];
+
+const priceRanges = [
+  { label: 'Alla priser', range: [0, 2200] },
+  { label: 'Under 500 kr', range: [0, 500] },
+  { label: '500–1000 kr', range: [500, 1000] },
+  { label: 'Över 1000 kr', range: [1000, 2200] },
+];
+
 const sortOptions = [
-  { label: 'Populärast', value: 'popular' },
-  { label: 'Lägsta pris', value: 'price-asc' },
-  { label: 'Högsta pris', value: 'price-desc' },
-  { label: 'Nyast', value: 'newest' },
+  { value: 'popular', label: 'Rekommenderade' },
+  { value: 'price-asc', label: 'Pris stigande' },
+  { value: 'price-desc', label: 'Pris fallande' },
 ];
 
 export default function ProductCatalog() {
-  const [activeCategory, setActiveCategory] = useState('Alla');
+  const [activeCategory, setActiveCategory] = useState(categories[0]?.value || '');
   const [sortBy, setSortBy] = useState('popular');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2200]);
 
   const filtered = allProducts
     .filter((p) => {
-      if (activeCategory === 'Alla') return true;
-      if (activeCategory === 'Energi') return p.id.startsWith('viking-energy');
-      if (activeCategory === 'Testo-support') return p.name.includes('Testo-support');
+      if (activeCategory === 'all') return true;
+      if (activeCategory === 'energy') return p.id.startsWith('viking-energy');
+      if (activeCategory === 'testo-support') return p.name.includes('Testo-support');
       return true;
     })
     .filter((p) => p.price >= priceRange[0] && p.price <= priceRange[1])
@@ -53,10 +58,10 @@ export default function ProductCatalog() {
             <span className="text-foreground font-medium">Produkter</span>
           </nav>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-2">
-            Alla produkter
+            Produkter
           </h1>
           <p className="text-muted-foreground">
-            {filtered.length} produkter — Premium kosttillskott för daglig prestation
+            Visar {filtered.length} produkter i vårt sortiment.
           </p>
         </div>
       </div>
@@ -66,23 +71,23 @@ export default function ProductCatalog() {
           {/* Sidebar */}
           <aside className="lg:w-64 flex-shrink-0">
             <div className="bg-white rounded-2xl border border-border p-6 sticky top-24">
-              <h3 className="font-bold text-foreground mb-4">Kategorier</h3>
+              <h3 className="font-bold text-foreground mb-4">Filtrera</h3>
               <div className="space-y-1 mb-8">
                 {categories.map((cat) => (
                   cat.disabled ? (
                     <div
-                      key={cat.label}
+                      key={cat.value}
                       className="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium bg-muted/50 text-muted-foreground cursor-not-allowed"
                     >
                       {cat.label}
-                      {cat.comingSoon && <span className="text-xs block">Kommer snart</span>}
+                      {cat.comingSoon && <span className="text-xs block">{cat.comingSoon}</span>}
                     </div>
                   ) : (
                     <button
-                      key={cat.label}
-                      onClick={() => setActiveCategory(cat.label)}
+                      key={cat.value}
+                      onClick={() => setActiveCategory(cat.value)}
                       className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
-                        activeCategory === cat.label
+                        activeCategory === cat.value
                           ? 'bg-primary text-white'
                           : 'text-foreground/70 hover:bg-muted hover:text-foreground'
                       }`}
@@ -95,12 +100,7 @@ export default function ProductCatalog() {
 
               <h3 className="font-bold text-foreground mb-4">Prisintervall</h3>
               <div className="space-y-3">
-                {[
-                  { label: 'Under 500 kr', range: [0, 499] as [number, number] },
-                  { label: '500–1000 kr', range: [500, 1000] as [number, number] },
-                  { label: 'Över 1000 kr', range: [1000, 2200] as [number, number] },
-                  { label: 'Alla priser', range: [0, 2200] as [number, number] },
-                ].map((opt) => (
+                {priceRanges.map((opt) => (
                   <button
                     key={opt.label}
                     onClick={() => setPriceRange(opt.range)}
@@ -125,9 +125,9 @@ export default function ProductCatalog() {
                 {categories.filter(cat => !cat.disabled).map((cat) => (
                   <button
                     key={cat.label}
-                    onClick={() => setActiveCategory(cat.label)}
+                    onClick={() => setActiveCategory(cat.value)}
                     className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-150 lg:hidden ${
-                      activeCategory === cat.label
+                      activeCategory === cat.value
                         ? 'bg-primary text-white'
                         : 'bg-white border border-border text-foreground/70 hover:text-foreground'
                     }`}
@@ -137,7 +137,7 @@ export default function ProductCatalog() {
                 ))}
               </div>
               <div className="flex items-center gap-2 ml-auto">
-                <label className="text-xs text-muted-foreground hidden sm:block">Sortera:</label>
+                <label className="text-xs text-muted-foreground hidden sm:block">Sortera efter</label>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
@@ -155,7 +155,7 @@ export default function ProductCatalog() {
             {filtered.length === 0 ? (
               <div className="text-center py-20 text-muted-foreground">
                 <Icon name="ArchiveBoxXMarkIcon" size={40} className="mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Inga produkter hittades med valda filter.</p>
+                <p className="text-sm">Inga produkter hittades för de valda filtret.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">

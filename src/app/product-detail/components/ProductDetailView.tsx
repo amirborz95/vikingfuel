@@ -6,14 +6,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import AppImage from '@/components/ui/AppImage';
 import Icon from '@/components/ui/AppIcon';
 import { useCart } from '@/context/CartContext';
-import { useLanguage } from '@/context/LanguageContext';
 import ProductCard from '@/app/components/ProductCard';
 import { allProducts } from '@/app/components/ProductsSection';
 
 export default function ProductDetailView() {
-  const { t } = useLanguage();
   const [selectedBundle, setSelectedBundle] = useState(0);
-  const [activeTab, setActiveTab] = useState(t.productDetail.sectionTitles.description);
+  const [activeTab, setActiveTab] = useState('Beskrivning');
   const [quantity, setQuantity] = useState(1);
   const [addedMsg, setAddedMsg] = useState(false);
   const { addItem } = useCart();
@@ -21,7 +19,7 @@ export default function ProductDetailView() {
   const bundles = [
     {
       id: 'bundle-1',
-      label: 'Buy 1',
+      label: 'Vikingfuel - Testo-support',
       sublabel: '60 capsules',
       price: 349,
       oldPrice: 0,
@@ -32,7 +30,7 @@ export default function ProductDetailView() {
     },
     {
       id: 'bundle-2',
-      label: 'Buy 3',
+      label: 'Vikingfuel - Testo-support 3-pack',
       sublabel: '180 capsules',
       price: 942,
       oldPrice: 1047,
@@ -43,7 +41,7 @@ export default function ProductDetailView() {
     },
     {
       id: 'bundle-3',
-      label: 'Buy 6',
+      label: 'Vikingfuel - Testo-support 6-pack',
       sublabel: '360 capsules',
       price: 1675,
       oldPrice: 2094,
@@ -55,35 +53,35 @@ export default function ProductDetailView() {
   ];
 
   const tabs = [
-    t.productDetail.sectionTitles.description,
-    t.productDetail.sectionTitles.ingredients,
-    t.productDetail.sectionTitles.usage,
-    t.productDetail.sectionTitles.shippingReturn,
+    'Beskrivning',
+    'Ingredienser',
+    'Användning',
+    'Frakt & retur',
   ];
 
   const tabContent: Record<string, React.ReactNode> = {
-    [t.productDetail.sectionTitles.description]: (
+    'Beskrivning': (
       <div className="prose prose-sm max-w-none text-muted-foreground">
-        <p className="mb-4">
-          Viking Energy is a premium energy supplement developed for those who want to perform at their best every day. The formula combines proven adaptogens with essential minerals to support natural energy production, mental sharpness, and physical endurance.
-        </p>
-        <p>
-          Each capsule is carefully dosed for maximum effect without unnecessary additives. Manufactured in the EU according to GMP standards with fully transparent ingredient lists.
-        </p>
+        {[
+          'Viking Energy är ett premium energitillskott utvecklat för dig som vill prestera på topp varje dag. Formulan kombinerar beprövade adaptogener med viktiga mineraler för att stödja naturlig energi, mental skärpa och fysisk uthållighet.',
+          'Varje kapsel är noggrant doserad för maximal effekt utan onödiga tillsatser. Tillverkat i EU enligt GMP-standard med fullständigt transparenta ingredienslistor.',
+        ].map((paragraph) => (
+          <p key={paragraph} className="mb-4">{paragraph}</p>
+        ))}
       </div>
     ),
 
-    [t.productDetail.sectionTitles.ingredients]: (
+    'Ingredienser': (
       <div className="space-y-3">
         {[
-          { name: 'Maca extract', amount: '500 mg' },
+          { name: 'Maca-extrakt', amount: '500 mg' },
           { name: 'Ashwagandha (KSM-66)', amount: '300 mg' },
           { name: 'Tribulus Terrestris', amount: '250 mg' },
           { name: 'Panax Ginseng', amount: '200 mg' },
-          { name: 'Ginger extract', amount: '100 mg' },
-          { name: 'Zinc', amount: '10 mg' },
-          { name: 'Selenium', amount: '55 µg' },
-          { name: 'Piperine (BioPerine)', amount: '5 mg' },
+          { name: 'Ingefära-extrakt', amount: '100 mg' },
+          { name: 'Zink', amount: '10 mg' },
+          { name: 'Selen', amount: '55 µg' },
+          { name: 'Piperin (BioPerine)', amount: '5 mg' },
         ].map((ing) => (
           <div
             key={ing.name}
@@ -96,36 +94,31 @@ export default function ProductDetailView() {
       </div>
     ),
 
-    [t.productDetail.sectionTitles.usage]: (
+    'Användning': (
       <div className="space-y-4 text-sm text-muted-foreground">
-        <p>
-          <strong className="text-foreground">Recommended dosage:</strong> 2 capsules daily with
-          water, preferably in the morning with or without food.
-        </p>
-        <p>
-          <strong className="text-foreground">Duration:</strong> Best results are achieved with continuous
-          use for at least 4–6 weeks.
-        </p>
-        <p>
-          <strong className="text-foreground">Note:</strong> Dietary supplements do not replace a
-          varied and balanced diet. Keep out of reach of children.
-        </p>
+        {[
+          'Rekommenderad dosering: 2 kapslar dagligen med vatten, helst på morgonen i samband med måltid.',
+          'Varaktighet: Bästa resultat uppnås vid kontinuerlig användning i minst 4–6 veckor.',
+          'Observera: Kosttillskott ersätter inte en varierad och balanserad kost. Förvaras oåtkomligt för barn.',
+        ].map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
       </div>
     ),
 
-    [t.productDetail.sectionTitles.shippingReturn]: (
+    'Frakt & retur': (
       <div className="space-y-4 text-sm text-muted-foreground">
         <div>
-          <p className="font-semibold text-foreground mb-1">Delivery time</p>
-          <p>1–3 business days in Sweden. Express shipping via PostNord or DHL.</p>
+          <p className="font-semibold text-foreground mb-1">Leveranstid</p>
+          <p>1–3 arbetsdagar i Sverige. Expressleverans via PostNord eller DHL.</p>
         </div>
         <div>
-          <p className="font-semibold text-foreground mb-1">Free shipping</p>
-          <p>Free shipping on all orders over 500 SEK. Orders under 500 SEK incur a 49 SEK shipping fee.</p>
+          <p className="font-semibold text-foreground mb-1">Fri frakt</p>
+          <p>Fri frakt på alla order över 500 kr. Order under 500 kr debiteras 49 kr i frakt.</p>
         </div>
         <div>
-          <p className="font-semibold text-foreground mb-1">Returns</p>
-          <p>{t.productDetail.shippingReturnText}</p>
+          <p className="font-semibold text-foreground mb-1">Returer</p>
+          <p>14 dagars ångerrätt från mottagningsdatum. Produkten ska vara oöppnad och i originalförpackning.</p>
         </div>
       </div>
     ),
@@ -155,14 +148,14 @@ export default function ProductDetailView() {
         <div className="container-wide">
           <nav className="flex items-center gap-2 text-xs text-muted-foreground">
             <Link href="/" className="hover:text-primary transition-colors">
-              {t.productDetail.breadcrumbHome}
+              Hem
             </Link>
             <Icon name="ChevronRightIcon" size={12} />
             <Link href="/products" className="hover:text-primary transition-colors">
-              {t.productDetail.breadcrumbProducts}
+              Produkter
             </Link>
             <Icon name="ChevronRightIcon" size={12} />
-            <span className="text-foreground font-medium">{t.productDetail.productName}</span>
+            <span className="text-foreground font-medium">{bundle.label}</span>
           </nav>
         </div>
       </div>
@@ -202,7 +195,11 @@ export default function ProductDetailView() {
 
               {/* Trust badges below image */}
               <div className="grid grid-cols-3 gap-3 mt-4">
-                {t.productDetail.trustBadges.map((b) => (
+                {[
+                  { label: 'Tillverkat i EU', description: 'Garanterad kvalitet och standard.' },
+                  { label: 'GMP-certifierat', description: 'Producerat enligt strikt tillverkningsstandard.' },
+                  { label: 'Fri frakt >500 kr', description: 'Fri leverans över 500 kr.' },
+                ].map((b) => (
                   <div
                     key={b.label}
                     className="flex flex-col items-center gap-1.5 p-3 bg-muted rounded-xl text-center"
@@ -224,11 +221,11 @@ export default function ProductDetailView() {
               {/* Badge */}
               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-accent rounded-full text-xs font-bold text-primary mb-4">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                New
+                Ny
               </span>
 
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-3 leading-tight">
-                Viking Energy
+                {bundle.label}
               </h1>
 
               {/* Rating */}
@@ -239,7 +236,7 @@ export default function ProductDetailView() {
                   ))}
                 </div>
                 <span className="text-sm font-bold text-foreground">4.9</span>
-                <span className="text-sm text-muted-foreground">(45 {t.productDetail.reviewsLabel})</span>
+                <span className="text-sm text-muted-foreground">(45 recensioner)</span>
               </div>
 
               {/* Price section */}
@@ -251,7 +248,7 @@ export default function ProductDetailView() {
                       {bundle.oldPrice} SEK
                     </span>
                     <span className="text-sm font-bold text-primary bg-accent px-2.5 py-1 rounded-full ml-2">
-                      Save {bundle.oldPrice - bundle.price} SEK
+                      Spara {bundle.oldPrice - bundle.price} SEK
                     </span>
                   </>
                 )}
@@ -259,7 +256,7 @@ export default function ProductDetailView() {
 
               {/* Bundle selector */}
               <div className="mb-8">
-                <p className="text-sm font-bold text-foreground mb-3">Select bundle:</p>
+                <p className="text-sm font-bold text-foreground mb-3">Välj paket</p>
                 <div className="space-y-3">
                   {bundles.map((b, i) => (
                     <button
@@ -312,7 +309,7 @@ export default function ProductDetailView() {
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="w-9 h-9 rounded-lg hover:bg-muted transition-colors flex items-center justify-center"
-                    aria-label="Minska"
+                    aria-label="Minska antal"
                   >
                     <Icon name="MinusIcon" size={14} />
                   </button>
@@ -320,7 +317,7 @@ export default function ProductDetailView() {
                   <button
                     onClick={() => setQuantity(quantity + 1)}
                     className="w-9 h-9 rounded-lg hover:bg-muted transition-colors flex items-center justify-center"
-                    aria-label="Öka"
+                    aria-label="Öka antal"
                   >
                     <Icon name="PlusIcon" size={14} />
                   </button>
@@ -336,11 +333,11 @@ export default function ProductDetailView() {
                 >
                   {addedMsg ? (
                     <>
-                      <Icon name="CheckIcon" size={16} /> Added to cart!
+                      <Icon name="CheckIcon" size={16} /> Tillagd i varukorg
                     </>
                   ) : (
                     <>
-                      <Icon name="ShoppingCartIcon" size={16} /> {t.buttons.addToCart}
+                      <Icon name="ShoppingCartIcon" size={16} /> Lägg till i varukorg
                     </>
                   )}
                 </button>
@@ -351,12 +348,17 @@ export default function ProductDetailView() {
                 className="w-full py-4 rounded-xl bg-primary text-white font-bold text-sm hover:bg-green-700 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
               >
                 <Icon name="BoltIcon" size={16} />
-                {t.buttons.buyNow}
+                Köp nu
               </button>
 
               {/* Benefits */}
               <div className="mt-6 pt-6 border-t border-border grid grid-cols-2 gap-3">
-                {t.trustBenefits.items.map((b) => (
+                {[
+                  { title: 'Snabb leverans', subtitle: '1-3 arbetsdagar' },
+                  { title: 'Fri frakt', subtitle: 'Över 500 kr' },
+                  { title: '14 dagar ångerrätt', subtitle: 'Full återbetalning' },
+                  { title: 'Säker betalning', subtitle: 'SSL-krypterad' },
+                ].map((b) => (
                   <div key={b.title} className="flex items-center gap-2">
                     <Icon name="TruckIcon" size={15} className="text-primary flex-shrink-0" />
                     <div>
@@ -411,7 +413,7 @@ export default function ProductDetailView() {
       <section className="py-16 bg-muted/30">
         <div className="container-wide">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-8">
-            Related products
+            Relaterade produkter
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {allProducts.map((product, i) => (

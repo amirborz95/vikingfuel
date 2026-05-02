@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import AppImage from '@/components/ui/AppImage';
+import { useCart } from '@/context/CartContext';
+import Icon from '@/components/ui/AppIcon';
 
 export interface Product {
   id: string;
@@ -27,7 +29,6 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const { addItem } = useCart();
-  const { t } = useLanguage();
   const [added, setAdded] = useState(false);
 
   const discount = product.oldPrice > 0 ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
@@ -120,12 +121,12 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
           {added ? (
             <>
               <Icon name="CheckIcon" size={16} />
-              {t.productCard.added}
+              Tillagd
             </>
           ) : (
             <>
               <Icon name="ShoppingCartIcon" size={16} />
-              {product.buttonLabel || t.buttons.addToCart}
+              Lägg till i varukorg
             </>
           )}
         </button>

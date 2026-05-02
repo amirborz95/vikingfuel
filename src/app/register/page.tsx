@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { useLanguage } from '@/context/LanguageContext';
 import AnnouncementBar from '../components/AnnouncementBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -12,7 +11,6 @@ import Footer from '@/components/Footer';
 export default function RegisterPage() {
   const router = useRouter();
   const { user, register } = useAuth();
-  const { t } = useLanguage();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,61 +32,61 @@ export default function RegisterPage() {
             <div className="container-wide">
               <div className="max-w-3xl mx-auto">
                 <div className="text-center mb-10">
-                  <h1 className="text-4xl font-extrabold text-foreground mb-4">{t.auth.registerTitle}</h1>
+                  <h1 className="text-4xl font-extrabold text-foreground mb-4">Registrera dig</h1>
                   <p className="text-lg text-muted-foreground">
-                    {t.auth.registerDescription}
+                    Skapa ett konto med din e-postadress och ett lösenord.
                   </p>
                 </div>
 
                 <div className="bg-muted/30 rounded-3xl p-8 shadow-sm">
                   {user ? (
                     <div className="space-y-6 text-center">
-                      <p className="text-foreground text-lg font-medium">{t.auth.alreadyLoggedIn.replace('{name}', user.name)}</p>
+                      <p className="text-foreground text-lg font-medium">Du är redan inloggad som {user.name}.</p>
                       <Link href="/account" className="inline-flex items-center justify-center rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors">
-                        {t.auth.goToAccount}
+                        Gå till mitt konto
                       </Link>
                     </div>
                   ) : (
                     <>
                       <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                          <label className="block text-sm font-medium text-foreground mb-2">{t.auth.nameLabel}</label>
+                          <label className="block text-sm font-medium text-foreground mb-2">Namn</label>
                           <input
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
                             className="w-full rounded-2xl border border-border px-4 py-3 text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                            placeholder={t.auth.namePlaceholder}
+                            placeholder="Ditt namn"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-foreground mb-2">{t.auth.emailLabel}</label>
+                          <label className="block text-sm font-medium text-foreground mb-2">E-post</label>
                           <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
                             className="w-full rounded-2xl border border-border px-4 py-3 text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                            placeholder={t.auth.emailPlaceholder}
+                            placeholder="example@exempel.se"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-foreground mb-2">{t.auth.passwordLabel}</label>
+                          <label className="block text-sm font-medium text-foreground mb-2">Lösenord</label>
                           <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                             className="w-full rounded-2xl border border-border px-4 py-3 text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                            placeholder={t.auth.passwordPlaceholder}
+                            placeholder="Ditt lösenord"
                           />
                         </div>
                         <button
                           type="submit"
                           className="w-full rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors"
                         >
-                          {t.auth.register}
+                          Registrera dig
                         </button>
                       </form>
                       {feedback && (
@@ -103,9 +101,9 @@ export default function RegisterPage() {
                         </div>
                       )}
                       <div className="mt-8 text-center text-sm text-muted-foreground">
-                        {t.auth.haveAccount}{' '}
+                        Har du redan ett konto?{' '}
                         <Link href="/login" className="font-bold text-foreground hover:text-primary">
-                          {t.auth.signIn}
+                          Logga in
                         </Link>
                       </div>
                     </>

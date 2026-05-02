@@ -4,12 +4,18 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import Icon from '@/components/ui/AppIcon';
 
 const trustItemIcons = ['TruckIcon', 'ShieldCheckIcon', 'ArrowPathIcon', 'SparklesIcon', 'BoltIcon'];
 
 export default function HeroSection() {
-  const { t } = useLanguage();
-  const trustItems = t.trustBenefits.items.map((item, index) => ({
+  const trustItems = [
+    { title: 'Snabb leverans', subtitle: '1-3 arbetsdagar' },
+    { title: 'Fri frakt', subtitle: 'Över 500 kr' },
+    { title: '14 dagar ångerrätt', subtitle: 'Full återbetalning' },
+    { title: 'Säker betalning', subtitle: 'SSL-krypterad' },
+    { title: 'Naturliga ingredienser', subtitle: 'Inga tillsatser' },
+  ].map((item, index) => ({
     ...item,
     icon: trustItemIcons[index] as any,
   }));
@@ -81,7 +87,7 @@ export default function HeroSection() {
               transition={{ duration: 0.6, delay: 0.35 }}
               className="text-[11px] font-bold tracking-[0.18em] uppercase text-[#16a34a] mb-3"
             >
-              {t.hero.premiumTag}
+              Premium
             </motion.p>
 
             <motion.h2
@@ -90,7 +96,7 @@ export default function HeroSection() {
               transition={{ duration: 0.7, delay: 0.42, ease: [0.16, 1, 0.3, 1] }}
               className="text-white font-bold text-xl sm:text-2xl lg:text-3xl leading-[1.2] tracking-[-0.01em] mb-3"
             >
-              {t.hero.headline}
+              Naturliga kosttillskott för daglig prestation
             </motion.h2>
 
             <motion.p
@@ -99,7 +105,7 @@ export default function HeroSection() {
               transition={{ duration: 0.7, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
               className="text-[#e2e8f0] text-sm sm:text-base leading-relaxed mb-7"
             >
-              {t.hero.description}
+              Viking Fuel erbjuder naturliga kosttillskott som hjälper dig att prestera bättre varje dag. Utvecklat för idrottare och aktiva människor.
             </motion.p>
 
             <motion.div
@@ -112,14 +118,14 @@ export default function HeroSection() {
                 href="/products"
                 className="inline-flex items-center gap-2 bg-white hover:bg-[#f1f5f9] text-[#0a0a0a] font-bold text-sm px-6 py-3 rounded-none transition-all duration-200 hover:-translate-y-0.5"
               >
-                {t.buttons.shopNow}
+                Handla nu
                 <Icon name="ArrowRightIcon" size={15} />
               </Link>
               <Link
                 href="/about"
                 className="inline-flex items-center gap-2 border border-white/40 hover:border-white/80 text-white font-semibold text-sm px-6 py-3 rounded-none transition-all duration-200 hover:-translate-y-0.5"
               >
-                {t.buttons.readMore}
+                Läs mer
               </Link>
             </motion.div>
           </div>
@@ -132,7 +138,7 @@ export default function HeroSection() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 divide-x divide-white/5">
             {trustItems.map((item, i) => (
               <motion.div
-                key={item.label}
+                key={item.title}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.7 + i * 0.07 }}
@@ -140,8 +146,8 @@ export default function HeroSection() {
               >
                 <Icon name={item.icon as any} size={20} className="text-[#16a34a] flex-shrink-0" />
                 <div>
-                  <p className="text-white text-[13px] font-semibold leading-tight">{item.label}</p>
-                  <p className="text-[#64748b] text-[11px] mt-0.5">{item.sub}</p>
+                  <p className="text-white text-[13px] font-semibold leading-tight">{item.title}</p>
+                  <p className="text-[#64748b] text-[11px] mt-0.5">{item.subtitle}</p>
                 </div>
               </motion.div>
             ))}
