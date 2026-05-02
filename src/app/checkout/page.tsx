@@ -74,20 +74,20 @@ export default function CheckoutPage() {
         }),
       });
 
+      const data = await response.json().catch(() => ({}));
+
       if (!response.ok) {
-        throw new Error('Failed to create checkout session');
+        throw new Error(data?.error || 'Failed to create checkout session');
       }
 
-      const { url } = await response.json();
-
-      if (url) {
-        window.location.href = url;
+      if (data?.url) {
+        window.location.href = data.url;
       } else {
         throw new Error('No checkout URL received');
       }
     } catch (error: any) {
       console.error('Checkout error:', error);
-      alert('Ett fel uppstod vid checkout - försök igen senare');
+      alert(`Ett fel uppstod vid checkout: ${error?.message || 'försök igen senare'}`);
       setLoading(false);
     }
   };
