@@ -9,13 +9,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
-    phone: '',
-    address: '',
-    city: '',
-    postalCode: '',
-    country: 'SE',
   });
 
   useEffect(() => {
@@ -67,9 +61,7 @@ export default function CheckoutPage() {
             image: item.image,
           })),
           customer: {
-            name: formData.name,
             email: formData.email,
-            phone: formData.phone,
           },
         }),
       });
@@ -101,116 +93,24 @@ export default function CheckoutPage() {
           {/* Form */}
           <div className="lg:col-span-2">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold text-foreground mb-4">Personuppgifter</h2>
-                <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Namn
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      required
-                      value={formData.name}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        E-post
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        required
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        Telefon
-                      </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        required
-                        value={formData.phone}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h2 className="text-xl font-semibold text-foreground mb-4">Leveransuppgifter</h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Adress
-                    </label>
-                    <input
-                      type="text"
-                      name="address"
-                      required
-                      value={formData.address}
-                      onChange={handleChange}
-                      placeholder="Gatuadress, postnummer och stad"
-                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        Stad
-                      </label>
-                      <input
-                        type="text"
-                        name="city"
-                        required
-                        value={formData.city}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        Postnummer
-                      </label>
-                      <input
-                        type="text"
-                        name="postalCode"
-                        required
-                        value={formData.postalCode}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">Land</label>
-                    <select
-                      name="country"
-                      required
-                      value={formData.country}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      <option value="SE">Sverige</option>
-                      <option value="NO">Norge</option>
-                      <option value="DK">Danmark</option>
-                      <option value="FI">Finland</option>
-                    </select>
-                  </div>
+                <h2 className="text-xl font-semibold text-foreground mb-4">Innan vi går vidare</h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Ange din e-postadress nedan. När du klickar på “Gå till betalning” fortsätter vi till Stripe för betalning och leveransuppgifter.
+                </p>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    E-postadress
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="din.email@example.com"
+                    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
                 </div>
               </div>
 

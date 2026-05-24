@@ -65,8 +65,8 @@ export async function POST(req: NextRequest) {
       },
       shipping_options: shippingOptions,
       metadata: {
-        customer_name: customer.name,
-        customer_phone: customer.phone,
+        ...(customer.name ? { customer_name: customer.name } : {}),
+        ...(customer.phone ? { customer_phone: customer.phone } : {}),
       },
     });
 
