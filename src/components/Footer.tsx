@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import AppLogo from './ui/AppLogo';
 import Icon from './ui/AppIcon';
+import AppImage from './ui/AppImage';
 
 export default function Footer() {
   type FooterLink = {
@@ -109,14 +110,23 @@ export default function Footer() {
           <p className="text-xs text-muted-foreground">
             © 2026 Viking Fuel AB. Alla rättigheter förbehållna.
           </p>
-          <div className="flex items-center gap-2 flex-wrap justify-center">
-            {['Visa', 'Mastercard', 'Klarna', 'Swish'].map((pay) => (
-              <span
-                key={pay}
-                className="px-3 py-1 text-[10px] font-bold rounded border border-border text-muted-foreground uppercase tracking-wide"
-              >
-                {pay}
-              </span>
+          <div className="flex items-center gap-4 flex-wrap justify-center">
+            {[
+              { alt: 'Visa', src: 'https://i.postimg.cc/87SSZpkR/Logo-Visa.avif' },
+              { alt: 'Mastercard', src: 'https://i.postimg.cc/87SSZpkM/Mastercard-Logo.png' },
+              { alt: 'Klarna', src: 'https://i.postimg.cc/v4ss0Y85/9113e9f347e43eb67e9ff42779934451676342d8.png' },
+              { alt: 'Google Pay', src: 'https://i.postimg.cc/tsjjBqRV/Google-Pay-Logo-width-500-format-webp.webp' },
+            ].map((p) => (
+              <div key={p.alt} className="flex items-center">
+                <AppImage
+                  src={p.src}
+                  alt={p.alt}
+                  width={72}
+                  height={24}
+                  className="object-contain"
+                  unoptimized
+                />
+              </div>
             ))}
           </div>
         </div>
