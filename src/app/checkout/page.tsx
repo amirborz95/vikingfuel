@@ -66,20 +66,21 @@ export default function CheckoutPage() {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to create checkout session');
+        throw new Error(data.error || 'Failed to create checkout session');
       }
 
-      const { url } = await response.json();
-
-      if (url) {
-        window.location.href = url;
+      if (data.url) {
+        window.location.href = data.url;
       } else {
         throw new Error('No checkout URL received');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Checkout error:', error);
-      alert('Det gick inte att skapa kassan. Försök igen senare.');
+      const message = error instanceof Error ? error.message : 'Okänt fel';
+      alert(`Det gick inte att skapa kassan: ${message}`);
       setLoading(false);
     }
   };
