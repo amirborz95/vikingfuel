@@ -34,16 +34,16 @@ export default function ShippingContent() {
           <section className="border-l-4 border-primary pl-6">
             <h2 className="text-2xl font-bold text-foreground mb-4">💰 Fraktkostnader</h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
-              Fraktkostnaden beräknas automatiskt baserat på din leveransadress och bestämd när du går till kassan. Vi erbjuder konkurrenskraftiga fraktpriser för hela Sverige.
+              Fraktkostnaden beräknas automatiskt baserat på din leveransadress och visas i kassan. Vi erbjuder konkurrenskraftiga fraktpriser för hela Sverige, med samma policy i Stripe-kassan.
             </p>
             <p className="text-muted-foreground leading-relaxed mb-4">
               <strong>Fraktkostnadsöversikt:</strong><br/>
-              • Paket upp till 5 kg: Från 49 kr (Stockholm/Göteborg), 59 kr (övriga Sverige)<br/>
+              • Paket upp till 5 kg: 49 kr i Stockholm/Göteborg, 59 kr i övriga Sverige<br/>
               • Paket 5–20 kg: Från 79 kr–139 kr beroende på område<br/>
-              • Frifrakt: På beställningar över 500 kr till huvuddelar av Sverige
+              • Fri frakt: På beställningar över 500 kr
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              Du ser alltid den exakta fraktkostnaden före du bekräftar köpet. Vi använder DHL, DB Schenker och PostNord för leveranser – beroende på adress för optimal hastighet och pris.
+              Stripe-kassan använder samma fraktpolicy: fri frakt över 500 kr, annars standardfrakt upp till 5 kg enligt ovan.
             </p>
           </section>
 

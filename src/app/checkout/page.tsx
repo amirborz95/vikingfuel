@@ -249,7 +249,7 @@ export default function CheckoutPage() {
               </div>
 
               <p className="text-xs text-muted-foreground">
-                Fri frakt för order över 500 kr.
+                Frakt upp till 5 kg: 49 kr i Stockholm/Göteborg, 59 kr i övriga Sverige. Fri frakt för order över 500 kr.
               </p>
             </div>
           </div>

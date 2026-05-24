@@ -114,7 +114,7 @@ export default function ProductDetailView() {
         </div>
         <div>
           <p className="font-semibold text-foreground mb-1">Fri frakt</p>
-          <p>Fri frakt på alla order över 500 kr. Order under 500 kr debiteras 49 kr i frakt.</p>
+          <p>Frakt upp till 5 kg: 49 kr i Stockholm/Göteborg, 59 kr i övriga Sverige. Fri frakt över 500 kr.</p>
         </div>
         <div>
           <p className="font-semibold text-foreground mb-1">Returer</p>

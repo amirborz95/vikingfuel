@@ -29,6 +29,29 @@ export async function POST(req: NextRequest) {
     }));
 
     // Create checkout session
+    const orderAmount = line_items.reduce(
+      (sum, item) => sum + (item.price_data.unit_amount || 0) * item.quantity,
+      0
+    );
+
+    const freeShipping = orderAmount >= 50000;
+    const shippingOptions: Stripe.Checkout.SessionCreateParams.ShippingOption[] = [
+      {
+        shipping_rate_data: {
+          type: 'fixed_amount',
+          fixed_amount: {
+            amount: freeShipping ? 0 : 5900,
+            currency: 'sek',
+          },
+          display_name: freeShipping ? 'Fri frakt över 500 kr' : 'Standardfrakt upp till 5 kg',
+          delivery_estimate: {
+            minimum: { unit: 'business_day', value: 2 },
+            maximum: { unit: 'business_day', value: 5 },
+          },
+        },
+      },
+    ];
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items,
@@ -40,6 +63,7 @@ export async function POST(req: NextRequest) {
       shipping_address_collection: {
         allowed_countries: ['SE', 'NO', 'DK', 'FI'],
       },
+      shipping_options: shippingOptions,
       metadata: {
         customer_name: customer.name,
         customer_phone: customer.phone,
