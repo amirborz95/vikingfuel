@@ -96,7 +96,7 @@ export default function CheckoutPage() {
                   <div>
                 <h2 className="text-xl font-semibold text-foreground mb-4">Innan vi går vidare</h2>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Ange din e-postadress nedan. När du klickar på “Gå till betalning” fortsätter vi till Stripe för betalning och leveransuppgifter.
+                  Ange din e-postadress nedan. När du klickar på “Gå till betalning” tar Stripe hand om betalning och leveransuppgifter, inklusive kort, Klarna eller Google Pay om de är tillgängliga.
                 </p>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">
