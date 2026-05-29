@@ -1,0 +1,22 @@
+[
+  {
+    "name": "peter",
+    "email": "petersve@gmail.com",
+    "password": "$2b$10$27JojhFZWi.5EA7/88eL9.d3u8bSOxtjqp3Ima4CAT6mxx0QRKtXm"
+  },
+  {
+    "name": "amir",
+    "email": "amir@gmail.com",
+    "password": "$2b$10$27JojhFZWi.5EA7/88eL9.d3u8bSOxtjqp3Ima4CAT6mxx0QRKtXm"
+  },
+  {
+    "name": "amir",
+    "email": "info@vikingfuel.com",
+    "password": "$2b$10$0XyHe3WnsIs7kDvHOM/iienvYGqUmfLM6nBbjBsIfJb/JX3gv4akW"
+  },
+  {
+    "name": "Amir Bakalaev",
+    "email": "amirborzlaev@gmail.com",
+    "password": "$2b$10$pSbHnAojEXJSIVzfHVwSk.J5mzYmLj8gqZEyXda/.Da6NW1Q5HUCO"
+  }
+]

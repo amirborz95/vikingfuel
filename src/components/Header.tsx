@@ -5,6 +5,8 @@ import Link from 'next/link';
 import AppLogo from '@/components/ui/AppLogo';
 import Icon from '@/components/ui/AppIcon';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import CartDrawer from '@/components/CartDrawer';
 
 const megaCategories = [
@@ -15,6 +17,9 @@ const megaCategories = [
 
 export default function Header() {
   const { totalItems, openCart } = useCart();
+  const { user, logout } = useAuth();
+  const router = useRouter();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -143,6 +148,43 @@ export default function Header() {
                 )}
               </button>
 
+              {/* User area */}
+              {!user ? (
+                <div className="hidden lg:flex items-center gap-2">
+                  <Link href="/login" className="px-3 py-2 text-sm rounded-lg hover:bg-muted">Logga in</Link>
+                  <Link href="/register" className="px-3 py-2 text-sm rounded-lg bg-primary text-primary-foreground">Registrera</Link>
+                </div>
+              ) : (
+                <div className="relative hidden lg:flex">
+                  <button
+                    onClick={() => setUserMenuOpen((s) => !s)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted"
+                    aria-haspopup="true"
+                    aria-expanded={userMenuOpen}
+                  >
+                    <Icon name="UserCircleIcon" size={20} />
+                    <span className="text-sm">{user.name}</span>
+                    <Icon name="ChevronDownIcon" size={12} />
+                  </button>
+                  {userMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg border border-border p-2">
+                      <Link href="/account" className="block px-3 py-2 text-sm hover:bg-muted rounded">
+                        Mitt konto
+                      </Link>
+                      <button
+                        onClick={() => {
+                          logout();
+                          setUserMenuOpen(false);
+                          router.push('/');
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-muted rounded"
+                      >
+                        Logga ut
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
               {/* Mobile hamburger */}
               <button
                 className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors ml-1"
@@ -191,6 +233,27 @@ export default function Header() {
               <p className="text-sm text-muted-foreground">
                 Hitta våra produkter, läs mer om oss och kontakta oss direkt.
               </p>
+              <div className="mt-4 flex gap-3">
+                {!user ? (
+                  <>
+                    <Link href="/login" onClick={() => setMobileOpen(false)} className="w-full inline-flex justify-center rounded-2xl border border-border px-4 py-3 text-sm font-bold text-foreground bg-white hover:bg-muted transition-colors">
+                      Logga in
+                    </Link>
+                    <Link href="/register" onClick={() => setMobileOpen(false)} className="w-full inline-flex justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors">
+                      Registrera
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/account" onClick={() => setMobileOpen(false)} className="w-full inline-flex justify-center rounded-2xl border border-border px-4 py-3 text-sm font-bold text-foreground bg-white hover:bg-muted transition-colors">
+                      Mitt konto
+                    </Link>
+                    <button onClick={() => { logout(); setMobileOpen(false); router.push('/'); }} className="w-full inline-flex justify-center rounded-2xl bg-rose-500 px-4 py-3 text-sm font-bold text-white hover:bg-rose-600">
+                      Logga ut
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -1,0 +1,102 @@
+[
+  {
+    "action": "register",
+    "email": "petersve@gmail.com",
+    "timestamp": "2026-05-28T08:34:40.499Z"
+  },
+  {
+    "action": "logout",
+    "email": "petersve@gmail.com",
+    "timestamp": "2026-05-28T08:35:05.047Z"
+  },
+  {
+    "action": "register",
+    "email": "amir@gmail.com",
+    "timestamp": "2026-05-28T08:35:55.254Z"
+  },
+  {
+    "action": "logout",
+    "email": "amir@gmail.com",
+    "timestamp": "2026-05-28T08:36:01.032Z"
+  },
+  {
+    "action": "login",
+    "email": "amir@gmail.com",
+    "timestamp": "2026-05-28T08:36:10.112Z"
+  },
+  {
+    "action": "logout",
+    "email": "amir@gmail.com",
+    "timestamp": "2026-05-28T08:36:30.734Z"
+  },
+  {
+    "action": "login",
+    "email": "amir@gmail.com",
+    "timestamp": "2026-05-28T08:36:37.377Z"
+  },
+  {
+    "action": "register",
+    "email": "info@vikingfuel.com",
+    "timestamp": "2026-05-28T08:49:40.398Z"
+  },
+  {
+    "action": "logout",
+    "email": "info@vikingfuel.com",
+    "timestamp": "2026-05-28T08:51:16.179Z"
+  },
+  {
+    "action": "login",
+    "email": "info@vikingfuel.com",
+    "timestamp": "2026-05-28T08:53:31.372Z"
+  },
+  {
+    "action": "logout",
+    "email": "info@vikingfuel.com",
+    "timestamp": "2026-05-28T08:53:50.296Z"
+  },
+  {
+    "action": "login",
+    "email": "info@vikingfuel.com",
+    "timestamp": "2026-05-28T08:54:13.633Z"
+  },
+  {
+    "action": "logout",
+    "email": "info@vikingfuel.com",
+    "timestamp": "2026-05-28T12:10:20.853Z"
+  },
+  {
+    "action": "login",
+    "email": "amir@gmail.com",
+    "timestamp": "2026-05-28T12:10:42.109Z"
+  },
+  {
+    "action": "logout",
+    "email": "amir@gmail.com",
+    "timestamp": "2026-05-28T12:10:50.797Z"
+  },
+  {
+    "action": "register",
+    "email": "amirborzlaev@gmail.com",
+    "timestamp": "2026-05-28T12:11:11.838Z"
+  },
+  {
+    "action": "logout",
+    "email": "amirborzlaev@gmail.com",
+    "timestamp": "2026-05-28T12:11:14.950Z"
+  },
+  {
+    "action": "login",
+    "email": "amirborzlaev@gmail.com",
+    "timestamp": "2026-05-28T12:11:18.088Z"
+  },
+  {
+    "action": "logout",
+    "email": "amirborzlaev@gmail.com",
+    "timestamp": "2026-05-28T12:11:24.738Z"
+  },
+  {
+    "action": "login",
+    "email": "info@vikingfuel.com",
+    "timestamp": "2026-05-28T12:11:28.243Z"
+  }
+]

@@ -38,12 +38,11 @@ export default function ShippingContent() {
             </p>
             <p className="text-muted-foreground leading-relaxed mb-4">
               <strong>Fraktkostnadsöversikt:</strong><br/>
-              • Paket upp till 5 kg: 49 kr i Stockholm/Göteborg, 59 kr i övriga Sverige<br/>
-              • Paket 5–20 kg: Från 79 kr–139 kr beroende på område<br/>
-              • Fri frakt: På beställningar över 500 kr
+              • Normalt frakt kostar 10 kr inom hela Sverige.<br/>
+              • Fri frakt: På beställningar över 700 kr
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              Stripe-kassan använder samma fraktpolicy: fri frakt över 500 kr, annars standardfrakt upp till 5 kg enligt ovan.
+              Stripe-kassan använder samma fraktpolicy: fri frakt över 700 kr, annars standardfrakt 10 kr inom hela Sverige.
             </p>
           </section>
 

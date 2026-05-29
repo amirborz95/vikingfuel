@@ -23,9 +23,12 @@
 }
 
 @layer base {
-  * {
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
     border-color: var(--border);
+    border-radius: 0 !important;
   }
 
   body {
@@ -53,18 +56,18 @@
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-full transition-all duration-200 hover:bg-green-700 hover:scale-[1.02] active:scale-[0.98] text-sm;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-none transition-all duration-200 hover:bg-green-700 hover:scale-[1.02] active:scale-[0.98] text-sm;
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 border border-foreground text-foreground font-semibold rounded-full transition-all duration-200 hover:bg-foreground hover:text-white text-sm;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 border border-foreground text-foreground font-semibold rounded-none transition-all duration-200 hover:bg-foreground hover:text-white text-sm;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-foreground font-medium rounded-lg transition-all duration-200 hover:bg-secondary text-sm;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-foreground font-medium rounded-none transition-all duration-200 hover:bg-secondary text-sm;
   }
   .product-card {
-    @apply bg-card rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border;
+    @apply bg-card rounded-none overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border;
   }
 
   .section-label {

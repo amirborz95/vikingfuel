@@ -5,6 +5,7 @@ declare module '../styles/tailwind.css';
 import '../styles/tailwind.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
+import AnalyticsTracker from '@/components/AnalyticsTracker';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: 'Viking Fuel — Premium Kosttillskott för Daglig Prestation',
   description:
-    'Viking Fuel erbjuder premium kosttillskott med naturliga ingredienser för energi, uthållighet och vitalitet. Tillverkat i EU. Fri frakt över 500 kr.',
+    'Viking Fuel erbjuder premium kosttillskott med naturliga ingredienser för energi, uthållighet och vitalitet. Tillverkat i EU. Fri frakt över 700 kr.',
   icons: {
     icon: [{ url: 'https://cdn.corenexis.com/files/c/4668994720.png', type: 'image/png' }],
   },
@@ -42,7 +43,10 @@ export default function RootLayout({
     <html lang="sv" className={plusJakartaSans.variable}>
       <body className={plusJakartaSans.className}>
         <AuthProvider>
-          <CartProvider>{children}</CartProvider>
+          <CartProvider>
+            <AnalyticsTracker />
+            {children}
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

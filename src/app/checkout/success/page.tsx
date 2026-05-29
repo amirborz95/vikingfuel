@@ -25,11 +25,11 @@ export default function CheckoutSuccessPage() {
 
           <h1 className="text-3xl font-bold text-foreground mb-2">Beställning genomförd!</h1>
           <p className="text-muted-foreground mb-6">
-            Tack för ditt köp. Du kommer snart att motta en bekräftelseemail med leveransinformation.
+            Tack för ditt köp. Stripe skickar automatiskt orderbekräftelse och kvitto till din e-post.
           </p>
 
           <div className="bg-muted rounded-lg p-4 mb-8 text-sm text-muted-foreground">
-            <p>En bekräftelse och spårningslänk skickas till din email-adress.</p>
+            <p>Kontrollera din inkorg för e-post från Stripe eller Vikingfuel.</p>
           </div>
 
           <Link href="/" className="btn-primary inline-flex gap-2">
@@ -41,3 +41,4 @@ export default function CheckoutSuccessPage() {
     </div>
   );
 }
+

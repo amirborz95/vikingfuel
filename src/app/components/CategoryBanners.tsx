@@ -26,15 +26,6 @@ const categories = [
     accent: 'from-foreground/70 via-foreground/40 to-transparent',
   },
   {
-    title: 'Ingredienser',
-    subtitle: 'Transparenta och naturliga råvaror',
-    btnLabel: 'Läs mer',
-    btnHref: '/#ingredients',
-    image: 'https://cdn.corenexis.com/files/c/2973866720.png',
-    alt: 'Natural herbs and roots on dark wooden surface, dramatic low-key lighting, deep shadows',
-    accent: 'from-foreground/70 via-foreground/40 to-transparent',
-  },
-  {
     title: 'Tillbehör',
     subtitle: 'Kommer snart — prenumerera för uppdateringar',
     btnLabel: 'Kommer snart',
@@ -48,9 +39,9 @@ const categories = [
 
 export default function CategoryBanners() {
   return (
-    <section className="py-16 bg-muted/30">
-      <div className="container-wide">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
+    <section className="py-20 lg:py-28 bg-muted/30">
+      <div className="px-1 sm:px-2 max-w-screen-2xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-12">
           {categories?.map((cat, i) => (
             <motion.div
               key={cat?.title}
@@ -58,7 +49,7 @@ export default function CategoryBanners() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-60px' }}
               transition={{ delay: i * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="group relative rounded-3xl overflow-hidden aspect-[16/9] sm:aspect-[4/3]"
+              className="group relative rounded-3xl overflow-hidden aspect-[5/3]"
             >
               {/* Image */}
               <AppImage
@@ -73,9 +64,9 @@ export default function CategoryBanners() {
               <div className={`absolute inset-0 bg-gradient-to-t ${cat?.accent}`} />
 
               {/* Content */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-                <h3 className="text-xl sm:text-2xl font-extrabold text-white mb-1">{cat?.title}</h3>
-                <p className="text-sm text-white/80 mb-4">{cat?.subtitle}</p>
+              <div className="absolute bottom-0 left-0 right-0 p-8 sm:p-10">
+                <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">{cat?.title}</h3>
+                <p className="text-base text-white/80 mb-6">{cat?.subtitle}</p>
                 <Link
                   href={cat?.btnHref}
                   className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-200 ${

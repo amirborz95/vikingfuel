@@ -13,11 +13,6 @@
   NEXT_PUBLIC_STRIPE_PRICE_ID_3 = "prod_UQQQ3AGMp7fCPa"
   NEXT_PUBLIC_STRIPE_PRICE_ID_6 = "prod_UQQVBKXDOEpmVH"
 
-[[redirects]]
-  from = "/*"
-  to = "/:splat"
-  status = 200
-
 [[headers]]
   for = "/*"
   [headers.values]

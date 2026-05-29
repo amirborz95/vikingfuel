@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { MAX_STOCK, totalUnits as calculateUnits, itemUnits } from '@/lib/inventory';
 
 export interface CartItem {
   id: string;
@@ -10,6 +11,7 @@ export interface CartItem {
   image: string;
   size: string;
   priceId: string;
+  units?: number;
 }
 
 interface CartContextType {
@@ -17,8 +19,9 @@ interface CartContextType {
   isOpen: boolean;
   isReady: boolean;
   totalItems: number;
+  totalUnits: number;
   totalPrice: number;
-  addItem: (item: Omit<CartItem, 'quantity'>) => void;
+  addItem: (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -57,13 +60,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items]);
 
-  const addItem = useCallback((item: Omit<CartItem, 'quantity'>) => {
+  const addItem = useCallback((item: Omit<CartItem, 'quantity'> & { quantity?: number }) => {
+    const quantityToAdd = item.quantity && item.quantity > 0 ? item.quantity : 1;
     setItems((prev) => {
       const existing = prev.find((i) => i.id === item.id);
-      if (existing) {
-        return prev.map((i) => (i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i));
+      const itemUnitsToAdd = (item.units ?? 1) * quantityToAdd;
+      const currentUnits = totalUnits(prev);
+      if (currentUnits + itemUnitsToAdd > MAX_STOCK) {
+        return prev;
       }
-      return [...prev, { ...item, quantity: 1 }];
+
+      if (existing) {
+        return prev.map((i) =>
+          i.id === item.id ? { ...i, quantity: i.quantity + quantityToAdd } : i
+        );
+      }
+      return [...prev, { ...item, quantity: quantityToAdd }];
     });
     setIsOpen(true);
   }, []);
@@ -73,11 +85,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateQuantity = useCallback((id: string, quantity: number) => {
-    if (quantity <= 0) {
-      setItems((prev) => prev.filter((i) => i.id !== id));
-    } else {
-      setItems((prev) => prev.map((i) => (i.id === id ? { ...i, quantity } : i)));
-    }
+    setItems((prev) => {
+      const item = prev.find((i) => i.id === id);
+      if (!item) return prev;
+      const newQuantity = quantity <= 0 ? 0 : quantity;
+      const newUnits = item.units ?? 1;
+      const currentUnits = totalUnits(prev) - itemUnits(item);
+
+      if (newQuantity === 0) {
+        return prev.filter((i) => i.id !== id);
+      }
+
+      if (currentUnits + newQuantity * newUnits > MAX_STOCK) {
+        return prev;
+      }
+
+      return prev.map((i) => (i.id === id ? { ...i, quantity: newQuantity } : i));
+    });
   }, []);
 
   const clearCart = useCallback(() => setItems([]), []);
@@ -85,6 +109,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const closeCart = useCallback(() => setIsOpen(false), []);
 
   const totalItems = items.reduce((s, i) => s + i.quantity, 0);
+  const totalUnits = calculateUnits(items);
   const totalPrice = items.reduce((s, i) => s + i.price * i.quantity, 0);
 
   return (
@@ -94,6 +119,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         isOpen,
         isReady,
         totalItems,
+        totalUnits,
         totalPrice,
         addItem,
         removeItem,

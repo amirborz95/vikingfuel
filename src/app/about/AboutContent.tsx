@@ -63,7 +63,7 @@ export default function AboutContent() {
 
               {[
                 'Viking Fuel började som en dröm om att skapa naturliga kosttillskott som verkligen fungerar. Grundaren, med bakgrund inom idrott och näring, insåg att många produkter på marknaden inte levde upp till sina löften.',
-                'Efter år av forskning och utveckling lanserade vi vår första produkt 2023. Sedan dess har vi hjälpt tusentals människor att nå sina mål genom våra vetenskapligt utformade formler.',
+                'Efter år av forskning och utveckling lanserade vi vår första produkt 2025. Sedan dess har vi hjälpt tusentals människor att nå sina mål genom våra vetenskapligt utformade formler.',
               ].map((paragraph, index) => (
                 <p key={index} className="text-lg text-muted-foreground leading-relaxed mb-6">
                   {paragraph}

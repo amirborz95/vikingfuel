@@ -1,6 +1,7 @@
 'use client';
 
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 import Link from 'next/link';
@@ -8,7 +9,8 @@ import Icon from './ui/AppIcon';
 import AppImage from './ui/AppImage';
 
 export default function CartDrawer() {
-  const { items, isOpen, closeCart, removeItem, updateQuantity, totalPrice } = useCart();
+  const { items, isOpen, closeCart, removeItem, updateQuantity, totalPrice, clearCart } = useCart();
+  const { user } = useAuth();
 
   return (
     <AnimatePresence>
@@ -113,19 +115,45 @@ export default function CartDrawer() {
                   <span className="text-sm text-muted-foreground">Totalt</span>
                   <span className="text-xl font-bold text-foreground">{totalPrice} kr</span>
                 </div>
-                {totalPrice < 500 && (
+                {totalPrice < 700 && (
                   <p className="text-xs text-muted-foreground bg-accent rounded-lg px-3 py-2">
-                    Lägg till {500 - totalPrice} kr för fri frakt
+                    Lägg till {700 - totalPrice} kr för fri frakt
                   </p>
                 )}
-                <Link
-                  href="/checkout"
-                  onClick={closeCart}
-                  className="btn-primary w-full justify-center text-base py-4"
-                >
-                  Gå till kassa
-                  <Icon name="ArrowRightIcon" size={18} />
-                </Link>
+                <p className="text-xs text-muted-foreground">
+                  6% moms ingår i totalsumman.
+                </p>
+                <div className="grid gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearCart();
+                      closeCart();
+                    }}
+                    className="w-full rounded-2xl border border-border px-4 py-3 text-sm font-bold text-foreground bg-white hover:bg-muted transition-colors"
+                  >
+                    Töm varukorg
+                  </button>
+                  {!user ? (
+                    <div className="space-y-3">
+                      <Link href="/login" onClick={closeCart} className="w-full inline-flex justify-center rounded-2xl border border-border px-4 py-3 text-sm font-bold text-foreground bg-white hover:bg-muted transition-colors">
+                        Logga in
+                      </Link>
+                      <Link href="/register" onClick={closeCart} className="w-full inline-flex justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors">
+                        Registrera dig
+                      </Link>
+                    </div>
+                  ) : (
+                    <Link
+                      href="/checkout"
+                      onClick={closeCart}
+                      className="btn-primary w-full justify-center text-base py-4"
+                    >
+                      Gå till kassa
+                      <Icon name="ArrowRightIcon" size={18} />
+                    </Link>
+                  )}
+                </div>
               </div>
             )}
           </motion.div>

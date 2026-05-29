@@ -8,7 +8,7 @@ export default function AnnouncementBar() {
     <div className="bg-foreground text-white py-2.5 text-xs font-medium">
       <Marquee gradient={false} speed={40} pauseOnHover>
         {[
-          'Fri frakt över 500 kr',
+          'Fri frakt över 700 kr',
           'Snabb leverans inom Sverige',
           '14 dagar ångerrätt',
           'Naturliga kosttillskott från Norden',

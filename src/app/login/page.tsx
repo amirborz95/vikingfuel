@@ -17,11 +17,13 @@ export default function LoginPage() {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const result = login(email, password);
-    setFeedback({ text: result.message, isError: !result.success });
-    if (result.success) {
-      router.push('/account');
-    }
+    (async () => {
+      const result = await login(email, password);
+      setFeedback({ text: result.message, isError: !result.success });
+      if (result.success) {
+        router.push('/account');
+      }
+    })();
   };
 
   return (        <div className="min-h-screen bg-white">
@@ -47,7 +49,7 @@ export default function LoginPage() {
                     </div>
                   ) : (
                     <>
-                      <form onSubmit={handleSubmit} className="space-y-6">
+                      <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
                         <div>
                           <label className="block text-sm font-medium text-foreground mb-2">E-post</label>
                           <input
@@ -55,6 +57,7 @@ export default function LoginPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
+                            autoComplete="username"
                             className="w-full rounded-2xl border border-border px-4 py-3 text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-primary"
                             placeholder="example@exempel.se"
                           />
@@ -66,6 +69,7 @@ export default function LoginPage() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
+                            autoComplete="current-password"
                             className="w-full rounded-2xl border border-border px-4 py-3 text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-primary"
                             placeholder="Ditt lösenord"
                           />

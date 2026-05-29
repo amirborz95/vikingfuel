@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import AppLogo from './ui/AppLogo';
 import Icon from './ui/AppIcon';
-import PaymentIcon from './ui/PaymentIcons';
+import PaymentLogos from './ui/PaymentLogos';
 
 export default function Footer() {
   type FooterLink = {
@@ -108,14 +108,10 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-border">
           <p className="text-xs text-muted-foreground">
-            © 2026 Viking Fuel AB. Alla rättigheter förbehållna.
+            © 2026 SmartVal AB. Alla rättigheter förbehållna.
           </p>
-          <div className="flex items-center gap-4 flex-wrap justify-center">
-            {['Visa', 'Mastercard', 'Klarna', 'Google Pay'].map((payment) => (
-              <div key={payment} className="flex items-center">
-                <PaymentIcon name={payment} width={72} height={28} />
-              </div>
-            ))}
+          <div className="flex items-center justify-center sm:justify-end w-full sm:w-auto">
+            <PaymentLogos />
           </div>
         </div>
       </div>

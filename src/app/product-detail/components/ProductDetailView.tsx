@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import AppImage from '@/components/ui/AppImage';
 import Icon from '@/components/ui/AppIcon';
 import { useCart } from '@/context/CartContext';
+import { MAX_STOCK } from '@/lib/inventory';
+import { useInventory } from '@/hooks/useInventory';
 import ProductCard from '@/app/components/ProductCard';
 import { allProducts } from '@/app/components/ProductsSection';
 
@@ -14,19 +16,21 @@ export default function ProductDetailView() {
   const [activeTab, setActiveTab] = useState('Beskrivning');
   const [quantity, setQuantity] = useState(1);
   const [addedMsg, setAddedMsg] = useState(false);
-  const { addItem } = useCart();
+  const { addItem, totalUnits } = useCart();
+  const inventory = useInventory();
 
   const bundles = [
     {
       id: 'bundle-1',
       label: 'Vikingfuel - Testo-support',
       sublabel: '60 capsules',
-      price: 349,
+      price: 10,
       oldPrice: 0,
       image: 'https://cdn.corenexis.com/files/c/2491997720.png',
       priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_1 || '',
       imageAlt: 'Single Viking Fuel Energy supplement bottle on white clean background',
       tag: null,
+      units: 1,
     },
     {
       id: 'bundle-2',
@@ -38,6 +42,7 @@ export default function ProductDetailView() {
       priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_3 || '',
       imageAlt: 'Three Viking Fuel Energy supplement bottles arranged together on white background',
       tag: '10% discount',
+      units: 3,
     },
     {
       id: 'bundle-3',
@@ -49,6 +54,7 @@ export default function ProductDetailView() {
       priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_6 || '',
       imageAlt: 'Six Viking Fuel Energy supplement bottles arranged in rows on white background',
       tag: '20% discount',
+      units: 6,
     },
   ];
 
@@ -72,25 +78,40 @@ export default function ProductDetailView() {
     ),
 
     'Ingredienser': (
-      <div className="space-y-3">
-        {[
-          { name: 'Maca-extrakt', amount: '500 mg' },
-          { name: 'Ashwagandha (KSM-66)', amount: '300 mg' },
-          { name: 'Tribulus Terrestris', amount: '250 mg' },
-          { name: 'Panax Ginseng', amount: '200 mg' },
-          { name: 'Ingefära-extrakt', amount: '100 mg' },
-          { name: 'Zink', amount: '10 mg' },
-          { name: 'Selen', amount: '55 µg' },
-          { name: 'Piperin (BioPerine)', amount: '5 mg' },
-        ].map((ing) => (
-          <div
-            key={ing.name}
-            className="flex justify-between items-center py-2.5 border-b border-border last:border-0"
-          >
-            <span className="text-sm font-medium text-foreground">{ing.name}</span>
-            <span className="text-sm font-bold text-primary">{ing.amount}</span>
-          </div>
-        ))}
+      <div className="space-y-6">
+        <div className="space-y-3 text-sm text-muted-foreground">
+          <p>
+            Per kapsel innehåller formulan följande högkvalitativa extrakt och mineraler. Rekommenderad daglig dos är
+            2 kapslar – då blir mängden av varje ingrediens dubblerad för maximal effekt.
+          </p>
+          <p className="font-semibold text-foreground">Rekommenderad daglig dos: 2 kapslar</p>
+        </div>
+
+        <div className="rounded-3xl border border-border bg-white p-5 space-y-3">
+          {[
+            { name: 'Macextrakt 4:1', perCapsule: '500 mg', dailyDose: '1000 mg' },
+            { name: 'Ashwagandhaextrakt (5% withanolider)', perCapsule: '300 mg', dailyDose: '600 mg' },
+            { name: 'Bockhornsklöverextrakt (10:1)', perCapsule: '250 mg', dailyDose: '500 mg' },
+            { name: 'Tribulus terrestris-extrakt (90% saponiner)', perCapsule: '200 mg', dailyDose: '400 mg' },
+            { name: 'Panax ginseng-extrakt (20%)', perCapsule: '150 mg', dailyDose: '300 mg' },
+            { name: 'Tallbarksextrakt (Pinus pinaster)', perCapsule: '100 mg', dailyDose: '200 mg' },
+            { name: 'Gelé royale-extrakt (3:1)', perCapsule: '100 mg', dailyDose: '200 mg' },
+            { name: 'Ingefärsextrakt (5%)', perCapsule: '80 mg', dailyDose: '160 mg' },
+            { name: 'Piperin (95%)', perCapsule: '5 mg', dailyDose: '10 mg' },
+            { name: 'Zink (bisglycinat)', perCapsule: '10 mg', dailyDose: '20 mg' },
+            { name: 'Selen', perCapsule: '55 µg', dailyDose: '110 µg' },
+            { name: 'Bor', perCapsule: '2 mg', dailyDose: '4 mg' },
+          ].map((ing) => (
+            <div
+              key={ing.name}
+              className="grid grid-cols-1 sm:grid-cols-[1.7fr_1fr_1fr] gap-3 items-center py-3 border-b border-border last:border-0"
+            >
+              <span className="text-sm font-medium text-foreground">{ing.name}</span>
+              <span className="text-sm text-muted-foreground">Per kapsel: {ing.perCapsule}</span>
+              <span className="text-sm font-bold text-primary">2 kapslar: {ing.dailyDose}</span>
+            </div>
+          ))}
+        </div>
       </div>
     ),
 
@@ -114,7 +135,7 @@ export default function ProductDetailView() {
         </div>
         <div>
           <p className="font-semibold text-foreground mb-1">Fri frakt</p>
-          <p>Frakt upp till 5 kg: 49 kr i Stockholm/Göteborg, 59 kr i övriga Sverige. Fri frakt över 500 kr.</p>
+          <p>Normalt frakt kostar 10 kr inom hela Sverige. Fri frakt över 700 kr.</p>
         </div>
         <div>
           <p className="font-semibold text-foreground mb-1">Returer</p>
@@ -127,7 +148,17 @@ export default function ProductDetailView() {
   const bundle = bundles[selectedBundle];
   const discount = bundle.oldPrice > 0 ? Math.round((1 - bundle.price / bundle.oldPrice) * 100) : 0;
 
+  const remainingUnits = inventory?.remainingUnits ?? MAX_STOCK;
+  const bundleUnits = bundle.units ?? 1;
+  const enoughStockForSelection = remainingUnits >= bundleUnits * quantity;
+  const enoughCartCapacity = totalUnits + bundleUnits * quantity <= MAX_STOCK;
+  const outOfStock = inventory ? remainingUnits === 0 : false;
+  const stockPercentage = Math.max(0, Math.min(100, Math.round((remainingUnits / MAX_STOCK) * 100)));
+  const canAddToCart = enoughStockForSelection && enoughCartCapacity;
+
   const handleAddToCart = () => {
+    if (!canAddToCart) return;
+
     addItem({
       id: bundle.id,
       name: `Viking Energy — ${bundle.label}`,
@@ -135,6 +166,8 @@ export default function ProductDetailView() {
       image: bundle.image,
       size: bundle.sublabel,
       priceId: bundle.priceId,
+      units: bundle.units ?? 1,
+      quantity,
     });
     setAddedMsg(true);
     setTimeout(() => setAddedMsg(false), 2000);
@@ -198,7 +231,7 @@ export default function ProductDetailView() {
                 {[
                   { label: 'Tillverkat i EU', description: 'Garanterad kvalitet och standard.' },
                   { label: 'GMP-certifierat', description: 'Producerat enligt strikt tillverkningsstandard.' },
-                  { label: 'Fri frakt >500 kr', description: 'Fri leverans över 500 kr.' },
+                  { label: 'Fri frakt >700 kr', description: 'Fri leverans över 700 kr.' },
                 ].map((b) => (
                   <div
                     key={b.label}
@@ -303,6 +336,25 @@ export default function ProductDetailView() {
                 </div>
               </div>
 
+              <div className="mb-5">
+                <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
+                  <span>
+                    {inventory
+                      ? remainingUnits > 0
+                        ? `Endast ${remainingUnits} burkar kvar av ${MAX_STOCK}`
+                        : 'Slut i lager'
+                      : 'Hämtar lagerstatus...'}
+                  </span>
+                  <span>{bundleUnits} burkar/paket</span>
+                </div>
+                <div className="h-2 rounded-full bg-border overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${remainingUnits > 0 ? 'bg-primary' : 'bg-red-400'}`}
+                    style={{ width: `${stockPercentage}%` }}
+                  />
+                </div>
+              </div>
+
               {/* Quantity + CTA */}
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex items-center gap-2 border border-border rounded-xl p-1">
@@ -325,10 +377,13 @@ export default function ProductDetailView() {
 
                 <button
                   onClick={handleAddToCart}
+                  disabled={!canAddToCart}
                   className={`flex-1 py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 ${
                     addedMsg
                       ? 'bg-green-100 text-primary border border-primary/30'
-                      : 'bg-foreground text-white hover:bg-primary'
+                      : canAddToCart
+                      ? 'bg-foreground text-white hover:bg-primary'
+                      : 'bg-muted text-muted-foreground cursor-not-allowed'
                   }`}
                 >
                   {addedMsg ? (
@@ -343,9 +398,12 @@ export default function ProductDetailView() {
                 </button>
               </div>
 
+              <p className="text-xs text-muted-foreground mb-4">6% moms ingår i priset.</p>
+
               <button
                 onClick={handleAddToCart}
-                className="w-full py-4 rounded-xl bg-primary text-white font-bold text-sm hover:bg-green-700 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
+                disabled={!canAddToCart}
+                className="w-full py-4 rounded-xl bg-primary text-white font-bold text-sm hover:bg-green-700 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:bg-muted"
               >
                 <Icon name="BoltIcon" size={16} />
                 Köp nu
@@ -355,7 +413,7 @@ export default function ProductDetailView() {
               <div className="mt-6 pt-6 border-t border-border grid grid-cols-2 gap-3">
                 {[
                   { title: 'Snabb leverans', subtitle: '1-3 arbetsdagar' },
-                  { title: 'Fri frakt', subtitle: 'Över 500 kr' },
+                  { title: 'Fri frakt', subtitle: 'Över 700 kr' },
                   { title: '14 dagar ångerrätt', subtitle: 'Full återbetalning' },
                   { title: 'Säker betalning', subtitle: 'SSL-krypterad' },
                 ].map((b) => (

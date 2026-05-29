@@ -14,8 +14,8 @@ const categories = [
 
 const priceRanges = [
   { label: 'Alla priser', range: [0, 2200] },
-  { label: 'Under 500 kr', range: [0, 500] },
-  { label: '500–1000 kr', range: [500, 1000] },
+  { label: 'Under 700 kr', range: [0, 700] },
+  { label: '700–1000 kr', range: [700, 1000] },
   { label: 'Över 1000 kr', range: [1000, 2200] },
 ];
 

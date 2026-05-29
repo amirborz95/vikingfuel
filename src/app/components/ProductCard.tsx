@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import AppImage from '@/components/ui/AppImage';
 import { useCart } from '@/context/CartContext';
+import { MAX_STOCK } from '@/lib/inventory';
+import { useInventory } from '@/hooks/useInventory';
 import Icon from '@/components/ui/AppIcon';
 
 export interface Product {
@@ -20,6 +22,7 @@ export interface Product {
   priceId: string;
   buttonLabel?: string;
   isBundle?: boolean;
+  units?: number;
 }
 
 interface ProductCardProps {
@@ -29,11 +32,19 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const { addItem } = useCart();
+  const inventory = useInventory();
   const [added, setAdded] = useState(false);
+
+  const remainingUnits = inventory?.remainingUnits ?? MAX_STOCK;
+  const productUnits = product.units ?? 1;
+  const itemAvailable = remainingUnits >= productUnits;
+  const remainingPercent = Math.max(0, Math.min(100, Math.round((remainingUnits / MAX_STOCK) * 100)));
 
   const discount = product.oldPrice > 0 ? Math.round((1 - product.price / product.oldPrice) * 100) : 0;
 
   const handleAdd = () => {
+    if (!itemAvailable) return;
+
     addItem({
       id: product.id,
       name: product.name,
@@ -41,6 +52,8 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       image: product.image,
       size: product.info,
       priceId: product.priceId,
+      units: product.units ?? 1,
+      quantity: 1,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
@@ -102,20 +115,37 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         </div>
 
         {/* Price */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em] font-semibold text-muted-foreground mb-2">
+            <span>{remainingUnits > 0 ? `${remainingUnits} burkar kvar` : 'Slut i lager'}</span>
+            <span>{productUnits} burkar/paket</span>
+          </div>
+          <div className="h-2 rounded-full bg-border overflow-hidden">
+            <div
+              className={`h-full rounded-full ${remainingUnits > 0 ? 'bg-primary' : 'bg-red-400'}`}
+              style={{ width: `${remainingPercent}%` }}
+            />
+          </div>
+        </div>
+
         <div className="flex items-baseline gap-2 mb-4 mt-auto">
           <span className="text-xl font-extrabold text-foreground">{product.price} kr</span>
           {product.oldPrice > 0 && (
             <span className="text-sm text-muted-foreground line-through">{product.oldPrice} kr</span>
           )}
         </div>
+        <p className="text-xs text-muted-foreground mb-3">6% moms ingår i priset.</p>
 
         {/* Button */}
         <button
           onClick={handleAdd}
+          disabled={!itemAvailable}
           className={`w-full py-3 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 ${
             added
               ? 'bg-green-100 text-primary border border-primary/30'
-              : 'bg-foreground text-white hover:bg-primary'
+              : itemAvailable
+              ? 'bg-foreground text-white hover:bg-primary'
+              : 'bg-muted text-muted-foreground cursor-not-allowed'
           }`}
         >
           {added ? (

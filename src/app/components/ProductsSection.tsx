@@ -11,13 +11,14 @@ export const allProducts: Product[] = [
     id: 'viking-energy-1',
     name: 'Vikingfuel - Testo-support',
     info: '60 kapslar',
-    price: 349,
+    price: 10,
     oldPrice: 0,
     reviews: 45,
     badge: 'Premium',
     badgeColor: 'bg-primary text-white',
     image: 'https://cdn.corenexis.com/files/c/2491997720.png',
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_1 || '',
+    units: 1,
   },
   {
     id: 'viking-energy-3',
@@ -30,6 +31,7 @@ export const allProducts: Product[] = [
     badgeColor: 'bg-amber-500 text-white',
     image: 'https://cdn.corenexis.com/files/c/1977886720.png',
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_3 || '',
+    units: 3,
   },
   {
     id: 'viking-energy-6',
@@ -42,6 +44,7 @@ export const allProducts: Product[] = [
     badgeColor: 'bg-foreground text-white',
     image: 'https://cdn.corenexis.com/files/c/8571187720.png',
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_6 || '',
+    units: 6,
   },
 ];
 

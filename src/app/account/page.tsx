@@ -8,11 +8,38 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export default function AccountPage() {
-  const { user, logout, getAuthLogs, getAllUsers } = useAuth();
+  const { user, logout } = useAuth();
+
+  const [serverUsers, setServerUsers] = React.useState<{ name: string; email: string }[]>([]);
+  const [serverLogs, setServerLogs] = React.useState<any[]>([]);
 
   // Only show logs for admin users
   const adminEmails = ['info@vikingfuel.com'];
   const isAdmin = user && adminEmails.includes(user.email);
+
+  React.useEffect(() => {
+    if (!isAdmin || !user) return;
+    (async () => {
+      try {
+        const uRes = await fetch('/api/admin/users');
+        if (uRes.ok) {
+          const ud = await uRes.json();
+          setServerUsers(ud.users || []);
+        }
+      } catch (e) {
+        // ignore
+      }
+      try {
+        const lRes = await fetch('/api/admin/logs');
+        if (lRes.ok) {
+          const ld = await lRes.json();
+          setServerLogs(ld.logs || []);
+        }
+      } catch (e) {
+        // ignore
+      }
+    })();
+  }, [isAdmin, user]);
 
   return (        <div className="min-h-screen bg-white">
           <AnnouncementBar />
@@ -59,12 +86,12 @@ export default function AccountPage() {
                     </div>
                     {isAdmin && (
                       <div className="rounded-3xl border border-border p-6 bg-white shadow-sm mt-6">
-                        <h2 className="text-2xl font-semibold text-foreground mb-4">Registrerade användare</h2>
+                        <h2 className="text-2xl font-semibold text-foreground mb-4">Registrerade användare (server)</h2>
                         <div className="space-y-2">
-                          {getAllUsers().length === 0 ? (
+                          {serverUsers.length === 0 ? (
                             <p className="text-sm text-muted-foreground">Inga registrerade användare ännu.</p>
                           ) : (
-                            getAllUsers().map((registeredUser, index) => (
+                            serverUsers.map((registeredUser, index) => (
                               <div key={index} className="text-sm bg-muted/50 p-3 rounded-lg">
                                 <span className="font-medium">{registeredUser.name}</span> - {registeredUser.email}
                               </div>
@@ -75,12 +102,12 @@ export default function AccountPage() {
                     )}
                     {isAdmin && (
                       <div className="rounded-3xl border border-border p-6 bg-white shadow-sm mt-6">
-                        <h2 className="text-2xl font-semibold text-foreground mb-4">Inloggningslogg</h2>
+                        <h2 className="text-2xl font-semibold text-foreground mb-4">Inloggningslogg (server)</h2>
                         <div className="space-y-2">
-                          {getAuthLogs().length === 0 ? (
+                          {serverLogs.length === 0 ? (
                             <p className="text-sm text-muted-foreground">Inga inloggningshändelser ännu.</p>
                           ) : (
-                            getAuthLogs().map((log, index) => (
+                            serverLogs.map((log, index) => (
                               <div key={index} className="text-sm bg-muted/50 p-3 rounded-lg">
                                 <span className="font-medium capitalize">{log.action}</span> - {log.email} - {new Date(log.timestamp).toLocaleString('sv-SE')}
                               </div>

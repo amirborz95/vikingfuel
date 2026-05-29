@@ -1,5 +1,6 @@
 # Local environment
 .env
+.env.local
 
 # Node modules
 node_modules/
@@ -11,6 +12,9 @@ out/
 
 # Production build
 build/
+
+# Local checks
+css-check.txt
 
 # Logs
 npm-debug.log*
