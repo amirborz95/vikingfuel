@@ -11,7 +11,7 @@ export const allProducts: Product[] = [
     id: 'viking-energy-1',
     name: 'Vikingfuel - Testo-support',
     info: '60 kapslar',
-    price: 10,
+    price: 349,
     oldPrice: 0,
     reviews: 45,
     badge: 'Premium',

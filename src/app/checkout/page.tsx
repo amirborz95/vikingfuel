@@ -59,7 +59,7 @@ export default function CheckoutPage() {
     );
   }
 
-  const shippingCost = totalPrice >= 700 ? 0 : 10;
+  const shippingCost = totalPrice >= 700 ? 0 : 49;
   const totalWithShipping = totalPrice + shippingCost;
   const totalWithShippingCents = Math.round(totalWithShipping * 100);
   const taxAmount = Math.round(totalWithShippingCents - totalWithShippingCents / 1.06) / 100;

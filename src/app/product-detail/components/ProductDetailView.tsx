@@ -24,7 +24,7 @@ export default function ProductDetailView() {
       id: 'bundle-1',
       label: 'Vikingfuel - Testo-support',
       sublabel: '60 capsules',
-      price: 10,
+      price: 349,
       oldPrice: 0,
       image: 'https://cdn.corenexis.com/files/c/2491997720.png',
       priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_1 || '',
@@ -135,7 +135,7 @@ export default function ProductDetailView() {
         </div>
         <div>
           <p className="font-semibold text-foreground mb-1">Fri frakt</p>
-          <p>Normalt frakt kostar 10 kr inom hela Sverige. Fri frakt över 700 kr.</p>
+          <p>Normalt frakt kostar 49 kr inom hela Sverige. Fri frakt över 700 kr.</p>
         </div>
         <div>
           <p className="font-semibold text-foreground mb-1">Returer</p>

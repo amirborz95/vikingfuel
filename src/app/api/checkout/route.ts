@@ -24,7 +24,7 @@ async function getOrCreateTaxRate() {
 
   return await stripe.taxRates.create({
     display_name: 'Moms',
-    description: '6% moms ingår',
+    description: '6% moms inklusive',
     country: 'SE',
     jurisdiction: 'Sweden',
     percentage: 6,
@@ -92,10 +92,10 @@ export async function POST(req: NextRequest) {
         price_data: {
           currency: 'sek',
           product_data: {
-            name: 'Standardfrakt 10 kr inom Sverige',
+            name: 'Standardfrakt 49 kr inom Sverige',
             tax_code: 'txcd_92010001',
           },
-          unit_amount: 1000,
+          unit_amount: 4900,
           tax_behavior: 'inclusive',
         },
         quantity: 1,

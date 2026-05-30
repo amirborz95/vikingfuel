@@ -65,7 +65,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => {
       const existing = prev.find((i) => i.id === item.id);
       const itemUnitsToAdd = (item.units ?? 1) * quantityToAdd;
-      const currentUnits = totalUnits(prev);
+      const currentUnits = calculateUnits(prev);
       if (currentUnits + itemUnitsToAdd > MAX_STOCK) {
         return prev;
       }
@@ -90,7 +90,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (!item) return prev;
       const newQuantity = quantity <= 0 ? 0 : quantity;
       const newUnits = item.units ?? 1;
-      const currentUnits = totalUnits(prev) - itemUnits(item);
+      const currentUnits = calculateUnits(prev) - itemUnits(item);
 
       if (newQuantity === 0) {
         return prev.filter((i) => i.id !== id);

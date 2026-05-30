@@ -38,11 +38,11 @@ export default function ShippingContent() {
             </p>
             <p className="text-muted-foreground leading-relaxed mb-4">
               <strong>Fraktkostnadsöversikt:</strong><br/>
-              • Normalt frakt kostar 10 kr inom hela Sverige.<br/>
+              • Normalt frakt kostar 49 kr inom hela Sverige.<br/>
               • Fri frakt: På beställningar över 700 kr
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              Stripe-kassan använder samma fraktpolicy: fri frakt över 700 kr, annars standardfrakt 10 kr inom hela Sverige.
+              Stripe-kassan använder samma fraktpolicy: fri frakt över 700 kr, annars standardfrakt 49 kr inom hela Sverige.
             </p>
           </section>
 
