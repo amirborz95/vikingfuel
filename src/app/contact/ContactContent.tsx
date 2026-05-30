@@ -17,6 +17,7 @@ export default function ContactContent() {
 
     const formData = new URLSearchParams();
     formData.append('form-name', 'contact');
+    formData.append('subject', `Nytt meddelande från kontaktformuläret – ${name || 'Vikingfuel'}`);
     formData.append('name', name);
     formData.append('email', email);
     formData.append('message', message);
@@ -65,6 +66,7 @@ export default function ContactContent() {
               className="space-y-6"
             >
               <input type="hidden" name="form-name" value="contact" />
+              <input type="hidden" name="subject" value="Nytt meddelande från kontaktformuläret" />
               <p className="hidden">
                 <label>
                   Lämna detta fält tomt: <input name="bot-field" />
