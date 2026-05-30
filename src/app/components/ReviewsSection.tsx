@@ -13,7 +13,7 @@ const reviews = [
     text: 'Har använt Vikingfuel i tre veckor nu och skillnaden är otrolig! Vaknar piggare på morgonen och har mycket bättre fokus genom hela dagen. Som småbarnsförälder har det varit en game-changer. Rekommenderar verkligen!',
     product: 'Vikingfuel - Testo-support',
     date: 'Mars 2026',
-    image: 'https://cdn.corenexis.com/files/c/8895963720.png'
+    image: 'https://kommodo.ai/i/TeSWDHvDRjkp0joETz15'
   },
   {
     name: 'Marcus Bergström',
@@ -30,7 +30,7 @@ const reviews = [
     text: 'Började med en burk för att testa och blev så imponerad att jag gick direkt till 6-pack. Har haft problem med låg energi och trötthet i flera år, men denna produkt har verkligen hjälpt. Känner mig starkare och mer motiverad varje dag.',
     product: 'Vikingfuel - Testo-support 6-pack',
     date: 'April 2026',
-    image: 'https://cdn.corenexis.com/files/c/3687461720.png'
+    image: 'https://kommodo.ai/i/BLvVxLlx9Wpo5STIosa2'
   },
   {
     name: 'Anna Svensson',
@@ -47,7 +47,7 @@ const reviews = [
     text: 'Som 52-åring har jag märkt att energin börjar tryta lite grand. Vikingfuel har hjälpt mig att hålla igång både på jobbet och när jag tränar. Naturliga ingredienser och tydlig effekt - perfekt!',
     product: 'Vikingfuel - Testo-support',
     date: 'April 2026',
-    image: 'https://cdn.corenexis.com/files/c/1566957720.png'
+    image: 'https://kommodo.ai/i/eaD4Pe8vuVOx80zOhYTE'
   },
   {
     name: 'Maria Andersson',
