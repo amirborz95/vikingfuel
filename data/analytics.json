@@ -130,5 +130,17 @@
     "city": "Grimsloev",
     "latitude": 56.896809,
     "longitude": 14.578429
+  },
+  {
+    "type": "page-view",
+    "page": "Viking Fuel — Premium Kosttillskott för Daglig Prestation",
+    "path": "/reviews/",
+    "email": "info@vikingfuel.com",
+    "timestamp": "2026-05-30T18:43:58.824Z",
+    "country": "Sweden",
+    "region": "Kronoberg",
+    "city": "Grimsloev",
+    "latitude": 56.896755,
+    "longitude": 14.578491
   }
 ]

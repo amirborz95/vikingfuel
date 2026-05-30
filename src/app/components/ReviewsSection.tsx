@@ -13,7 +13,7 @@ const reviews = [
     text: 'Har använt Vikingfuel i tre veckor nu och skillnaden är otrolig! Vaknar piggare på morgonen och har mycket bättre fokus genom hela dagen. Som småbarnsförälder har det varit en game-changer. Rekommenderar verkligen!',
     product: 'Vikingfuel - Testo-support',
     date: 'Mars 2026',
-    image: 'https://kommodo.ai/i/TeSWDHvDRjkp0joETz15'
+    // image removed
   },
   {
     name: 'Marcus Bergström',
@@ -30,7 +30,7 @@ const reviews = [
     text: 'Började med en burk för att testa och blev så imponerad att jag gick direkt till 6-pack. Har haft problem med låg energi och trötthet i flera år, men denna produkt har verkligen hjälpt. Känner mig starkare och mer motiverad varje dag.',
     product: 'Vikingfuel - Testo-support 6-pack',
     date: 'April 2026',
-    image: 'https://kommodo.ai/i/BLvVxLlx9Wpo5STIosa2'
+    // image removed
   },
   {
     name: 'Anna Svensson',
@@ -47,7 +47,7 @@ const reviews = [
     text: 'Som 52-åring har jag märkt att energin börjar tryta lite grand. Vikingfuel har hjälpt mig att hålla igång både på jobbet och när jag tränar. Naturliga ingredienser och tydlig effekt - perfekt!',
     product: 'Vikingfuel - Testo-support',
     date: 'April 2026',
-    image: 'https://kommodo.ai/i/eaD4Pe8vuVOx80zOhYTE'
+    // image removed
   },
   {
     name: 'Maria Andersson',
@@ -196,19 +196,9 @@ export default function ReviewsSection() {
               </div>
 
               {/* Review Image */}
-              {review.image && (
-                <div className="mb-4 rounded-xl overflow-hidden aspect-[9/16]">
-                  <AppImage
-                    src={review.image}
-                    alt={`Recension från ${review.name}`}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover"
-                  />
-                </div>
-              )}
+              {/* No review image */}
 
-              <p className={`text-sm text-foreground leading-relaxed italic ${review.image ? 'mb-6' : 'mb-4'}`}>
+              <p className="text-sm text-foreground leading-relaxed italic mb-4">
                 &ldquo;{review.text}&rdquo;
               </p>
 
