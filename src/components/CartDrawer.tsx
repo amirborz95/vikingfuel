@@ -134,25 +134,14 @@ export default function CartDrawer() {
                   >
                     Töm varukorg
                   </button>
-                  {!user ? (
-                    <div className="space-y-3">
-                      <Link href="/login" onClick={closeCart} className="w-full inline-flex justify-center rounded-2xl border border-border px-4 py-3 text-sm font-bold text-foreground bg-white hover:bg-muted transition-colors">
-                        Logga in
-                      </Link>
-                      <Link href="/register" onClick={closeCart} className="w-full inline-flex justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors">
-                        Registrera dig
-                      </Link>
-                    </div>
-                  ) : (
-                    <Link
-                      href="/checkout"
-                      onClick={closeCart}
-                      className="btn-primary w-full justify-center text-base py-4"
-                    >
-                      Gå till kassa
-                      <Icon name="ArrowRightIcon" size={18} />
-                    </Link>
-                  )}
+                  <Link
+                    href="/checkout"
+                    onClick={closeCart}
+                    className="btn-primary w-full justify-center text-base py-4"
+                  >
+                    Gå till kassa
+                    <Icon name="ArrowRightIcon" size={18} />
+                  </Link>
                 </div>
               </div>
             )}
