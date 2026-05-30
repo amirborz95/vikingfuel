@@ -23,4 +23,8 @@ export const imageHosts = [
         protocol: 'https',
         hostname: 'i.postimg.cc',
     },
+    {
+        protocol: 'https',
+        hostname: 'cdn.corenexis.com',
+    },
 ];
