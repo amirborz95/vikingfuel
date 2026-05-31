@@ -27,4 +27,8 @@ export const imageHosts = [
         protocol: 'https',
         hostname: 'cdn.corenexis.com',
     },
+    {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+    },
 ];
