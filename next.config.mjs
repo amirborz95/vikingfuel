@@ -4,7 +4,6 @@ import { imageHosts } from './image-hosts.config.mjs';
 const nextConfig = {
   trailingSlash: true,
   productionBrowserSourceMaps: true,
-  distDir: process.env.DIST_DIR || '.next',
 
   typescript: {
     ignoreBuildErrors: true,
@@ -17,7 +16,7 @@ const nextConfig = {
   images: {
     remotePatterns: imageHosts,
     minimumCacheTTL: 60,
-    unoptimized: false,
+    unoptimized: true,
   }
 };
 export default nextConfig;

@@ -1,21 +1,8 @@
+
+
 [build]
   command = "npm run build"
-  publish = ".netlify/output"
-  functions = ".netlify/functions"
-  environment = { DIST_DIR = ".netlify/output" }
+  publish = ".next"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-[context.production.environment]
-  NEXT_PUBLIC_SITE_URL = "https://vikingfuel.se"
-  NEXT_PUBLIC_STRIPE_PRICE_ID_1 = "prod_UQ2YbLknUj5u35"
-  NEXT_PUBLIC_STRIPE_PRICE_ID_3 = "prod_UQQQ3AGMp7fCPa"
-  NEXT_PUBLIC_STRIPE_PRICE_ID_6 = "prod_UQQVBKXDOEpmVH"
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
