@@ -82,5 +82,101 @@
     "city": "Grimsloev",
     "latitude": 56.8966635,
     "longitude": 14.5789125
+  },
+  {
+    "type": "page-view",
+    "page": "Viking Fuel — Premium Kosttillskott för Daglig Prestation",
+    "path": "/",
+    "email": "anonymous",
+    "timestamp": "2026-05-31T19:07:15.563Z",
+    "country": "Sweden",
+    "region": "Kronoberg",
+    "city": "Grimsloev",
+    "latitude": 56.7333,
+    "longitude": 14.5333
+  },
+  {
+    "type": "page-view",
+    "page": "Viking Fuel — Premium Kosttillskott för Daglig Prestation",
+    "path": "/checkout/",
+    "email": "anonymous",
+    "timestamp": "2026-05-31T19:07:24.079Z",
+    "country": "Sweden",
+    "region": "Kronoberg",
+    "city": "Grimsloev",
+    "latitude": 56.7333,
+    "longitude": 14.5333
+  },
+  {
+    "type": "page-view",
+    "page": "Viking Fuel — Premium Kosttillskott för Daglig Prestation",
+    "path": "/",
+    "email": "anonymous",
+    "timestamp": "2026-05-31T19:07:33.592Z",
+    "country": "Sweden",
+    "region": "Kronoberg",
+    "city": "Grimsloev",
+    "latitude": 56.7333,
+    "longitude": 14.5333
+  },
+  {
+    "type": "page-view",
+    "page": "Viking Fuel — Premium Kosttillskott för Daglig Prestation",
+    "path": "/checkout/",
+    "email": "anonymous",
+    "timestamp": "2026-05-31T19:07:35.918Z",
+    "country": "Sweden",
+    "region": "Kronoberg",
+    "city": "Grimsloev",
+    "latitude": 56.7333,
+    "longitude": 14.5333
+  },
+  {
+    "type": "page-view",
+    "page": "Viking Fuel — Premium Kosttillskott för Daglig Prestation",
+    "path": "/checkout/",
+    "email": "anonymous",
+    "timestamp": "2026-05-31T19:28:46.536Z",
+    "country": "Sweden",
+    "region": "Kronoberg",
+    "city": "Grimsloev",
+    "latitude": 56.7333,
+    "longitude": 14.5333
+  },
+  {
+    "type": "page-view",
+    "page": "Viking Fuel — Premium Kosttillskott för Daglig Prestation",
+    "path": "/",
+    "email": "anonymous",
+    "timestamp": "2026-05-31T19:28:51.532Z",
+    "country": "Sweden",
+    "region": "Kronoberg",
+    "city": "Grimsloev",
+    "latitude": 56.7333,
+    "longitude": 14.5333
+  },
+  {
+    "type": "page-view",
+    "page": "Viking Fuel — Premium Kosttillskott för Daglig Prestation",
+    "path": "/checkout/",
+    "email": "anonymous",
+    "timestamp": "2026-05-31T19:28:56.080Z",
+    "country": "Sweden",
+    "region": "Kronoberg",
+    "city": "Grimsloev",
+    "latitude": 56.7333,
+    "longitude": 14.5333
+  },
+  {
+    "type": "page-view",
+    "page": "Viking Fuel — Premium Kosttillskott för Daglig Prestation",
+    "path": "/checkout/",
+    "email": "anonymous",
+    "timestamp": "2026-05-31T19:29:28.833Z",
+    "country": "Sweden",
+    "region": "Kronoberg",
+    "city": "Grimsloev",
+    "latitude": 56.7333,
+    "longitude": 14.5333
   }
 ]

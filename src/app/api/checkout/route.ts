@@ -65,13 +65,22 @@ export async function POST(req: NextRequest) {
 
     const taxRate = await getOrCreateTaxRate();
 
+    // Ensure Stripe images are full URLs
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vikingfuel.se';
+    function toAbsoluteImageUrl(img: string) {
+      if (!img) return '';
+      if (img.startsWith('http://') || img.startsWith('https://')) return img;
+      if (img.startsWith('/')) return siteUrl.replace(/\/$/, '') + img;
+      return siteUrl.replace(/\/$/, '') + '/' + img;
+    }
+
     // Create line items for Stripe
     const line_items = items.map((item: any) => ({
       price_data: {
         currency: 'sek',
         product_data: {
           name: item.name,
-          images: [item.image],
+          images: [toAbsoluteImageUrl(item.image)],
         },
         unit_amount: Math.round(item.price * 100), // Convert to cents
         tax_behavior: 'inclusive',
