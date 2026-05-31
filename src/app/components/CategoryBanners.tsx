@@ -55,9 +55,10 @@ export default function CategoryBanners() {
               <AppImage
                 src={cat?.image}
                 alt={cat?.alt}
-                fill
-                sizes="(max-width: 640px) 100vw, 50vw"
-                className="object-contain transition-transform duration-700 group-hover:scale-105"
+                width={1200}
+                height={720}
+                className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
+                priority={i === 0}
               />
 
               {/* Scrim */}
