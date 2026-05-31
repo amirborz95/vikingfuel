@@ -9,6 +9,21 @@ if (!stripeSecret) {
 }
 const stripe = new Stripe(stripeSecret);
 
+export const dynamic = 'force-dynamic';
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vikingfuel.se';
+
+// Stripe only accepts fully-qualified https image URLs. Product images are
+// served from the site itself with relative paths, so make them absolute and
+// drop anything that isn't a usable URL.
+function toAbsoluteImageUrl(image: unknown): string | undefined {
+  if (typeof image !== 'string' || !image.trim()) return undefined;
+  const value = image.trim();
+  if (value.startsWith('https://')) return value;
+  if (value.startsWith('/')) return `${siteUrl.replace(/\/$/, '')}${value}`;
+  return undefined;
+}
+
 async function getOrCreateTaxRate() {
   const existingRates = await stripe.taxRates.list({ limit: 100 });
   const found = existingRates.data.find(
@@ -66,19 +81,22 @@ export async function POST(req: NextRequest) {
     const taxRate = await getOrCreateTaxRate();
 
     // Create line items for Stripe
-    const line_items = items.map((item: any) => ({
-      price_data: {
-        currency: 'sek',
-        product_data: {
-          name: item.name,
-          images: [item.image],
+    const line_items = items.map((item: any) => {
+      const imageUrl = toAbsoluteImageUrl(item.image);
+      return {
+        price_data: {
+          currency: 'sek',
+          product_data: {
+            name: item.name,
+            ...(imageUrl ? { images: [imageUrl] } : {}),
+          },
+          unit_amount: Math.round(item.price * 100), // Convert to cents
+          tax_behavior: 'inclusive',
         },
-        unit_amount: Math.round(item.price * 100), // Convert to cents
-        tax_behavior: 'inclusive',
-      },
-      quantity: item.quantity,
-      tax_rates: [taxRate.id],
-    }));
+        quantity: item.quantity,
+        tax_rates: [taxRate.id],
+      };
+    });
 
     // Create checkout session
     const orderAmount = line_items.reduce(

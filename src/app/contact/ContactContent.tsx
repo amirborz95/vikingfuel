@@ -15,18 +15,30 @@ export default function ContactContent() {
     setError('');
     setIsLoading(true);
 
-    fetch('/api/contact', {
+    // Submissions are handled by Netlify Forms. The POST must be
+    // x-www-form-urlencoded and target the static skeleton path (/__forms.html),
+    // not the SSR catch-all at '/'. Notifications are delivered to
+    // info@vikingfuel.se.
+    const payload = new URLSearchParams({
+      'form-name': 'contact',
+      subject: `Ny kontaktförfrågan från Vikingfuel: ${name}`,
+      'bot-field': '',
+      name,
+      email,
+      message,
+    });
+
+    fetch('/__forms.html', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: JSON.stringify({ name, email, message }),
+      body: payload.toString(),
     })
-      .then(async (res) => {
+      .then((res) => {
         setIsLoading(false);
-        const data = await res.json();
-        if (!res.ok || data.error) {
-          throw new Error(data.error || 'Ett fel uppstod när meddelandet skulle skickas.');
+        if (!res.ok) {
+          throw new Error('Ett fel uppstod när meddelandet skulle skickas.');
         }
         setIsSubmitted(true);
         setName('');
@@ -34,6 +46,7 @@ export default function ContactContent() {
         setMessage('');
       })
       .catch((err) => {
+        setIsLoading(false);
         setError(err.message || 'Ett fel uppstod. Försök igen senare.');
       });
   };
@@ -47,14 +60,27 @@ export default function ContactContent() {
         </div>
         <div className="max-w-2xl mx-auto">
           <div className="bg-muted/30 rounded-2xl p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form
+              name="contact"
+              method="POST"
+              data-netlify="true"
+              netlify-honeypot="bot-field"
+              onSubmit={handleSubmit}
+              className="space-y-6"
+            >
+              <input type="hidden" name="form-name" value="contact" />
+              <p className="hidden">
+                <label>
+                  Lämna detta fält tomt: <input name="bot-field" />
+                </label>
+              </p>
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2" htmlFor="name">
                   Namn
                 </label>
                 <input
                   id="name"
-                  name="Namn"
+                  name="name"
                   type="text"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
@@ -69,7 +95,7 @@ export default function ContactContent() {
                 </label>
                 <input
                   id="email"
-                  name="E-post"
+                  name="email"
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
@@ -84,7 +110,7 @@ export default function ContactContent() {
                 </label>
                 <textarea
                   id="message"
-                  name="Meddelande"
+                  name="message"
                   rows={6}
                   value={message}
                   onChange={(event) => setMessage(event.target.value)}
