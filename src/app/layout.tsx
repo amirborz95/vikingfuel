@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   description:
     'Viking Fuel erbjuder premium kosttillskott med naturliga ingredienser för energi, uthållighet och vitalitet. Tillverkat i EU. Fri frakt över 700 kr.',
   icons: {
-    icon: [{ url: 'https://cdn.corenexis.com/files/c/4668994720.png', type: 'image/png' }],
+    icon: [{ url: '/assets/images/viking_logo_nav.png', type: 'image/png' }],
   },
   openGraph: {
     title: 'Viking Fuel — Premium Kosttillskott',
