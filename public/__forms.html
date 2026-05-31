@@ -1,0 +1,17 @@
+<!-- Static skeleton so Netlify's build bot can register the contact form.
+     The real form is rendered client-side by Next.js, which the build bot
+     cannot see, so it must be declared here too. -->
+<html>
+  <head>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="contact" />
+      <input name="name" />
+      <input name="email" type="email" />
+      <textarea name="message"></textarea>
+      <input name="bot-field" />
+    </form>
+  </body>
+</html>
