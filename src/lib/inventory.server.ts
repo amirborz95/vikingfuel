@@ -1,37 +1,62 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { getStore } from '@netlify/blobs';
 import { MAX_STOCK } from './inventory';
 
-const dataDir = path.join(process.cwd(), 'data');
-const inventoryFile = path.join(dataDir, 'inventory.json');
+// Inventory is a single small counter document that is read and written as a
+// whole, so it lives in Netlify Blobs. The previous implementation wrote to a
+// local JSON file, which fails at runtime because the serverless filesystem is
+// read-only — that failure was what made checkout return
+// "Kunde inte reservera lagret. Försök igen.".
+const STORE_NAME = 'inventory';
+const STATE_KEY = 'state';
 
 export interface InventoryState {
   remainingUnits: number;
 }
 
-async function readJson<T = any>(filePath: string): Promise<T> {
-  try {
-    const raw = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(raw) as T;
-  } catch {
-    return null as unknown as T;
-  }
+function clamp(value: number) {
+  return Math.max(0, Math.min(MAX_STOCK, value));
 }
 
-async function writeJson(filePath: string, data: any) {
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+function getInventoryStore() {
+  // Strong consistency so a read immediately reflects the last reservation.
+  return getStore({ name: STORE_NAME, consistency: 'strong' });
+}
+
+// First-run seed: preserve the stock level previously committed in
+// data/inventory.json so existing sold counts carry over to the blob store.
+async function readSeedValue(): Promise<number> {
+  try {
+    const raw = await fs.readFile(
+      path.join(process.cwd(), 'data', 'inventory.json'),
+      'utf-8'
+    );
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed.remainingUnits === 'number') {
+      return clamp(parsed.remainingUnits);
+    }
+  } catch {
+    // Ignore — fall back to full stock below.
+  }
+  return MAX_STOCK;
 }
 
 export async function getInventoryState(): Promise<InventoryState> {
-  const saved = await readJson<InventoryState>(inventoryFile);
+  const store = getInventoryStore();
+  const saved = (await store.get(STATE_KEY, { type: 'json' })) as
+    | InventoryState
+    | null;
+
   if (!saved || typeof saved.remainingUnits !== 'number') {
-    return { remainingUnits: MAX_STOCK };
+    return { remainingUnits: await readSeedValue() };
   }
-  return { remainingUnits: Math.max(0, Math.min(MAX_STOCK, saved.remainingUnits)) };
+
+  return { remainingUnits: clamp(saved.remainingUnits) };
 }
 
 export async function adjustInventoryUnits(delta: number): Promise<InventoryState> {
+  const store = getInventoryStore();
   const inventory = await getInventoryState();
   const nextValue = inventory.remainingUnits + delta;
 
@@ -39,10 +64,8 @@ export async function adjustInventoryUnits(delta: number): Promise<InventoryStat
     throw new Error('Inte tillräckligt lager kvar');
   }
 
-  const nextInventory = {
-    remainingUnits: Math.max(0, Math.min(MAX_STOCK, nextValue)),
-  };
-  await writeJson(inventoryFile, nextInventory);
+  const nextInventory = { remainingUnits: clamp(nextValue) };
+  await store.setJSON(STATE_KEY, nextInventory);
   return nextInventory;
 }
 
