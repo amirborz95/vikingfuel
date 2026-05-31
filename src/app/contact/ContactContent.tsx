@@ -15,18 +15,28 @@ export default function ContactContent() {
     setError('');
     setIsLoading(true);
 
-    fetch('/api/contact', {
+    // Submit to Netlify Forms. The POST must target the static skeleton path
+    // (/__forms.html) so it reaches Netlify's form handler instead of the
+    // Next.js server, and must be url-encoded with the matching form-name.
+    const payload = new URLSearchParams({
+      'form-name': 'contact',
+      subject: `Ny kontaktförfrågan från ${name}`,
+      name,
+      email,
+      message,
+    });
+
+    fetch('/__forms.html', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: JSON.stringify({ name, email, message }),
+      body: payload.toString(),
     })
-      .then(async (res) => {
+      .then((res) => {
         setIsLoading(false);
-        const data = await res.json();
-        if (!res.ok || data.error) {
-          throw new Error(data.error || 'Ett fel uppstod när meddelandet skulle skickas.');
+        if (!res.ok) {
+          throw new Error('Ett fel uppstod när meddelandet skulle skickas.');
         }
         setIsSubmitted(true);
         setName('');
@@ -34,6 +44,7 @@ export default function ContactContent() {
         setMessage('');
       })
       .catch((err) => {
+        setIsLoading(false);
         setError(err.message || 'Ett fel uppstod. Försök igen senare.');
       });
   };

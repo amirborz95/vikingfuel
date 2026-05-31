@@ -1,0 +1,22 @@
+<!doctype html>
+<!--
+  Static skeleton so Netlify's build bot can detect the contact form at deploy time.
+  This file is never shown to users; the real UI lives in the React contact page,
+  which submits to this form via AJAX. Keep the field names in sync with ContactContent.tsx.
+-->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Netlify Forms</title>
+  </head>
+  <body>
+    <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="contact" />
+      <input type="hidden" name="subject" value="Ny kontaktförfrågan från Vikingfuel" />
+      <input name="bot-field" />
+      <input name="name" />
+      <input type="email" name="email" />
+      <textarea name="message"></textarea>
+    </form>
+  </body>
+</html>
