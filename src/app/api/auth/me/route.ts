@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthenticatedUser } from '@/lib/auth';
+import { getAuthenticatedUser, sanitizeUser } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
     if (!user) {
       return NextResponse.json({ user: null });
     }
-    return NextResponse.json({ user: { name: user.name, email: user.email } });
+    return NextResponse.json({ user: sanitizeUser(user) });
   } catch (err: any) {
     console.error('Auth me error:', err);
     return NextResponse.json({ user: null });

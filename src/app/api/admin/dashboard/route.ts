@@ -35,7 +35,17 @@ export async function POST(req: NextRequest) {
     const sessions = await readSessions();
     const analytics = await readAnalytics();
 
-    const safeUsers = users.map((user) => ({ name: user.name, email: user.email }));
+    const safeUsers = users.map((user) => ({
+      name: user.name,
+      email: user.email,
+      phone: user.phone || '',
+      address: user.address || '',
+      city: user.city || '',
+      postalCode: user.postalCode || '',
+      state: user.state || '',
+      orderCount: (user.orders || []).length,
+      latestOrder: (user.orders || []).slice(-1)[0]?.createdAt || null,
+    }));
     const safeSessions = sessions.map((session) => ({
       email: session.email,
       createdAt: session.createdAt,
@@ -88,10 +98,12 @@ export async function POST(req: NextRequest) {
     const geoPageViews = pageViews.filter((entry) => entry.country || entry.region || entry.city).length;
     const geoCountries = new Set(pageViews.filter((entry) => entry.country).map((entry) => entry.country)).size;
 
+    const totalOrders = users.reduce((count, user) => count + ((user.orders || []).length), 0);
     const metrics = {
       totalUsers: safeUsers.length,
       totalLogins,
       totalRegistrations,
+      totalOrders,
       activeSessions: safeSessions.length,
       uniqueLoginEmails,
       latestLogin,

@@ -151,6 +151,7 @@ export default function Header() {
               {/* User area */}
               {!user ? (
                 <div className="hidden lg:flex items-center gap-2">
+                  <Link href="/" className="px-3 py-2 text-sm rounded-lg hover:bg-muted">Gäst</Link>
                   <Link href="/login" className="px-3 py-2 text-sm rounded-lg hover:bg-muted">Logga in</Link>
                   <Link href="/register" className="px-3 py-2 text-sm rounded-lg bg-primary text-primary-foreground">Registrera</Link>
                 </div>
@@ -236,6 +237,9 @@ export default function Header() {
               <div className="mt-4 flex gap-3">
                 {!user ? (
                   <>
+                    <Link href="/" onClick={() => setMobileOpen(false)} className="w-full inline-flex justify-center rounded-2xl border border-border px-4 py-3 text-sm font-bold text-foreground bg-white hover:bg-muted transition-colors">
+                      Gäst
+                    </Link>
                     <Link href="/login" onClick={() => setMobileOpen(false)} className="w-full inline-flex justify-center rounded-2xl border border-border px-4 py-3 text-sm font-bold text-foreground bg-white hover:bg-muted transition-colors">
                       Logga in
                     </Link>

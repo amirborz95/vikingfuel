@@ -1,8 +1,20 @@
 [
   {
-    "token": "4aa59871-7c69-4b78-ac41-fd3e65b7eda8",
-    "email": "info@vikingfuel.com",
-    "createdAt": "2026-05-28T12:11:28.241Z",
-    "expiresAt": "2026-06-04T12:11:28.241Z"
+    "token": "8c52e952-f997-4c68-b5f7-efe7901aa185",
+    "email": "testuser+copilot@vikingfuel.se",
+    "createdAt": "2026-06-01T08:12:57.529Z",
+    "expiresAt": "2026-06-08T08:12:57.529Z"
+  },
+  {
+    "token": "3c175fe8-faf6-4db9-91e8-92700be67e1e",
+    "email": "testuser+copilot@vikingfuel.se",
+    "createdAt": "2026-06-01T08:13:17.642Z",
+    "expiresAt": "2026-06-08T08:13:17.642Z"
+  },
+  {
+    "token": "ac2c2276-bcca-4690-86c0-69c13136ac52",
+    "email": "testuser+copilot@vikingfuel.se",
+    "createdAt": "2026-06-01T08:16:41.271Z",
+    "expiresAt": "2026-06-08T08:16:41.272Z"
   }
 ]

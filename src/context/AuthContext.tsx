@@ -5,6 +5,13 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 export interface User {
   name: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  address?: string;
+  postalCode?: string;
+  city?: string;
+  state?: string;
 }
 
 interface AuthContextType {
@@ -13,6 +20,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
   register: (name: string, email: string, password: string) => Promise<{ success: boolean; message: string }>;
   logout: () => Promise<void>;
+  updateUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -48,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false, message: data?.error || 'Inloggning misslyckades.' };
       }
       const account = data.user;
-      setUser({ name: account.name, email: account.email });
+      setUser(account);
       return { success: true, message: `Välkommen tillbaka, ${account.name}!` };
     } catch (err) {
       return { success: false, message: 'Serverfel vid inloggning.' };
@@ -67,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false, message: data?.error || 'Registrering misslyckades.' };
       }
       const account = data.user;
-      setUser({ name: account.name, email: account.email });
+      setUser(account);
       return { success: true, message: `Registrering lyckades! Välkommen, ${account.name}!` };
     } catch (err) {
       return { success: false, message: 'Serverfel vid registrering.' };
@@ -85,6 +93,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
+  const updateUser = useCallback((updatedUser: User) => {
+    setUser(updatedUser);
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
@@ -92,8 +104,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       login,
       register,
       logout,
+      updateUser,
     }),
-    [user, login, register, logout]
+    [user, login, register, logout, updateUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

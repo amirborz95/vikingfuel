@@ -2,21 +2,409 @@
   {
     "name": "peter",
     "email": "petersve@gmail.com",
-    "password": "$2b$10$27JojhFZWi.5EA7/88eL9.d3u8bSOxtjqp3Ima4CAT6mxx0QRKtXm"
+    "password": "$2b$10$27JojhFZWi.5EA7/88eL9.d3u8bSOxtjqp3Ima4CAT6mxx0QRKtXm",
+    "firstName": "",
+    "lastName": "",
+    "phone": "",
+    "address": "",
+    "postalCode": "",
+    "city": "",
+    "state": "",
+    "orders": []
   },
   {
     "name": "amir",
     "email": "amir@gmail.com",
-    "password": "$2b$10$27JojhFZWi.5EA7/88eL9.d3u8bSOxtjqp3Ima4CAT6mxx0QRKtXm"
+    "password": "$2b$10$27JojhFZWi.5EA7/88eL9.d3u8bSOxtjqp3Ima4CAT6mxx0QRKtXm",
+    "firstName": "",
+    "lastName": "",
+    "phone": "",
+    "address": "",
+    "postalCode": "",
+    "city": "",
+    "state": "",
+    "orders": []
   },
   {
     "name": "amir",
     "email": "info@vikingfuel.com",
-    "password": "$2b$10$0XyHe3WnsIs7kDvHOM/iienvYGqUmfLM6nBbjBsIfJb/JX3gv4akW"
+    "password": "$2b$10$0XyHe3WnsIs7kDvHOM/iienvYGqUmfLM6nBbjBsIfJb/JX3gv4akW",
+    "firstName": "",
+    "lastName": "",
+    "phone": "",
+    "address": "",
+    "postalCode": "",
+    "city": "",
+    "state": "",
+    "orders": []
   },
   {
     "name": "Amir Bakalaev",
     "email": "amirborzlaev@gmail.com",
-    "password": "$2b$10$pSbHnAojEXJSIVzfHVwSk.J5mzYmLj8gqZEyXda/.Da6NW1Q5HUCO"
+    "password": "$2b$10$pSbHnAojEXJSIVzfHVwSk.J5mzYmLj8gqZEyXda/.Da6NW1Q5HUCO",
+    "firstName": "Amir",
+    "lastName": "Bakalaev",
+    "phone": "0739908161",
+    "address": "mältarevägen 31",
+    "postalCode": "35237",
+    "city": "växjö",
+    "state": "kronobergslän",
+    "orders": [
+      {
+        "id": "e2e-test-1780759466755",
+        "sessionId": "test-session-1780759468912",
+        "items": [
+          {
+            "name": "E2E Test Item",
+            "quantity": 1,
+            "price": 3
+          }
+        ],
+        "totalAmount": 3,
+        "currency": "SEK",
+        "status": "shipped",
+        "paymentMethod": "test",
+        "shippingAddress": {
+          "name": "Test Recipient",
+          "address": {
+            "line1": "Kundgatan 1",
+            "postal_code": "11122",
+            "city": "Stockholm",
+            "country": "SE"
+          }
+        },
+        "shippingOption": "postnord",
+        "shippingPostcode": "11122",
+        "postnordShipmentId": "ILPN0018UF7XJNRBZRIVUUHUPUEZJG",
+        "postnordLabelUrl": null,
+        "postnordLabelPdfUrl": null,
+        "postnordTracking": "00573132901670830720",
+        "createdAt": "2026-06-06T15:24:28.912Z",
+        "shippedAt": "2026-06-07T11:27:23.011Z"
+      }
+    ]
+  },
+  {
+    "name": "peter",
+    "email": "peter@gmail.com",
+    "password": "$2b$10$OjSoavmgR2R.rvtsbLSezOtwv9zYhgfwatEDf2rLKwdugiyrcDFPa",
+    "firstName": "",
+    "lastName": "",
+    "phone": "",
+    "address": "",
+    "postalCode": "",
+    "city": "",
+    "state": "",
+    "orders": []
+  },
+  {
+    "name": "Test User",
+    "email": "testuser+copilot@vikingfuel.se",
+    "password": "$2b$10$yir0TjUYhoGBp2T3tEJ/9OdL86OmeSCNtUVyhi7IcUm.GRO5Qmh7O",
+    "firstName": "Test",
+    "lastName": "User",
+    "phone": "",
+    "address": "",
+    "postalCode": "",
+    "city": "",
+    "state": "",
+    "orders": [
+      {
+        "id": "1780301849186",
+        "items": [
+          {
+            "name": "Viking Energy",
+            "quantity": 2,
+            "price": 199
+          }
+        ],
+        "totalAmount": 398,
+        "currency": "SEK",
+        "status": "completed",
+        "paymentMethod": "card",
+        "createdAt": "2026-06-01T08:17:29.186Z"
+      }
+    ]
+  },
+  {
+    "email": "Amirborzlaev@gmail.com",
+    "name": null,
+    "orders": [
+      {
+        "id": "cs_live_b1nu2hzg4O5ckkkOfA3EbeAJ7LrzsB1yEDvakIRownybFrkLX7mpnXiWEl",
+        "sessionId": "cs_live_b1nu2hzg4O5ckkkOfA3EbeAJ7LrzsB1yEDvakIRownybFrkLX7mpnXiWEl",
+        "items": [
+          {
+            "name": "Vikingfuel - Testo-support",
+            "quantity": 2,
+            "price": 5
+          },
+          {
+            "name": "PostNord frakt 5 kr",
+            "quantity": 1,
+            "price": 5
+          }
+        ],
+        "totalAmount": 15,
+        "currency": "SEK",
+        "status": "completed",
+        "paymentMethod": "card",
+        "billingAddress": {
+          "address": {
+            "city": "Alvesta",
+            "country": "SE",
+            "line1": "Mältarevägen 31",
+            "line2": null,
+            "postal_code": "34235",
+            "state": null
+          },
+          "business_name": null,
+          "email": "Amirborzlaev@gmail.com",
+          "individual_name": null,
+          "name": "Amir Bakalaev",
+          "phone": null,
+          "tax_exempt": "none",
+          "tax_ids": []
+        },
+        "shippingAddress": {
+          "name": "Amir Bakalaev",
+          "address": {
+            "city": "Alvesta",
+            "country": "SE",
+            "line1": "Mältarevägen 31",
+            "line2": null,
+            "postal_code": "34235",
+            "state": null
+          }
+        },
+        "shippingOption": "PostNord",
+        "shippingPostcode": "34235",
+        "postnordShipmentId": null,
+        "postnordLabelUrl": null,
+        "postnordLabelPdfUrl": null,
+        "postnordTracking": null,
+        "createdAt": "2026-06-06T12:03:48.000Z"
+      },
+      {
+        "id": "cs_live_b1nu2hzg4O5ckkkOfA3EbeAJ7LrzsB1yEDvakIRownybFrkLX7mpnXiWEl",
+        "sessionId": "cs_live_b1nu2hzg4O5ckkkOfA3EbeAJ7LrzsB1yEDvakIRownybFrkLX7mpnXiWEl",
+        "items": [
+          {
+            "name": "Vikingfuel - Testo-support",
+            "quantity": 2,
+            "price": 5
+          },
+          {
+            "name": "PostNord frakt 5 kr",
+            "quantity": 1,
+            "price": 5
+          }
+        ],
+        "totalAmount": 15,
+        "currency": "SEK",
+        "status": "completed",
+        "paymentMethod": "card",
+        "billingAddress": {
+          "address": {
+            "city": "Alvesta",
+            "country": "SE",
+            "line1": "Mältarevägen 31",
+            "line2": null,
+            "postal_code": "34235",
+            "state": null
+          },
+          "business_name": null,
+          "email": "Amirborzlaev@gmail.com",
+          "individual_name": null,
+          "name": "Amir Bakalaev",
+          "phone": null,
+          "tax_exempt": "none",
+          "tax_ids": []
+        },
+        "shippingAddress": {
+          "name": "Amir Bakalaev",
+          "address": {
+            "city": "Alvesta",
+            "country": "SE",
+            "line1": "Mältarevägen 31",
+            "line2": null,
+            "postal_code": "34235",
+            "state": null
+          }
+        },
+        "shippingOption": "PostNord",
+        "shippingPostcode": "34235",
+        "postnordShipmentId": null,
+        "postnordLabelUrl": null,
+        "postnordLabelPdfUrl": null,
+        "postnordTracking": null,
+        "createdAt": "2026-06-06T12:03:48.000Z"
+      },
+      {
+        "id": "cs_live_b1QkoxifDTFqcINTODQRdj6JlWVDrboACFSSTB1MkN4mbFn4DT34pDDolb",
+        "sessionId": "cs_live_b1QkoxifDTFqcINTODQRdj6JlWVDrboACFSSTB1MkN4mbFn4DT34pDDolb",
+        "items": [
+          {
+            "name": "Vikingfuel - Testo-support",
+            "quantity": 1,
+            "price": 5
+          },
+          {
+            "name": "PostNord frakt 5 kr",
+            "quantity": 1,
+            "price": 5
+          }
+        ],
+        "totalAmount": 10,
+        "currency": "SEK",
+        "status": "completed",
+        "paymentMethod": "card",
+        "billingAddress": {
+          "address": {
+            "city": "Alvesta",
+            "country": "SE",
+            "line1": "Mältarevägen 31",
+            "line2": null,
+            "postal_code": "342 35",
+            "state": null
+          },
+          "business_name": null,
+          "email": "amirborzlaev@gmail.com",
+          "individual_name": null,
+          "name": "Amir Bakalaev",
+          "phone": null,
+          "tax_exempt": "none",
+          "tax_ids": []
+        },
+        "shippingAddress": {
+          "name": "Amir Bakalaev",
+          "address": {
+            "city": "Alvesta",
+            "country": "SE",
+            "line1": "Mältarevägen 31",
+            "line2": null,
+            "postal_code": "342 35",
+            "state": null
+          }
+        },
+        "shippingOption": "PostNord",
+        "shippingPostcode": "35235",
+        "postnordShipmentId": null,
+        "postnordLabelUrl": null,
+        "postnordLabelPdfUrl": null,
+        "postnordTracking": null,
+        "createdAt": "2026-06-06T13:08:43.000Z"
+      },
+      {
+        "id": "cs_live_b1p5o22CZnLiv3qX2IVHdvLvk8DX0bFE0yzJzL6IOiuPOYRayVEYEmBmKj",
+        "sessionId": "cs_live_b1p5o22CZnLiv3qX2IVHdvLvk8DX0bFE0yzJzL6IOiuPOYRayVEYEmBmKj",
+        "items": [
+          {
+            "name": "Vikingfuel - Testo-support",
+            "quantity": 1,
+            "price": 5
+          },
+          {
+            "name": "PostNord frakt 5 kr",
+            "quantity": 1,
+            "price": 5
+          }
+        ],
+        "totalAmount": 10,
+        "currency": "SEK",
+        "status": "completed",
+        "paymentMethod": "card",
+        "billingAddress": {
+          "address": {
+            "city": "Alvesta",
+            "country": "SE",
+            "line1": "Mältarevägen 31",
+            "line2": null,
+            "postal_code": "342 35",
+            "state": null
+          },
+          "business_name": null,
+          "email": "amirborzlaev@gmail.com",
+          "individual_name": null,
+          "name": "Amir Bakalaev",
+          "phone": null,
+          "tax_exempt": "none",
+          "tax_ids": []
+        },
+        "shippingAddress": {
+          "name": "Amir Bakalaev",
+          "address": {
+            "city": "Alvesta",
+            "country": "SE",
+            "line1": "Mältarevägen 31",
+            "line2": null,
+            "postal_code": "342 35",
+            "state": null
+          }
+        },
+        "shippingOption": "PostNord",
+        "shippingPostcode": "34235",
+        "postnordShipmentId": null,
+        "postnordLabelUrl": null,
+        "postnordLabelPdfUrl": null,
+        "postnordTracking": null,
+        "createdAt": "2026-06-06T13:16:56.000Z"
+      },
+      {
+        "id": "cs_live_b15pJvIY771D53n85sxs0uBSawYJnPBiHVlXrc2ONVJjH7g8evRJ5CnXna",
+        "sessionId": "cs_live_b15pJvIY771D53n85sxs0uBSawYJnPBiHVlXrc2ONVJjH7g8evRJ5CnXna",
+        "items": [
+          {
+            "name": "Vikingfuel - Testo-support",
+            "quantity": 1,
+            "price": 3
+          },
+          {
+            "name": "PostNord frakt 3 kr",
+            "quantity": 1,
+            "price": 3
+          }
+        ],
+        "totalAmount": 6,
+        "currency": "SEK",
+        "status": "completed",
+        "paymentMethod": "card",
+        "billingAddress": {
+          "address": {
+            "city": "Alvesta",
+            "country": "SE",
+            "line1": "Mältarevägen 31",
+            "line2": null,
+            "postal_code": "34235",
+            "state": null
+          },
+          "business_name": null,
+          "email": "amirborzlaev@gmail.com",
+          "individual_name": null,
+          "name": "Amir",
+          "phone": null,
+          "tax_exempt": "none",
+          "tax_ids": []
+        },
+        "shippingAddress": {
+          "name": "Amir",
+          "address": {
+            "city": "Alvesta",
+            "country": "SE",
+            "line1": "Mältarevägen 31",
+            "line2": null,
+            "postal_code": "34235",
+            "state": null
+          }
+        },
+        "shippingOption": "PostNord",
+        "shippingPostcode": "35235",
+        "postnordShipmentId": null,
+        "postnordLabelUrl": null,
+        "postnordLabelPdfUrl": null,
+        "postnordTracking": null,
+        "createdAt": "2026-06-06T14:29:46.000Z"
+      }
+    ]
   }
 ]

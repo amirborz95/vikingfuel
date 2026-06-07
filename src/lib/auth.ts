@@ -17,6 +17,14 @@ export interface UserRecord {
   name: string;
   email: string;
   password: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  address?: string;
+  postalCode?: string;
+  city?: string;
+  state?: string;
+  orders?: any[];
 }
 
 export interface AuthLog {
@@ -67,8 +75,29 @@ export async function findUserByEmail(email: string): Promise<UserRecord | undef
 
 export async function createUser(name: string, email: string, password: string) {
   const users = await readUsers();
-  users.push({ name, email, password });
+  users.push({
+    name,
+    email,
+    password,
+    firstName: '',
+    lastName: '',
+    phone: '',
+    address: '',
+    postalCode: '',
+    city: '',
+    state: '',
+    orders: [],
+  });
   await writeUsers(users);
+}
+
+export function sanitizeUser(user: UserRecord) {
+  const {
+    password,
+    orders,
+    ...rest
+  } = user;
+  return rest;
 }
 
 export async function hashPassword(password: string) {

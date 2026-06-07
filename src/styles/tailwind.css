@@ -28,7 +28,6 @@
   *::after {
     box-sizing: border-box;
     border-color: var(--border);
-    border-radius: 0 !important;
   }
 
   body {
@@ -56,7 +55,7 @@
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-none transition-all duration-200 hover:bg-green-700 hover:scale-[1.02] active:scale-[0.98] text-sm;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-md transition-all duration-200 hover:brightness-95 active:scale-[0.98] text-sm;
   }
 
   .btn-outline {
@@ -67,7 +66,7 @@
     @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-foreground font-medium rounded-none transition-all duration-200 hover:bg-secondary text-sm;
   }
   .product-card {
-    @apply bg-card rounded-none overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border;
+    @apply bg-card rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl border;
   }
 
   .section-label {
@@ -76,6 +75,13 @@
 
   .container-wide {
     @apply max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Orders scroll container */
+  .orders-scroll {
+    max-height: 680px; /* keeps the orders list contained */
+    overflow: auto;
+    padding-right: 8px;
   }
 }
 

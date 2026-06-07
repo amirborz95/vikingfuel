@@ -14,7 +14,7 @@ if (!stripeSecret) {
 }
 
 const stripe = new Stripe(stripeSecret, {
-  apiVersion: '2022-11-15',
+  apiVersion: '2026-04-22.dahlia',
 });
 
 function formatAmount(amountInCents: number) {
@@ -48,8 +48,11 @@ function buildEmailText(session: Stripe.Checkout.Session) {
   const taxAmount = session.total_details?.amount_tax || 0;
   const totalAmount = session.amount_total || 0;
   const customerEmail = session.customer_email || 'Okänd e-post';
+  const shippingOptionLabel =
+    session.metadata?.shipping_option === 'postnord' ? 'PostNord' : 'Uthämtning';
+  const shippingPostcode = session.metadata?.shipping_postcode || '';
 
-  return `Hej!\n\nTack för din beställning hos Vikingfuel. Här är ditt kvitto och orderbekräftelse på svenska.\n\nOrdernummer: ${session.id}\nE-post: ${customerEmail}\n\nOrderdetaljer:\n${itemsText}\n\nMoms (6%): ${formatAmount(taxAmount)} kr\nTotal att betala: ${formatAmount(totalAmount)} kr\n\nVi meddelar dig när din order har skickats.\n\nTack för att du handlar hos Vikingfuel!\n\nMed vänlig hälsning,\nVikingfuel\n`;
+  return `Hej!\n\nTack för din beställning hos Vikingfuel. Här är ditt kvitto och orderbekräftelse på svenska.\n\nOrdernummer: ${session.id}\nE-post: ${customerEmail}\n\nLeveransalternativ: ${shippingOptionLabel}\nPostnummer: ${shippingPostcode}\nOrderdetaljer:\n${itemsText}\n\nMoms (6%): ${formatAmount(taxAmount)} kr\nTotal att betala: ${formatAmount(totalAmount)} kr\n\nVi meddelar dig när din order har skickats.\n\nTack för att du handlar hos Vikingfuel!\n\nMed vänlig hälsning,\nVikingfuel\n`;
 }
 
 function getTransporter() {
@@ -113,4 +116,84 @@ export async function sendOrderConfirmationEmail(session: Stripe.Checkout.Sessio
 export async function sendOrderConfirmationEmailForSessionId(sessionId: string) {
   const session = await retrieveCheckoutSession(sessionId);
   return sendOrderConfirmationEmail(session);
+}
+
+export function buildOrderConfirmationTextFromStoredOrder(order: any, recipientEmail: string) {
+  const itemsText = (order.items || [])
+    .map((item: any) => `• ${item.name} x${item.quantity} — ${formatAmount(item.price * (item.quantity || 1) * 100)} kr`)
+    .join('\n');
+
+  const shippingAddress = order.shippingAddress?.address
+    ? Object.entries(order.shippingAddress.address)
+        .filter(([, value]) => !!value)
+        .map(([key, value]) => `${value}`)
+        .join(', ')
+    : '';
+
+  return `Hej!\n\nTack för din beställning hos Vikingfuel. Här är din orderbekräftelse.\n\nOrdernummer: ${order.id}\nE-post: ${recipientEmail}\n\nLeveransadress: ${shippingAddress}\nOrderdetaljer:\n${itemsText}\n\nTotal att betala: ${formatAmount((order.totalAmount || 0) * 100)} kr\n\nVi meddelar dig när din order har skickats.\n\nMed vänlig hälsning,\nVikingfuel\n`;
+}
+
+export async function sendOrderConfirmationEmailForStoredOrder(order: any, recipientEmail: string) {
+  if (!recipientEmail) {
+    throw new Error('Recipient email is required for order confirmation');
+  }
+
+  const transporter = getTransporter();
+  await transporter.sendMail({
+    from: senderEmail,
+    to: recipientEmail,
+    replyTo: replyToEmail,
+    subject: 'Orderbekräftelse och kvitto från Vikingfuel',
+    text: buildOrderConfirmationTextFromStoredOrder(order, recipientEmail),
+  });
+  return { sent: true };
+}
+
+export function buildShippingNotificationTextFromStoredOrder(order: any, recipientEmail: string, tracking?: string) {
+  const postNordShipmentId = order.postnordShipmentId || '';
+  const trackingText = tracking || order.postnordTracking || 'Ej tillgängligt';
+  return `Hej!\n\nDin beställning ${order.id} har skickats.\n\nOrdernummer: ${order.id}\nE-post: ${recipientEmail}\n${postNordShipmentId ? `PostNord-nummer: ${postNordShipmentId}\n` : ''}Spårningsnummer: ${trackingText}\n\nDu kan följa din försändelse på PostNords spårningssida med numret ovan.\n\nMed vänlig hälsning,\nVikingfuel\n`;
+}
+
+export async function sendShippingNotificationForStoredOrder(order: any, recipientEmail: string, tracking?: string) {
+  if (!recipientEmail) {
+    throw new Error('Recipient email is required for shipping notification');
+  }
+
+  const transporter = getTransporter();
+  await transporter.sendMail({
+    from: senderEmail,
+    to: recipientEmail,
+    replyTo: replyToEmail,
+    subject: 'Din beställning har skickats — spårningsnummer',
+    text: buildShippingNotificationTextFromStoredOrder(order, recipientEmail, tracking),
+  });
+  return { sent: true };
+}
+
+export async function sendShippingNotificationForSessionId(sessionId: string) {
+  const session = await retrieveCheckoutSession(sessionId);
+
+  const postNordShipmentId = session.metadata?.postnord_shipment_id || '';
+  const tracking = session.metadata?.postnord_tracking || '';
+  const labelUrl = session.metadata?.postnord_label_url || session.metadata?.postnord_label_pdf_url || '';
+  if (!tracking) {
+    return { skipped: true, reason: 'No tracking available' };
+  }
+
+  if (!session.customer_email) {
+    throw new Error('Customer email not found on session');
+  }
+
+  const transporter = getTransporter();
+  const mailOptions = {
+    from: senderEmail,
+    to: session.customer_email,
+    replyTo: replyToEmail,
+    subject: 'Din beställning har skickats — spårningsnummer',
+    text: `Hej!\n\nDin beställning ${session.id} har skickats via PostNord.\n${postNordShipmentId ? `PostNord-nummer: ${postNordShipmentId}\n` : ''}${tracking ? `Spårningsnummer: ${tracking}\n` : ''}${labelUrl ? `Fraktsedel: ${labelUrl}\n` : ''}Du kan följa din försändelse på PostNords spårningssida med detta nummer.\n\nMed vänlig hälsning,\nVikingfuel`,
+  };
+
+  await transporter.sendMail(mailOptions);
+  return { sent: true };
 }

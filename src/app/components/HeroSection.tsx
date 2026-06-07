@@ -26,7 +26,7 @@ export default function HeroSection() {
         {/* Full-width background image */}
         <div className="absolute inset-0 z-0">
           <img
-            src="https://cdn.corenexis.com/files/c/2479558720.png"
+            src="https://i.postimg.cc/SQZ7ycXV/Chat-GPT-Image-Jun-4-2026-01-35-12-PM.png"
             alt="Viking Fuel hero background"
             className="w-full h-full object-cover object-center"
             loading="eager"

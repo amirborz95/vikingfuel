@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { MAX_STOCK } from '@/lib/inventory';
+import AppImage from '@/components/ui/AppImage';
 
 export default function CheckoutPage() {
   const { user } = useAuth();
@@ -12,6 +13,11 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
   const [inventoryState, setInventoryState] = useState<{ remainingUnits: number; maxStock: number } | null>(null);
+  const [shippingOption, setShippingOption] = useState<'pickup' | 'postnord'>('pickup');
+  const [postcode, setPostcode] = useState('');
+  const [isPostcodeValid, setIsPostcodeValid] = useState(false);
+  const [postcodeChecking, setPostcodeChecking] = useState(false);
+  const [postcodeError, setPostcodeError] = useState('');
   const [formData, setFormData] = useState({
     email: '',
   });
@@ -59,7 +65,7 @@ export default function CheckoutPage() {
     );
   }
 
-  const shippingCost = totalPrice >= 700 ? 0 : 49;
+  const shippingCost = shippingOption === 'postnord' ? 49 : 0;
   const totalWithShipping = totalPrice + shippingCost;
   const totalWithShippingCents = Math.round(totalWithShipping * 100);
   const taxAmount = Math.round(totalWithShippingCents - totalWithShippingCents / 1.06) / 100;
@@ -97,6 +103,8 @@ export default function CheckoutPage() {
           customer: {
             email: formData.email,
           },
+          shippingOption,
+          shippingPostcode: postcode.replace(/\s+/g, ''),
         }),
       });
 
@@ -158,6 +166,7 @@ export default function CheckoutPage() {
                     placeholder="din.email@example.com"
                   />
                 </div>
+                {/* Shipping options moved to order summary sidebar after postcode validation */}
                 <p className="text-sm text-muted-foreground">
                   När du klickar på “Gå till betalning” skickas du vidare till säker Stripe-betalning.
                 </p>
@@ -192,7 +201,13 @@ export default function CheckoutPage() {
                         <td className="px-4 py-4 align-top">
                           <div className="flex items-start gap-4">
                             <div className="h-16 w-16 overflow-hidden border border-border bg-slate-100">
-                              <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                              <AppImage
+                                src={item.image}
+                                alt={item.name}
+                                width={64}
+                                height={64}
+                                className="h-full w-full object-contain"
+                              />
                             </div>
                             <div>
                               <p className="font-semibold">{item.name}</p>
@@ -239,6 +254,47 @@ export default function CheckoutPage() {
           </div>
 
           <aside className="space-y-6">
+            <div className="border border-border bg-white p-4">
+              <p className="text-sm font-medium text-foreground mb-2">Skriv ditt postnummer</p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={postcode}
+                  onChange={(e) => {
+                    setPostcode(e.target.value);
+                    setIsPostcodeValid(false);
+                    setPostcodeError('');
+                  }}
+                  placeholder="XXXXY eller 12345"
+                  className="w-full rounded-2xl border border-border px-4 py-3 text-base"
+                />
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setPostcodeError('');
+                    const cleaned = postcode.replace(/\s+/g, '');
+                    // Swedish postcode basic validation: 5 digits
+                    if (!/^\d{5}$/.test(cleaned)) {
+                      setPostcodeError('Ogiltigt postnummer. Ange 5 siffror.');
+                      setIsPostcodeValid(false);
+                      return;
+                    }
+                    setPostcodeChecking(true);
+                    // For now we accept any valid-format postcode. Placeholder for real API check.
+                    await new Promise((r) => setTimeout(r, 400));
+                    setIsPostcodeValid(true);
+                    setPostcodeChecking(false);
+                  }}
+                  className="rounded-2xl bg-foreground px-4 py-2 text-white"
+                >
+                  {postcodeChecking ? 'Kontrollerar...' : 'Kontrollera'}
+                </button>
+              </div>
+              {postcodeError && <p className="mt-2 text-sm text-rose-600">{postcodeError}</p>}
+              {isPostcodeValid && <p className="mt-2 text-sm text-emerald-700">Postnummer godkänt</p>}
+            </div>
             <div className="border border-border bg-slate-50 p-8">
               <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">Orderdetaljer</p>
               <div className="mt-4 space-y-4 text-sm text-foreground">
@@ -259,6 +315,46 @@ export default function CheckoutPage() {
                   <span>{totalWithShipping.toLocaleString('sv-SE')} kr</span>
                 </div>
               </div>
+            </div>
+
+            {/* Shipping options shown after postcode validation */}
+            <div className="border border-border bg-white p-4">
+              <p className="text-sm font-medium text-foreground mb-3">Leveransalternativ</p>
+              {!isPostcodeValid ? (
+                <p className="text-sm text-muted-foreground">Ange och kontrollera postnummer för att se tillgängliga leveransalternativ.</p>
+              ) : (
+                <div className="space-y-3">
+                  <label className={`flex items-center gap-3 rounded-2xl border p-3 ${shippingOption === 'pickup' ? 'border-foreground' : 'border-border'}`}>
+                    <input
+                      type="radio"
+                      name="shippingOptionSidebar"
+                      value="pickup"
+                      checked={shippingOption === 'pickup'}
+                      onChange={() => setShippingOption('pickup')}
+                      className="h-4 w-4"
+                    />
+                    <div>
+                      <div className="font-semibold">Uthämtning</div>
+                      <div className="text-sm text-muted-foreground">Gratis, ingen frakt.</div>
+                    </div>
+                  </label>
+
+                  <label className={`flex items-center gap-3 rounded-2xl border p-3 ${shippingOption === 'postnord' ? 'border-foreground' : 'border-border'}`}>
+                    <input
+                      type="radio"
+                      name="shippingOptionSidebar"
+                      value="postnord"
+                      checked={shippingOption === 'postnord'}
+                      onChange={() => setShippingOption('postnord')}
+                      className="h-4 w-4"
+                    />
+                    <div>
+                      <div className="font-semibold">PostNord</div>
+                      <div className="text-sm text-muted-foreground">3 kr frakt.</div>
+                    </div>
+                  </label>
+                </div>
+              )}
             </div>
 
             <div className="border border-border bg-slate-50 p-8">
@@ -285,7 +381,7 @@ export default function CheckoutPage() {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={loading || !formData.email || outOfStock}
+                disabled={loading || !formData.email || outOfStock || !isPostcodeValid}
               className="w-full border border-border bg-foreground px-5 py-4 text-base font-bold text-white hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Bearbetar...' : 'Gå till betalning'}

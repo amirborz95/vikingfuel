@@ -35,11 +35,18 @@ async function getOrCreateTaxRate() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { items, customer } = body;
+    const { items, customer, shippingOption, shippingPostcode } = body;
 
-    if (!items || !customer) {
+    if (!items || !customer || !shippingOption || !shippingPostcode) {
       return NextResponse.json(
-        { error: 'Missing items or customer info' },
+        { error: 'Missing items, customer info, or shipping option' },
+        { status: 400 }
+      );
+    }
+
+    if (!['pickup', 'postnord'].includes(shippingOption)) {
+      return NextResponse.json(
+        { error: 'Invalid shipping option' },
         { status: 400 }
       );
     }
@@ -95,16 +102,16 @@ export async function POST(req: NextRequest) {
       0
     );
 
-    const freeShipping = orderAmount >= 70000;
-    if (!freeShipping) {
+    if (shippingOption === 'postnord') {
       line_items.push({
         price_data: {
           currency: 'sek',
           product_data: {
-            name: 'Standardfrakt 49 kr inom Sverige',
+            name: 'PostNord frakt 3 kr',
+            description: 'Fraktkostnad för PostNord leverans',
             tax_code: 'txcd_92010001',
           },
-          unit_amount: 4900,
+          unit_amount: 300,
           tax_behavior: 'inclusive',
         },
         quantity: 1,
@@ -123,12 +130,15 @@ export async function POST(req: NextRequest) {
         receipt_email: customer.email,
       },
       billing_address_collection: 'required',
-      shipping_address_collection: {
-        allowed_countries: ['SE', 'NO', 'DK', 'FI'],
-      },
+      ...(shippingOption === 'postnord'
+        ? { shipping_address_collection: { allowed_countries: ['SE', 'NO', 'DK', 'FI'] } }
+        : {}),
       metadata: {
         ...(customer.name ? { customer_name: customer.name } : {}),
         ...(customer.phone ? { customer_phone: customer.phone } : {}),
+        shipping_option: shippingOption,
+        shipping_option_label: shippingOption === 'postnord' ? 'PostNord' : 'Uthämtning',
+        shipping_postcode: shippingPostcode,
       },
     });
 

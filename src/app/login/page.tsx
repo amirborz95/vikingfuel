@@ -98,6 +98,12 @@ export default function LoginPage() {
                           Registrera dig
                         </Link>
                       </div>
+                      <div className="mt-4 text-center text-sm text-muted-foreground">
+                        Eller fortsätt som{' '}
+                        <Link href="/" className="font-bold text-foreground hover:text-primary">
+                          gäst
+                        </Link>
+                      </div>
                     </>
                   )}
                 </div>

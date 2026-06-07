@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { appendAuthLog, createSession, createUser, findUserByEmail, hashPassword, SESSION_COOKIE_NAME } from '@/lib/auth';
+import { appendAuthLog, createSession, createUser, findUserByEmail, hashPassword, sanitizeUser, SESSION_COOKIE_NAME } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
     await createUser(name, email, hashedPassword);
 
     const session = await createSession(email);
-    const response = NextResponse.json({ success: true, user: { name, email } });
+    const newUser = await findUserByEmail(email);
+    const response = NextResponse.json({ success: true, user: newUser ? sanitizeUser(newUser) : { name, email } });
     response.cookies.set(SESSION_COOKIE_NAME, session.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

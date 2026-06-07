@@ -98,5 +98,45 @@
     "action": "login",
     "email": "info@vikingfuel.com",
     "timestamp": "2026-05-28T12:11:28.243Z"
+  },
+  {
+    "action": "logout",
+    "email": "info@vikingfuel.com",
+    "timestamp": "2026-06-01T07:40:26.462Z"
+  },
+  {
+    "action": "register",
+    "email": "peter@gmail.com",
+    "timestamp": "2026-06-01T07:40:51.142Z"
+  },
+  {
+    "action": "register",
+    "email": "testuser+copilot@vikingfuel.se",
+    "timestamp": "2026-06-01T08:12:57.533Z"
+  },
+  {
+    "action": "login",
+    "email": "testuser+copilot@vikingfuel.se",
+    "timestamp": "2026-06-01T08:13:17.645Z"
+  },
+  {
+    "action": "login",
+    "email": "testuser+copilot@vikingfuel.se",
+    "timestamp": "2026-06-01T08:16:41.274Z"
+  },
+  {
+    "action": "logout",
+    "email": "peter@gmail.com",
+    "timestamp": "2026-06-01T09:06:18.558Z"
+  },
+  {
+    "action": "login",
+    "email": "amirborzlaev@gmail.com",
+    "timestamp": "2026-06-01T09:06:43.940Z"
+  },
+  {
+    "action": "logout",
+    "email": "amirborzlaev@gmail.com",
+    "timestamp": "2026-06-01T16:18:40.454Z"
   }
 ]
