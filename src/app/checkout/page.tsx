@@ -166,7 +166,80 @@ export default function CheckoutPage() {
                     placeholder="din.email@example.com"
                   />
                 </div>
-                {/* Shipping options moved to order summary sidebar after postcode validation */}
+
+                {/* Postcode input with auto-validation */}
+                <div>
+                  <label htmlFor="postcode" className="block text-sm font-semibold text-foreground mb-2">
+                    Postnummer (Sverige)
+                  </label>
+                  <input
+                    id="postcode"
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={5}
+                    value={postcode}
+                    onChange={(e) => {
+                      const cleaned = e.target.value.replace(/\s+/g, '');
+                      setPostcode(cleaned);
+                      setPostcodeError('');
+                      
+                      // Auto-validate when 5 digits are entered
+                      if (cleaned.length === 5 && /^\d{5}$/.test(cleaned)) {
+                        setIsPostcodeValid(true);
+                      } else if (cleaned.length > 0 && !/^\d{5}$/.test(cleaned)) {
+                        setPostcodeError('Ogiltigt postnummer. Ange 5 siffror.');
+                        setIsPostcodeValid(false);
+                      } else {
+                        setIsPostcodeValid(false);
+                      }
+                    }}
+                    placeholder="12345"
+                    className="w-full border border-border bg-white px-5 py-4 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  {postcodeError && <p className="mt-2 text-sm text-rose-600">{postcodeError}</p>}
+                  {isPostcodeValid && <p className="mt-2 text-sm text-emerald-700">✓ Postnummer godkänt</p>}
+                </div>
+
+                {/* Shipping options shown after postcode validation */}
+                {isPostcodeValid && (
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-3">
+                      Leveransalternativ
+                    </label>
+                    <div className="space-y-3">
+                      <label className={`flex items-center gap-3 rounded-2xl border p-4 cursor-pointer transition-all ${shippingOption === 'pickup' ? 'border-foreground bg-primary/5' : 'border-border'}`}>
+                        <input
+                          type="radio"
+                          name="shippingOption"
+                          value="pickup"
+                          checked={shippingOption === 'pickup'}
+                          onChange={() => setShippingOption('pickup')}
+                          className="h-4 w-4"
+                        />
+                        <div>
+                          <div className="font-semibold text-foreground">Uthämtning</div>
+                          <div className="text-sm text-muted-foreground">Gratis, ingen frakt.</div>
+                        </div>
+                      </label>
+
+                      <label className={`flex items-center gap-3 rounded-2xl border p-4 cursor-pointer transition-all ${shippingOption === 'postnord' ? 'border-foreground bg-primary/5' : 'border-border'}`}>
+                        <input
+                          type="radio"
+                          name="shippingOption"
+                          value="postnord"
+                          checked={shippingOption === 'postnord'}
+                          onChange={() => setShippingOption('postnord')}
+                          className="h-4 w-4"
+                        />
+                        <div>
+                          <div className="font-semibold text-foreground">PostNord</div>
+                          <div className="text-sm text-muted-foreground">49 kr frakt.</div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
                 <p className="text-sm text-muted-foreground">
                   När du klickar på “Gå till betalning” skickas du vidare till säker Stripe-betalning.
                 </p>
@@ -254,47 +327,6 @@ export default function CheckoutPage() {
           </div>
 
           <aside className="space-y-6">
-            <div className="border border-border bg-white p-4">
-              <p className="text-sm font-medium text-foreground mb-2">Skriv ditt postnummer</p>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={6}
-                  value={postcode}
-                  onChange={(e) => {
-                    setPostcode(e.target.value);
-                    setIsPostcodeValid(false);
-                    setPostcodeError('');
-                  }}
-                  placeholder="XXXXY eller 12345"
-                  className="w-full rounded-2xl border border-border px-4 py-3 text-base"
-                />
-                <button
-                  type="button"
-                  onClick={async () => {
-                    setPostcodeError('');
-                    const cleaned = postcode.replace(/\s+/g, '');
-                    // Swedish postcode basic validation: 5 digits
-                    if (!/^\d{5}$/.test(cleaned)) {
-                      setPostcodeError('Ogiltigt postnummer. Ange 5 siffror.');
-                      setIsPostcodeValid(false);
-                      return;
-                    }
-                    setPostcodeChecking(true);
-                    // For now we accept any valid-format postcode. Placeholder for real API check.
-                    await new Promise((r) => setTimeout(r, 400));
-                    setIsPostcodeValid(true);
-                    setPostcodeChecking(false);
-                  }}
-                  className="rounded-2xl bg-foreground px-4 py-2 text-white"
-                >
-                  {postcodeChecking ? 'Kontrollerar...' : 'Kontrollera'}
-                </button>
-              </div>
-              {postcodeError && <p className="mt-2 text-sm text-rose-600">{postcodeError}</p>}
-              {isPostcodeValid && <p className="mt-2 text-sm text-emerald-700">Postnummer godkänt</p>}
-            </div>
             <div className="border border-border bg-slate-50 p-8">
               <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">Orderdetaljer</p>
               <div className="mt-4 space-y-4 text-sm text-foreground">
@@ -315,46 +347,6 @@ export default function CheckoutPage() {
                   <span>{totalWithShipping.toLocaleString('sv-SE')} kr</span>
                 </div>
               </div>
-            </div>
-
-            {/* Shipping options shown after postcode validation */}
-            <div className="border border-border bg-white p-4">
-              <p className="text-sm font-medium text-foreground mb-3">Leveransalternativ</p>
-              {!isPostcodeValid ? (
-                <p className="text-sm text-muted-foreground">Ange och kontrollera postnummer för att se tillgängliga leveransalternativ.</p>
-              ) : (
-                <div className="space-y-3">
-                  <label className={`flex items-center gap-3 rounded-2xl border p-3 ${shippingOption === 'pickup' ? 'border-foreground' : 'border-border'}`}>
-                    <input
-                      type="radio"
-                      name="shippingOptionSidebar"
-                      value="pickup"
-                      checked={shippingOption === 'pickup'}
-                      onChange={() => setShippingOption('pickup')}
-                      className="h-4 w-4"
-                    />
-                    <div>
-                      <div className="font-semibold">Uthämtning</div>
-                      <div className="text-sm text-muted-foreground">Gratis, ingen frakt.</div>
-                    </div>
-                  </label>
-
-                  <label className={`flex items-center gap-3 rounded-2xl border p-3 ${shippingOption === 'postnord' ? 'border-foreground' : 'border-border'}`}>
-                    <input
-                      type="radio"
-                      name="shippingOptionSidebar"
-                      value="postnord"
-                      checked={shippingOption === 'postnord'}
-                      onChange={() => setShippingOption('postnord')}
-                      className="h-4 w-4"
-                    />
-                    <div>
-                      <div className="font-semibold">PostNord</div>
-                      <div className="text-sm text-muted-foreground">3 kr frakt.</div>
-                    </div>
-                  </label>
-                </div>
-              )}
             </div>
 
             <div className="border border-border bg-slate-50 p-8">
