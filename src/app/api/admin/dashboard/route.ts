@@ -3,6 +3,7 @@ import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
 import { readSessions, readUsers, AuthLog } from '@/lib/auth';
 import { readAnalytics } from '@/lib/analytics';
+import { readWaitlistEmails } from '@/lib/waitlist';
 
 const ADMIN_PASSWORD = process.env.ADMIN_PANEL_PASSWORD || 'Viking2026Fuel!';
 const dataDir = path.join(process.cwd(), 'data');
@@ -116,7 +117,7 @@ export async function POST(req: NextRequest) {
       geoCountries,
     };
 
-    const waitlistEmails = await readJson<string[]>(path.join(dataDir, 'waitlist.json'));
+    const waitlistEmails = await readWaitlistEmails();
 
     return NextResponse.json({
       users: safeUsers,
