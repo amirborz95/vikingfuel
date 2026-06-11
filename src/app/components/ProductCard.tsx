@@ -8,6 +8,7 @@ import { useCart } from '@/context/CartContext';
 import { MAX_STOCK } from '@/lib/inventory';
 import { useInventory } from '@/hooks/useInventory';
 import Icon from '@/components/ui/AppIcon';
+import WaitlistModal from './WaitlistModal';
 
 export interface Product {
   id: string;
@@ -34,6 +35,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const { addItem } = useCart();
   const inventory = useInventory();
   const [added, setAdded] = useState(false);
+  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
 
   const remainingUnits = inventory?.remainingUnits ?? MAX_STOCK;
   const productUnits = product.units ?? 1;
@@ -138,28 +140,19 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
 
         {/* Button */}
         <button
-          onClick={handleAdd}
-          disabled={!itemAvailable}
-          className={`w-full py-3 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 ${
-            added
-              ? 'bg-green-100 text-primary border border-primary/30'
-              : itemAvailable
-              ? 'bg-foreground text-white hover:bg-primary'
-              : 'bg-muted text-muted-foreground cursor-not-allowed'
-          }`}
+          onClick={() => setShowWaitlistModal(true)}
+          className="w-full py-3 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 bg-muted text-muted-foreground hover:bg-slate-200 cursor-pointer"
         >
-          {added ? (
-            <>
-              <Icon name="CheckIcon" size={16} />
-              Tillagd
-            </>
-          ) : (
-            <>
-              <Icon name="ShoppingCartIcon" size={16} />
-              Lägg till i varukorg
-            </>
-          )}
+          <Icon name="BellIcon" size={16} />
+          Var med i kö-listan
         </button>
+
+        {/* Waitlist Modal */}
+        <WaitlistModal 
+          isOpen={showWaitlistModal}
+          onClose={() => setShowWaitlistModal(false)}
+          productName={product.name}
+        />
       </div>
     </motion.div>
   );
