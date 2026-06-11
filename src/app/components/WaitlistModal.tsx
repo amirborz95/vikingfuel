@@ -20,12 +20,23 @@ export default function WaitlistModal({ isOpen, onClose, productName = 'Produkte
     setError('');
     setLoading(true);
 
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      setError('Ange en giltig e-postadress.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Store email in localStorage or send to API if needed
-      const existingEmails = JSON.parse(localStorage.getItem('waitlistEmails') || '[]');
-      if (!existingEmails.includes(email)) {
-        existingEmails.push(email);
-        localStorage.setItem('waitlistEmails', JSON.stringify(existingEmails));
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: normalizedEmail }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Något gick fel');
       }
 
       setSubmitted(true);
@@ -34,8 +45,8 @@ export default function WaitlistModal({ isOpen, onClose, productName = 'Produkte
         setSubmitted(false);
         onClose();
       }, 2000);
-    } catch (err) {
-      setError('Något gick fel. Försök igen.');
+    } catch (err: any) {
+      setError(err?.message || 'Något gick fel. Försök igen.');
       setLoading(false);
     }
   };

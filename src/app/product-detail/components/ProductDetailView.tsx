@@ -24,7 +24,7 @@ export default function ProductDetailView() {
   const bundles = [
     {
       id: 'bundle-1',
-      label: 'Vikingfuel - Testo-support',
+      label: 'Testo-support',
       sublabel: '60 capsules',
       price: 349,
       oldPrice: 0,
@@ -36,7 +36,7 @@ export default function ProductDetailView() {
     },
     {
       id: 'bundle-2',
-      label: 'Vikingfuel - Testo-support 3-pack',
+      label: 'Testo-support 3-pack',
       sublabel: '180 capsules',
       price: 314,
       oldPrice: 0,
@@ -48,7 +48,7 @@ export default function ProductDetailView() {
     },
     {
       id: 'bundle-3',
-      label: 'Vikingfuel - Testo-support 6-pack',
+      label: 'Testo-support 6-pack',
       sublabel: '360 capsules',
       price: 279,
       oldPrice: 0,

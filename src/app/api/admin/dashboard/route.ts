@@ -116,6 +116,8 @@ export async function POST(req: NextRequest) {
       geoCountries,
     };
 
+    const waitlistEmails = await readJson<string[]>(path.join(dataDir, 'waitlist.json'));
+
     return NextResponse.json({
       users: safeUsers,
       logs: orderedLogs,
@@ -125,6 +127,7 @@ export async function POST(req: NextRequest) {
       pageViewsByPage,
       pageViewsByUser,
       pageViewsByCountry,
+      waitlistEmails,
     });
   } catch (err: any) {
     console.error('Admin dashboard error:', err);

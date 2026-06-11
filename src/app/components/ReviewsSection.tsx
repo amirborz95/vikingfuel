@@ -11,7 +11,7 @@ const reviews = [
     location: 'Stockholm',
     rating: 5,
     text: 'Har använt Vikingfuel i tre veckor nu och skillnaden är otrolig! Vaknar piggare på morgonen och har mycket bättre fokus genom hela dagen. Som småbarnsförälder har det varit en game-changer. Rekommenderar verkligen!',
-    product: 'Vikingfuel - Testo-support',
+    product: 'Testo-support',
     date: 'Mars 2026',
     // image removed
   },
@@ -20,7 +20,7 @@ const reviews = [
     location: 'Göteborg',
     rating: 5,
     text: 'Köpte 3-pack för att spara pengar och är supernöjd. Produkten känns premium från första kapseln. Leveransen gick blixtsnabbt och förpackningen var riktigt snygg. Märker redan skillnad i energinivåerna.',
-    product: 'Vikingfuel - Testo-support 3-pack',
+    product: 'Testo-support 3-pack',
     date: 'April 2026',
   },
   {
@@ -28,7 +28,7 @@ const reviews = [
     location: 'Malmö',
     rating: 5,
     text: 'Började med en burk för att testa och blev så imponerad att jag gick direkt till 6-pack. Har haft problem med låg energi och trötthet i flera år, men denna produkt har verkligen hjälpt. Känner mig starkare och mer motiverad varje dag.',
-    product: 'Vikingfuel - Testo-support 6-pack',
+    product: 'Testo-support 6-pack',
     date: 'April 2026',
     // image removed
   },
@@ -37,7 +37,7 @@ const reviews = [
     location: 'Uppsala',
     rating: 5,
     text: 'Efter att ha fött mitt andra barn kämpade jag med ständig trötthet och brist på energi. Testade Vikingfuel på rekommendation från en vän och är så glad att jag gjorde det! Har fått tillbaka min gamla energi och känner mig mycket piggare.',
-    product: 'Vikingfuel - Testo-support',
+    product: 'Testo-support',
     date: 'April 2026',
   },
   {
@@ -45,7 +45,7 @@ const reviews = [
     location: 'Helsingborg',
     rating: 5,
     text: 'Som 52-åring har jag märkt att energin börjar tryta lite grand. Vikingfuel har hjälpt mig att hålla igång både på jobbet och när jag tränar. Naturliga ingredienser och tydlig effekt - perfekt!',
-    product: 'Vikingfuel - Testo-support',
+    product: 'Testo-support',
     date: 'April 2026',
     // image removed
   },
@@ -54,7 +54,7 @@ const reviews = [
     location: 'Linköping',
     rating: 5,
     text: 'Har testat många olika kosttillskott genom åren, men inget har varit lika effektivt som Vikingfuel. Märker skillnad redan efter några dagar. Bra smak och lätt att svälja.',
-    product: 'Vikingfuel - Testo-support',
+    product: 'Testo-support',
     date: 'April 2026',
   },
   {
@@ -62,7 +62,7 @@ const reviews = [
     location: 'Västerås',
     rating: 5,
     text: 'Tränar mycket och behöver tillskott som hjälper till med återhämtning. Vikingfuel har blivit en viktig del av min rutin. Känner mig starkare och återhämtar snabbare mellan passen.',
-    product: 'Vikingfuel - Testo-support',
+    product: 'Testo-support',
     date: 'April 2026',
   },
   {
@@ -70,7 +70,7 @@ const reviews = [
     location: 'Örebro',
     rating: 5,
     text: 'Efter en lång period av stress och utmattning hittade jag äntligen något som hjälper. Vikingfuel har gett mig tillbaka balansen och energin jag behöver för att klara av vardagen.',
-    product: 'Vikingfuel - Testo-support',
+    product: 'Testo-support',
     date: 'Mars 2026',
   },
   {
@@ -78,7 +78,7 @@ const reviews = [
     location: 'Norrköping',
     rating: 4,
     text: 'Bra produkt som lever upp till förväntningarna. Tar det varje morgon och känner mig mer alert genom dagen. Lite högre pris än konkurrerande produkter men kvaliteten känns värd det.',
-    product: 'Vikingfuel - Testo-support',
+    product: 'Testo-support',
     date: 'April 2026',
   },
   {
@@ -86,7 +86,7 @@ const reviews = [
     location: 'Halmstad',
     rating: 5,
     text: 'Min sambo och jag delar på ett paket. Båda mår mycket bättre nu! Han har fått bättre fokus på jobbet och jag har mer energi till träningen. Kommer definitivt att köpa fler när det börjar ta slut.',
-    product: 'Vikingfuel - Testo-support 3-pack',
+    product: 'Testo-support 3-pack',
     date: 'April 2026',
   },
   {
@@ -102,7 +102,7 @@ const reviews = [
     location: 'Kalmar',
     rating: 5,
     text: 'Har testat många energiprodukter genom åren, men denna sticker verkligen ut. Naturliga ingredienser, tydlig effekt och ingen konstig eftersmak. Rekommenderar till alla som känner sig trötta.',
-    product: 'Vikingfuel - Testo-support',
+    product: 'Testo-support',
     date: 'April 2026',
   },
   {
@@ -110,7 +110,7 @@ const reviews = [
     location: 'Växjö',
     rating: 5,
     text: 'Som småbarnsförälder behöver jag all energi jag kan få. Denna produkt har räddat mina dagar! Vaknar utvilad och klarar av hela dagen utan att känna mig utmattad.',
-    product: 'Vikingfuel - Testo-support',
+    product: 'Testo-support',
     date: 'April 2026',
   },
   {
@@ -118,7 +118,7 @@ const reviews = [
     location: 'Karlstad',
     rating: 4,
     text: 'Bra kvalitet och effekt. Märker skillnad i återhämtningen efter träning. Kommer fortsätta använda det här. Förpackningen kunde vara lite snyggare men produkten är utmärkt.',
-    product: 'Vikingfuel - Testo-support',
+    product: 'Testo-support',
     date: 'Mars 2026',
   },
   {
@@ -126,7 +126,7 @@ const reviews = [
     location: 'Skövde',
     rating: 5,
     text: 'Från att vara trött hela tiden till att ha energi att både träna och arbeta effektivt. Vikingfuel har förändrat mitt liv till det bättre. Tack för en fantastisk produkt!',
-    product: 'Vikingfuel - Testo-support 3-pack',
+    product: 'Testo-support 3-pack',
     date: 'April 2026',
   },
   {
@@ -134,7 +134,7 @@ const reviews = [
     location: 'Borås',
     rating: 5,
     text: 'Min läkare rekommenderade naturliga tillskott för bättre energi. Vikingfuel var det bästa valet jag gjort! Märker skillnad i både humör och fysisk prestationsförmåga.',
-    product: 'Vikingfuel - Testo-support',
+    product: 'Testo-support',
     date: 'April 2026',
   },
 ];

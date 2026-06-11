@@ -22,9 +22,7 @@ export default function ShippingContent() {
             </p>
             <p className="text-muted-foreground leading-relaxed mb-4">
               <strong>Leveranstider:</strong><br/>
-              • Stockholm, Göteborg, Malmö: 2–3 dagar<br/>
-              • Övriga Sverige: 3–4 dagar<br/>
-              • Arktiska områden: Kan ta upp till 5–7 dagar
+              3 till 5 dagar
             </p>
             <p className="text-muted-foreground leading-relaxed">
               Leveranstiden räknas från det att paketet lämnas till transportöret, inte från orderbekräftelse. Under höga orderperioder kan det ta upp till 2 arbetsdagar innan paketet skickas.

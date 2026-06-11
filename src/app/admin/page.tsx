@@ -77,6 +77,7 @@ interface DashboardData {
   pageViewsByPage: PageViewSummary[];
   pageViewsByUser: VisitorSummary[];
   pageViewsByCountry: CountrySummary[];
+  waitlistEmails: string[];
 }
 
 export default function AdminPage() {
@@ -282,6 +283,7 @@ export default function AdminPage() {
                       <a href="#users" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Users</a>
                       <a href="#auth-history" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Auth</a>
                       <a href="#live-users" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Live</a>
+                      <a href="#waitlist" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Waitlist</a>
                       <a href="#insights" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Insights</a>
                     </div>
                   </div>
@@ -525,6 +527,42 @@ export default function AdminPage() {
                       )}
                     </div>
                   </div>
+                </div>
+
+                <div id="waitlist" className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
+                  <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Waitlist</p>
+                      <h2 className="mt-2 text-2xl font-bold text-slate-900">Waiting List Emails</h2>
+                      <p className="mt-2 text-sm text-slate-600">Alla emailadresser som har anmält sig för väntelistan.</p>
+                    </div>
+                    <span className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-700 whitespace-nowrap">
+                      {data?.waitlistEmails?.length ?? 0} emails
+                    </span>
+                  </div>
+
+                  {data?.waitlistEmails?.length ? (
+                    <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-slate-50 p-2">
+                      <table className="w-full text-left text-sm border-separate border-spacing-0">
+                        <thead>
+                          <tr className="border-b border-slate-200 text-slate-600 uppercase tracking-[0.15em] text-xs">
+                            <th className="px-4 py-3">E-post</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {data.waitlistEmails.map((email, index) => (
+                            <tr key={`${email}-${index}`} className="border-b border-slate-200 bg-white">
+                              <td className="px-4 py-3 text-slate-700 break-all">{email}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-12 text-center text-sm text-slate-500">
+                      Inga e-postadresser hittades för väntelistan.
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">

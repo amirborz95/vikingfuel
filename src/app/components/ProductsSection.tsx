@@ -9,7 +9,7 @@ import Icon from '@/components/ui/AppIcon';
 export const allProducts: Product[] = [
   {
     id: 'viking-energy-1',
-    name: 'Vikingfuel - Testo-support',
+    name: 'Testo-support',
     info: '60 kapslar',
     price: 349,
     oldPrice: 0,
@@ -22,7 +22,7 @@ export const allProducts: Product[] = [
   },
   {
     id: 'viking-energy-3',
-    name: 'Vikingfuel - Testo-support 3-pack',
+    name: 'Testo-support 3-pack',
     info: '180 kapslar - 10% rabatt',
     price: 314,
     oldPrice: 0,
@@ -35,7 +35,7 @@ export const allProducts: Product[] = [
   },
   {
     id: 'viking-energy-6',
-    name: 'Vikingfuel - Testo-support 6-pack',
+    name: 'Testo-support 6-pack',
     info: '360 kapslar - 20% rabatt',
     price: 279,
     oldPrice: 0,
