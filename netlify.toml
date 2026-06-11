@@ -4,11 +4,5 @@
   command = "npm run build"
   publish = ".next"
 
-[[redirects]]
-  from = "/admin"
-  to = "/admin/"
-  status = 301
-  force = true
-
 [[plugins]]
   package = "@netlify/plugin-nextjs"
