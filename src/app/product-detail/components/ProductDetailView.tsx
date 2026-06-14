@@ -91,17 +91,17 @@ export default function ProductDetailView() {
 
         <div className="rounded-3xl border border-border bg-white p-5 space-y-3">
           {[
-            { name: 'Macextrakt 4:1', perCapsule: '500 mg', dailyDose: '1000 mg' },
-            { name: 'Ashwagandhaextrakt (5% withanolider)', perCapsule: '300 mg', dailyDose: '600 mg' },
-            { name: 'Bockhornsklöverextrakt (10:1)', perCapsule: '250 mg', dailyDose: '500 mg' },
-            { name: 'Tribulus terrestris-extrakt (90% saponiner)', perCapsule: '200 mg', dailyDose: '400 mg' },
-            { name: 'Panax ginseng-extrakt (20%)', perCapsule: '150 mg', dailyDose: '300 mg' },
-            { name: 'Tallbarksextrakt (Pinus pinaster)', perCapsule: '100 mg', dailyDose: '200 mg' },
-            { name: 'Gelé royale-extrakt (3:1)', perCapsule: '100 mg', dailyDose: '200 mg' },
-            { name: 'Ingefärsextrakt (5%)', perCapsule: '80 mg', dailyDose: '160 mg' },
-            { name: 'Piperin (95%)', perCapsule: '5 mg', dailyDose: '10 mg' },
-            { name: 'Zink (bisglycinat)', perCapsule: '10 mg', dailyDose: '20 mg' },
-            { name: 'Selen', perCapsule: '55 µg', dailyDose: '110 µg' },
+            { name: 'Macextrakt 4:1', perCapsule: '120 mg', dailyDose: '240 mg' },
+            { name: 'Ashwagandhaextrakt (5% withanolider)', perCapsule: '160 mg', dailyDose: '320 mg' },
+            { name: 'Bockhornsklöverextrakt (10:1)', perCapsule: '80 mg', dailyDose: '160 mg' },
+            { name: 'Tribulus terrestris-extrakt (90% saponiner)', perCapsule: '80 mg', dailyDose: '160 mg' },
+            { name: 'Panax ginseng-extrakt (20%)', perCapsule: '50 mg', dailyDose: '100 mg' },
+            { name: 'Tallbarksextrakt (Pinus pinaster)', perCapsule: '40 mg', dailyDose: '80 mg' },
+            { name: 'Gelé royale-extrakt (3:1)', perCapsule: '20 mg', dailyDose: '40 mg' },
+            { name: 'Ingefärsextrakt (5%)', perCapsule: '25 mg', dailyDose: '50 mg' },
+            { name: 'Piperin (95%)', perCapsule: '3 mg', dailyDose: '6 mg' },
+            { name: 'Zink (bisglycinat)', perCapsule: '8 mg', dailyDose: '16 mg' },
+            { name: 'Selen', perCapsule: '18 µg', dailyDose: '36 µg' },
             { name: 'Bor', perCapsule: '2 mg', dailyDose: '4 mg' },
           ].map((ing) => (
             <div
