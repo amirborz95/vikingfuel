@@ -1,34 +1,37 @@
-import fs from 'fs/promises';
-import path from 'path';
+import { getStore } from '@netlify/blobs';
 import { MAX_STOCK } from './inventory';
+import seed from '../../data/inventory.json';
 
-const dataDir = path.join(process.cwd(), 'data');
-const inventoryFile = path.join(dataDir, 'inventory.json');
+const STORE_NAME = 'inventory';
+const STATE_KEY = 'state';
 
 export interface InventoryState {
   remainingUnits: number;
 }
 
-async function readJson<T = any>(filePath: string): Promise<T> {
-  try {
-    const raw = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(raw) as T;
-  } catch {
-    return null as unknown as T;
-  }
+function clamp(value: number) {
+  return Math.max(0, Math.min(MAX_STOCK, value));
 }
 
-async function writeJson(filePath: string, data: any) {
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+// Counter data: use strong consistency for immediate read-after-write.
+function inventoryStore() {
+  return getStore({ name: STORE_NAME, consistency: 'strong' });
+}
+
+function seedValue(): number {
+  const fromSeed = (seed as { remainingUnits?: unknown })?.remainingUnits;
+  return typeof fromSeed === 'number' ? clamp(fromSeed) : MAX_STOCK;
 }
 
 export async function getInventoryState(): Promise<InventoryState> {
-  const saved = await readJson<InventoryState>(inventoryFile);
+  const saved = (await inventoryStore().get(STATE_KEY, {
+    type: 'json',
+  })) as InventoryState | null;
+
   if (!saved || typeof saved.remainingUnits !== 'number') {
-    return { remainingUnits: MAX_STOCK };
+    return { remainingUnits: seedValue() };
   }
-  return { remainingUnits: Math.max(0, Math.min(MAX_STOCK, saved.remainingUnits)) };
+  return { remainingUnits: clamp(saved.remainingUnits) };
 }
 
 export async function adjustInventoryUnits(delta: number): Promise<InventoryState> {
@@ -39,10 +42,8 @@ export async function adjustInventoryUnits(delta: number): Promise<InventoryStat
     throw new Error('Inte tillräckligt lager kvar');
   }
 
-  const nextInventory = {
-    remainingUnits: Math.max(0, Math.min(MAX_STOCK, nextValue)),
-  };
-  await writeJson(inventoryFile, nextInventory);
+  const nextInventory = { remainingUnits: clamp(nextValue) };
+  await inventoryStore().setJSON(STATE_KEY, nextInventory);
   return nextInventory;
 }
 
