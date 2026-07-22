@@ -131,7 +131,7 @@ export default function ProductDetailView() {
       <div className="space-y-4 text-sm text-muted-foreground">
         <div>
           <p className="font-semibold text-foreground mb-1">Leveranstid</p>
-          <p>1–3 arbetsdagar i Sverige. Expressleverans via PostNord eller DHL.</p>
+          <p>2–4 arbetsdagar i Sverige. Leverans via PostNord eller DHL.</p>
         </div>
         <div>
           <p className="font-semibold text-foreground mb-1">Fri frakt</p>
@@ -393,7 +393,7 @@ export default function ProductDetailView() {
               {/* Benefits */}
               <div className="mt-6 pt-6 border-t border-border grid grid-cols-2 gap-3">
                 {[
-                  { title: 'Snabb leverans', subtitle: '1-3 arbetsdagar' },
+                  { title: 'Snabb leverans', subtitle: '2-4 arbetsdagar' },
                   { title: 'Fri frakt', subtitle: 'Över 700 kr' },
                   { title: '14 dagar ångerrätt', subtitle: 'Full återbetalning' },
                   { title: 'Säker betalning', subtitle: 'SSL-krypterad' },

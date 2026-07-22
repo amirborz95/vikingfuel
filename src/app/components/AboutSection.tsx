@@ -10,7 +10,7 @@ const stats = [
   { label: 'Nöjda kunder', value: '20K+' },
   { label: 'Naturliga ingredienser', value: '100%' },
   { label: 'EU-tillverkning', value: 'GMP' },
-  { label: 'Snabb leverans', value: 'Inom 1–3 dagar' },
+  { label: 'Snabb leverans', value: 'Inom 2–4 dagar' },
 ];
 
 export default function AboutSection() {

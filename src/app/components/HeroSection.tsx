@@ -9,7 +9,7 @@ const trustItemIcons = ['TruckIcon', 'ShieldCheckIcon', 'ArrowPathIcon', 'Sparkl
 
 export default function HeroSection() {
   const trustItems = [
-    { title: 'Snabb leverans', subtitle: '1-3 arbetsdagar' },
+    { title: 'Snabb leverans', subtitle: '2-4 arbetsdagar' },
     { title: 'Fri frakt', subtitle: 'Över 700 kr' },
     { title: '14 dagar ångerrätt', subtitle: 'Full återbetalning' },
     { title: 'Säker betalning', subtitle: 'SSL-krypterad' },

@@ -71,18 +71,6 @@ export default function Footer() {
                 info@vikingfuel.se
               </a>
             </p>
-            <div className="flex gap-3 mt-4">
-              {(['Instagram', 'Facebook', 'Twitter'] as const).map((social) => (
-                <a
-                  key={social}
-                  href="#"
-                  aria-label={social}
-                  className="w-9 h-9 rounded-full border border-border flex items-center justify-center hover:bg-primary hover:border-primary hover:text-white transition-all text-muted-foreground"
-                >
-                  <Icon name="GlobeAltIcon" size={16} />
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* Link columns */}
