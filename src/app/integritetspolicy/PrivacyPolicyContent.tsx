@@ -6,7 +6,7 @@ const sections = [
   {
     heading: 'Om denna policy',
     paragraphs: [
-      'SmartVal AB värnar om din personliga integritet och dataskydd. Den här integritetspolicyn förklarar hur vi samlar in, använder, lagrar och skyddar dina personuppgifter.',
+      'SmartVal Sverige AB värnar om din personliga integritet och dataskydd. Den här integritetspolicyn förklarar hur vi samlar in, använder, lagrar och skyddar dina personuppgifter.',
       'Vi följer EU:s dataskyddsförordning (GDPR) och svenska dataskyddslagar. Om du har frågor om hur vi hanterar dina data, kontakta oss på info@vikingfuel.se.',
     ],
   },
@@ -77,7 +77,7 @@ const sections = [
     heading: 'Kontakta oss',
     paragraphs: [
       'Om du har frågor om denna integritetsregler eller hur vi hanterar dina personuppgifter, kontakta oss:',
-      'E-post: info@vikingfuel.se\nAdress: SmartVal AB, Sverige\nResponstid: Vi svarar inom 1–2 arbetsdagar.',
+      'E-post: info@vikingfuel.se\nAdress: SmartVal Sverige AB, Sverige\nResponstid: Vi svarar inom 1–2 arbetsdagar.',
     ],
   },
 ];

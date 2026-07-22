@@ -8,7 +8,7 @@ const sections = [
     paragraphs: [
       'Genom att besöka och handla på vikingfuel.se godkänner du dessa villkor. Vi förbehåller oss rätten att ändra villkoren när som helst.',
       'Vi rekommenderar att du läser denna sida regelbundet för att vara uppdaterad på eventuella ändringar. Betydande ändringar meddelas via e-post eller på webbplatsen.',
-      'Vi är ett svenskregistrerat företag (SmartVal AB) och följer svenska och EU:s konsumentskyddslagar.',
+      'Vi är ett svenskregistrerat företag (SmartVal Sverige AB) och följer svenska och EU:s konsumentskyddslagar.',
     ],
   },
   {
@@ -61,7 +61,7 @@ const sections = [
   {
     heading: 'Immaterialrätter',
     paragraphs: [
-      'Allt innehåll på vår webbplats – inklusive texter, bilder, logotyper och design – är skyddat av upphovsrätt och tillhör SmartVal AB.',
+      'Allt innehåll på vår webbplats – inklusive texter, bilder, logotyper och design – är skyddat av upphovsrätt och tillhör SmartVal Sverige AB.',
       'Du får inte kopiera, distribuera eller använda innehållet för kommersiella ändamål utan skriftlig tillstånd från oss.',
       'Du får skriva ut eller ladda ner information för personligt bruk, men inte för vidare distribution.',
     ],

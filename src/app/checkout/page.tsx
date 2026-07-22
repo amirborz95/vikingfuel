@@ -65,7 +65,7 @@ export default function CheckoutPage() {
     );
   }
 
-  const shippingCost = totalPrice >= 700 ? 0 : 49;
+  const shippingCost = shippingOption === 'pickup' ? 0 : totalPrice >= 700 ? 0 : 49;
   const totalWithShipping = totalPrice + shippingCost;
   const totalWithShippingCents = Math.round(totalWithShipping * 100);
   const taxAmount = Math.round(totalWithShippingCents - totalWithShippingCents / 1.06) / 100;
@@ -198,6 +198,29 @@ export default function CheckoutPage() {
                   />
                   {postcodeError && <p className="mt-2 text-sm text-rose-600">{postcodeError}</p>}
                   {isPostcodeValid && <p className="mt-2 text-sm text-emerald-700">✓ Postnummer godkänt</p>}
+                  {postcode.length > 0 && !isPostcodeValid && (
+                    <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                      <p className="text-sm font-semibold text-amber-800">
+                        Vi hanterar just nu endast svenska postnummer i kassan.
+                      </p>
+                      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                        <Link
+                          href="/contact"
+                          className="inline-flex items-center justify-center rounded-xl bg-foreground px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-900"
+                        >
+                          Kontakta oss
+                        </Link>
+                        <a
+                          href="https://t.me/Vikinfuel_bot"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center rounded-xl border border-foreground px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-white"
+                        >
+                          Kontakta via Telegram
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Shipping options shown after postcode validation */}
@@ -218,7 +241,7 @@ export default function CheckoutPage() {
                         />
                         <div>
                           <div className="font-semibold text-foreground">Uthämtning</div>
-                          <div className="text-sm text-muted-foreground">Fri frakt vid 700 kr eller mer. Under 700 kr tillkommer 49 kr frakt.</div>
+                          <div className="text-sm text-muted-foreground">Gratis alltid vid uthämtning.</div>
                         </div>
                       </label>
 
@@ -336,7 +359,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between border-b border-border pb-3">
                   <span>Frakt</span>
-                  <span>{shippingCost === 0 ? 'Fri frakt' : `${shippingCost.toLocaleString('sv-SE')} kr`}</span>
+                  <span>{shippingCost === 0 ? 'Gratis' : `${shippingCost.toLocaleString('sv-SE')} kr`}</span>
                 </div>
                 <div className="flex justify-between border-b border-border pb-3">
                   <span>Moms (6%)</span>

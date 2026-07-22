@@ -100,7 +100,11 @@ export async function POST(req: NextRequest) {
       (sum, item) => sum + (item.price_data.unit_amount || 0) * item.quantity,
       0
     );
-    const shippingAmountInCents = subtotalInCents >= 70000 ? 0 : 4900;
+    const shippingAmountInCents = shippingOption === 'pickup'
+      ? 0
+      : subtotalInCents >= 70000
+        ? 0
+        : 4900;
 
     if (shippingAmountInCents > 0) {
       line_items.push({

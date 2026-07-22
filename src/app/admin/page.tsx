@@ -195,6 +195,32 @@ export default function AdminPage() {
     if (unlocked) fetchOrders();
   }, [unlocked]);
 
+  const normalizeShippingOption = (value?: string | null) => {
+    if (!value) return 'pickup';
+    const normalized = value.toLowerCase();
+    return normalized === 'postnord' ? 'postnord' : 'pickup';
+  };
+
+  const getShippingSummary = (order: any) => {
+    const shippingMethod = normalizeShippingOption(order?.shippingOption);
+
+    if (shippingMethod === 'postnord') {
+      const address = order?.shippingAddress?.address
+        ? Object.values(order.shippingAddress.address).filter(Boolean).join(', ')
+        : '';
+
+      return {
+        label: 'PostNord',
+        detail: address || 'Ingen adress angiven',
+      };
+    }
+
+    return {
+      label: 'Uthämtning',
+      detail: 'Ingen adress behövs – kunden hämtar själv',
+    };
+  };
+
   const authEvents = useMemo(() => {
     if (!data) return [];
     return data.logs
@@ -383,9 +409,10 @@ export default function AdminPage() {
                           {pagedOrders.map((row: any, idx: number) => {
                           const o = row.order;
                           const itemsText = (o.items || []).map((it: any) => `${it.name} x${it.quantity}`).join(', ');
-                          const address = o.shippingAddress?.address ? Object.values(o.shippingAddress.address).filter(Boolean).join(', ') : '';
+                          const shippingSummary = getShippingSummary(o);
                           const isLoading = actionLoading === o.id;
                           const statusLabel = o.status === 'shipped' ? 'Shipped' : 'Pending';
+                          const isPostNord = normalizeShippingOption(o.shippingOption) === 'postnord';
 
                           return (
                             <div key={`${row.userEmail}-${o.id}-${idx}`} className="overflow-hidden rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md">
@@ -412,7 +439,8 @@ export default function AdminPage() {
                                 </div>
                                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                                   <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Shipping</p>
-                                  <p className="mt-2 text-sm text-slate-700">{address || 'No address'}</p>
+                                  <p className="mt-2 text-sm font-semibold text-slate-900">{shippingSummary.label}</p>
+                                  <p className="mt-1 text-sm text-slate-700">{shippingSummary.detail}</p>
                                 </div>
                                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                                   <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Total</p>
@@ -440,7 +468,7 @@ export default function AdminPage() {
                                     onClick={() => markShipped(row.userEmail, o.id, o.postnordTracking)}
                                     className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-slate-100 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
                                   >
-                                    Mark Shipped
+                                    {isPostNord ? 'Mark Shipped' : 'Markera som redo för uthämtning'}
                                   </button>
                                 </div>
                               </div>

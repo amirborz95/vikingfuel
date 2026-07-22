@@ -108,7 +108,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-border">
           <p className="text-xs text-muted-foreground">
-            © 2026 SmartVal AB. Alla rättigheter förbehållna.
+            © 2026 SmartVal Sverige AB. Alla rättigheter förbehållna.
           </p>
           <div className="flex items-center justify-center sm:justify-end w-full sm:w-auto">
             <PaymentLogos />

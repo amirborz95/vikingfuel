@@ -115,11 +115,9 @@ export default function CartDrawer() {
                   <span className="text-sm text-muted-foreground">Totalt</span>
                   <span className="text-xl font-bold text-foreground">{totalPrice} kr</span>
                 </div>
-                {totalPrice < 700 && (
-                  <p className="text-xs text-muted-foreground bg-accent rounded-lg px-3 py-2">
-                    49 kr frakt tillkommer under 700 kr. Fri frakt vid 700 kr eller mer.
-                  </p>
-                )}
+                <p className="text-xs text-muted-foreground bg-accent rounded-lg px-3 py-2">
+                  Uthämtning är gratis. PostNord är gratis vid 700 kr eller mer, annars kostar frakten 49 kr.
+                </p>
                 <p className="text-xs text-muted-foreground">
                   6% moms ingår i totalsumman.
                 </p>
