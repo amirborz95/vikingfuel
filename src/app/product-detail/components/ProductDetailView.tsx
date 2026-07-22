@@ -9,7 +9,6 @@ import { useCart } from '@/context/CartContext';
 import { MAX_STOCK } from '@/lib/inventory';
 import { useInventory } from '@/hooks/useInventory';
 import ProductCard from '@/app/components/ProductCard';
-import WaitlistModal from '@/app/components/WaitlistModal';
 import { allProducts } from '@/app/components/ProductsSection';
 
 export default function ProductDetailView() {
@@ -17,7 +16,6 @@ export default function ProductDetailView() {
   const [activeTab, setActiveTab] = useState('Beskrivning');
   const [quantity, setQuantity] = useState(1);
   const [addedMsg, setAddedMsg] = useState(false);
-  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const { addItem, totalUnits } = useCart();
   const inventory = useInventory();
 
@@ -357,8 +355,7 @@ export default function ProductDetailView() {
                 </div>
               </div>
 
-              {/* Quantity (kept for reference but hidden since products not available) */}
-              <div className="flex items-center gap-3 mb-4 opacity-50 pointer-events-none">
+              <div className="flex items-center gap-3 mb-4">
                 <div className="flex items-center gap-2 border border-border rounded-xl p-1">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -378,32 +375,20 @@ export default function ProductDetailView() {
                 </div>
 
                 <button
-                  disabled={true}
-                  className="flex-1 py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 bg-muted text-muted-foreground cursor-not-allowed"
+                  onClick={handleAddToCart}
+                  disabled={!canAddToCart}
+                  className={`flex-1 py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 ${
+                    canAddToCart
+                      ? 'bg-primary text-white hover:bg-green-700'
+                      : 'bg-muted text-muted-foreground cursor-not-allowed'
+                  }`}
                 >
-                  <Icon name="ShoppingCartIcon" size={16} /> Lägg till i varukorg
+                  <Icon name="ShoppingCartIcon" size={16} />
+                  {addedMsg ? 'Tillagd i varukorg' : canAddToCart ? 'Lägg till i varukorg' : 'Slut i lager'}
                 </button>
               </div>
 
               <p className="text-xs text-muted-foreground mb-4">6% moms ingår i priset.</p>
-
-              {/* Waitlist Button */}
-              <button
-                onClick={() => setShowWaitlistModal(true)}
-                className="w-full py-4 rounded-xl bg-muted text-muted-foreground font-bold text-sm hover:bg-slate-200 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Icon name="BellIcon" size={16} />
-                Var med i kö-listan
-              </button>
-
-              {/* Old "Köp nu" button hidden */}
-              <button
-                disabled={true}
-                className="w-full py-4 rounded-xl bg-primary text-white font-bold text-sm hover:bg-green-700 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:bg-muted opacity-0 hidden"
-              >
-                <Icon name="BoltIcon" size={16} />
-                Köp nu
-              </button>
 
               {/* Benefits */}
               <div className="mt-6 pt-6 border-t border-border grid grid-cols-2 gap-3">
@@ -477,12 +462,6 @@ export default function ProductDetailView() {
         </div>
       </section>
 
-      {/* Waitlist Modal */}
-      <WaitlistModal 
-        isOpen={showWaitlistModal}
-        onClose={() => setShowWaitlistModal(false)}
-        productName={bundles[selectedBundle]?.label || 'Produkten'}
-      />
     </>
   );
 }
