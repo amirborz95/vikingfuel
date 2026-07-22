@@ -11,7 +11,6 @@ import CartDrawer from '@/components/CartDrawer';
 
 const megaCategories = [
   { label: 'Testo-support', href: '/products', disabled: false },
-  { label: 'Vitalitet', href: '#', disabled: true },
   { label: 'Tillbehör', href: '#', disabled: true },
 ];
 
@@ -44,7 +43,6 @@ export default function Header() {
   const navItems = [
     { label: 'Hem', href: '/' },
     { label: 'Produkter', href: '/products', hasMega: true },
-    { label: 'Om oss', href: '/about' },
     { label: 'Vanliga frågor', href: '/faq' },
     { label: 'Kontakt', href: '/contact' },
   ];

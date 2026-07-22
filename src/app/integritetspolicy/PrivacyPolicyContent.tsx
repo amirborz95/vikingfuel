@@ -77,7 +77,7 @@ const sections = [
     heading: 'Kontakta oss',
     paragraphs: [
       'Om du har frågor om denna integritetsregler eller hur vi hanterar dina personuppgifter, kontakta oss:',
-      'E-post: info@vikingfuel.se\nAdress: SmartVal AB, Sverige\nResponstid: Vi svarar inom 5 arbetsdagar.',
+      'E-post: info@vikingfuel.se\nAdress: SmartVal AB, Sverige\nResponstid: Vi svarar inom 1–2 arbetsdagar.',
     ],
   },
 ];

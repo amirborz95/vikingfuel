@@ -18,14 +18,14 @@ export default function ShippingContent() {
           <section className="border-l-4 border-primary pl-6">
             <h2 className="text-2xl font-bold text-foreground mb-4">📦 Snabb leverans inom Sverige</h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
-              Vi skickar din beställning inom 1–2 arbetsdagar efter orderbekräftelse (helgfritt). Vi arbetar med pålitliga logistikpartner för att säkerställa att dina varor ankommer i perfekt skick.
+              Vi skickar din beställning inom 1–2 arbetsdagar efter orderbekräftelse (helgfritt). Leveranstiden i Sverige är normalt 3–5 arbetsdagar efter att paketet har lämnats till transportören.
             </p>
             <p className="text-muted-foreground leading-relaxed mb-4">
               <strong>Leveranstider:</strong><br/>
-              3 till 5 dagar
+              3–5 arbetsdagar
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              Leveranstiden räknas från det att paketet lämnas till transportöret, inte från orderbekräftelse. Under höga orderperioder kan det ta upp till 2 arbetsdagar innan paketet skickas.
+              Leveranstiden räknas från det att paketet lämnas till transportören, inte från orderbekräftelse. Under höga orderperioder kan det ta upp till 2 arbetsdagar innan paketet skickas.
             </p>
           </section>
 
@@ -70,27 +70,11 @@ export default function ShippingContent() {
               För att göra ändringar:
               • E-posta oss på info@vikingfuel.se med ditt ordernummer<br/>
               • Inkludera vilka ändringar du vill göra<br/>
-              • Vi svarar normalt inom 2 timmar på vardagar<br/>
+              • Vi svarar normalt inom 1–2 arbetsdagar<br/>
               • Kostnad för ändringar: Ingen om paketet inte är skickat ännu
             </p>
             <p className="text-muted-foreground leading-relaxed">
               Om paketet redan är skickat kan du returnera det enligt vår returpolicy (14 dagars ångerrätt).
-            </p>
-          </section>
-
-          <section className="border-l-4 border-primary pl-6">
-            <h2 className="text-2xl font-bold text-foreground mb-4">🏘️ Leveransadresser</h2>
-            <p className="text-muted-foreground leading-relaxed mb-4">
-              Vi kan leverera till:
-            </p>
-            <p className="text-muted-foreground leading-relaxed mb-4 whitespace-pre-line">
-              • Din hemadress eller arbetsadress<br/>
-              • Paketautomater hos DPD, Amazon Locker och PostNord<br/>
-              • Utvalda Pressbyrån eller CircleK-butiker<br/>
-              • Postkontor runt om i Sverige
-            </p>
-            <p className="text-muted-foreground leading-relaxed">
-              <strong>OBS:</strong> Paket till paketautomater eller butiker kan få längre leveranstid (1–2 dagar extra). Vi kan dock inte leverera till postbox – endast till fysisk adress eller automat.
             </p>
           </section>
 
@@ -104,7 +88,7 @@ export default function ShippingContent() {
               1. Kontakta oss omedelbar med foton på skadan och paketet<br/>
               2. Vi ersätter varan eller ger återbetalning<br/>
               3. Vi hanterar ersättning med transportören<br/>
-              Tydig resultat: 3–5 arbetsdagar<br/>
+              Lösning: 7–10 arbetsdagar<br/>
             </p>
             <p className="text-muted-foreground leading-relaxed">
               <strong>Försvunnet paket:</strong><br/>
@@ -133,7 +117,7 @@ export default function ShippingContent() {
             </p>
             <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
               E-post: info@vikingfuel.se
-              Svartid: 1–2 arbetsdagar (normalt samma dag)
+              Svarstid: 1–2 arbetsdagar
               Öppettider: Mån–Fre 09:00–17:00 CET
             </p>
           </section>

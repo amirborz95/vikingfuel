@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: 'Viking Fuel — Premium Kosttillskott för Daglig Prestation',
   description:
-    'Viking Fuel erbjuder premium kosttillskott med naturliga ingredienser för energi, uthållighet och vitalitet. Tillverkat i EU. Fri frakt över 700 kr.',
+    'Viking Fuel erbjuder premium kosttillskott med naturliga ingredienser för energi, uthållighet och prestationsstöd. Tillverkat i EU. Fri frakt över 700 kr.',
   icons: {
     icon: [{ url: '/viking_logo_nav.png', type: 'image/png' }],
   },

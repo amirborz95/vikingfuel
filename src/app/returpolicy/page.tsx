@@ -99,7 +99,7 @@ export default function ReturnPolicyPage() {
                 Vi kan inte acceptera returer av:
               </p>
               <p className="text-muted-foreground leading-relaxed mb-4">
-                • <strong>Öppnade eller delvis användbara produkter</strong> – på grund av hygien- och hälsoskäl kan vi inte återförsälja öppnade kosttillskott eller drycker<br/>
+                • <strong>Delvis använda produkter</strong> – vi kan inte acceptera returer av delvis använda produkter<br/>
                 • <strong>Produkter med saknad/skadad förpackning</strong> – om originalförpackning är borta eller allvarligt skadad<br/>
                 • <strong>Produkter utan etikett</strong> – etiketten måste finnas kvar för att vi ska kunna verifiera produkten<br/>
                 • <strong>Använt tillbehör</strong> – mätskopor, blandare, eller andra tillbehör som visar tecken på användning<br/>
@@ -142,7 +142,7 @@ export default function ReturnPolicyPage() {
               </p>
               <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
                 E-post: info@vikingfuel.se
-                Svartid: 24 timmar (normalt samma dag)
+                Svarstid: 1–2 arbetsdagar
                 Öppettider: Mån–Fre 09:00–17:00 CET
               </p>
             </section>
