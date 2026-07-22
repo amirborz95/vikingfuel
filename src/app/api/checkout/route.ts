@@ -96,22 +96,22 @@ export async function POST(req: NextRequest) {
       tax_rates: [taxRate.id],
     }));
 
-    // Create checkout session
-    const orderAmount = line_items.reduce(
+    const subtotalInCents = line_items.reduce(
       (sum, item) => sum + (item.price_data.unit_amount || 0) * item.quantity,
       0
     );
+    const shippingAmountInCents = subtotalInCents >= 70000 ? 0 : 4900;
 
-    if (shippingOption === 'postnord') {
+    if (shippingAmountInCents > 0) {
       line_items.push({
         price_data: {
           currency: 'sek',
           product_data: {
-            name: 'PostNord frakt 3 kr',
-            description: 'Fraktkostnad för PostNord leverans',
+            name: 'Frakt 49 kr',
+            description: 'Fraktkostnad för beställningar under 700 kr',
             tax_code: 'txcd_92010001',
           },
-          unit_amount: 300,
+          unit_amount: shippingAmountInCents,
           tax_behavior: 'inclusive',
         },
         quantity: 1,

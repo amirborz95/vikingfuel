@@ -117,7 +117,7 @@ export default function CartDrawer() {
                 </div>
                 {totalPrice < 700 && (
                   <p className="text-xs text-muted-foreground bg-accent rounded-lg px-3 py-2">
-                    Lägg till {700 - totalPrice} kr för fri frakt
+                    49 kr frakt tillkommer under 700 kr. Fri frakt vid 700 kr eller mer.
                   </p>
                 )}
                 <p className="text-xs text-muted-foreground">

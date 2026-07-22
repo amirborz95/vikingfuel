@@ -65,7 +65,7 @@ export default function CheckoutPage() {
     );
   }
 
-  const shippingCost = shippingOption === 'postnord' ? 49 : 0;
+  const shippingCost = totalPrice >= 700 ? 0 : 49;
   const totalWithShipping = totalPrice + shippingCost;
   const totalWithShippingCents = Math.round(totalWithShipping * 100);
   const taxAmount = Math.round(totalWithShippingCents - totalWithShippingCents / 1.06) / 100;
@@ -218,7 +218,7 @@ export default function CheckoutPage() {
                         />
                         <div>
                           <div className="font-semibold text-foreground">Uthämtning</div>
-                          <div className="text-sm text-muted-foreground">Gratis, ingen frakt.</div>
+                          <div className="text-sm text-muted-foreground">Fri frakt vid 700 kr eller mer. Under 700 kr tillkommer 49 kr frakt.</div>
                         </div>
                       </label>
 
@@ -233,7 +233,7 @@ export default function CheckoutPage() {
                         />
                         <div>
                           <div className="font-semibold text-foreground">PostNord</div>
-                          <div className="text-sm text-muted-foreground">49 kr frakt.</div>
+                          <div className="text-sm text-muted-foreground">49 kr frakt under 700 kr. Gratis vid 700 kr eller mer.</div>
                         </div>
                       </label>
                     </div>
