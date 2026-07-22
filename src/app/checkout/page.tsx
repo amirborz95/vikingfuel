@@ -170,24 +170,23 @@ export default function CheckoutPage() {
                 {/* Postcode input with auto-validation */}
                 <div>
                   <label htmlFor="postcode" className="block text-sm font-semibold text-foreground mb-2">
-                    Postnummer (Sverige)
+                    Postnummer
                   </label>
                   <input
                     id="postcode"
                     type="text"
-                    inputMode="numeric"
-                    maxLength={5}
+                    inputMode="text"
+                    maxLength={20}
                     value={postcode}
                     onChange={(e) => {
                       const cleaned = e.target.value.replace(/\s+/g, '');
                       setPostcode(cleaned);
                       setPostcodeError('');
-                      
-                      // Auto-validate when 5 digits are entered
-                      if (cleaned.length === 5 && /^\d{5}$/.test(cleaned)) {
+
+                      const isSwedishPostcode = /^\d{5}$/.test(cleaned);
+                      if (isSwedishPostcode) {
                         setIsPostcodeValid(true);
-                      } else if (cleaned.length > 0 && !/^\d{5}$/.test(cleaned)) {
-                        setPostcodeError('Ogiltigt postnummer. Ange 5 siffror.');
+                      } else if (cleaned.length > 0) {
                         setIsPostcodeValid(false);
                       } else {
                         setIsPostcodeValid(false);
@@ -201,7 +200,7 @@ export default function CheckoutPage() {
                   {postcode.length > 0 && !isPostcodeValid && (
                     <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
                       <p className="text-sm font-semibold text-amber-800">
-                        Vi hanterar just nu endast svenska postnummer i kassan.
+                        Om du inte har ett svenskt postnummer kan du kontakta oss direkt för hjälp.
                       </p>
                       <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                         <Link
