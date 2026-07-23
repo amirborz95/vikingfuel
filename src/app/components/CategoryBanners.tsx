@@ -52,7 +52,7 @@ export default function CategoryBanners() {
               className="group relative rounded-3xl overflow-hidden aspect-[5/3]"
             >
               {/* Image */}
-              <div className="absolute inset-0">
+              <div className="absolute inset-0 overflow-hidden bg-zinc-900">
                 <AppImage
                   src={cat?.image}
                   alt={cat?.alt}
@@ -60,13 +60,14 @@ export default function CategoryBanners() {
                   height={720}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   priority={i === 0}
+                  style={{ objectPosition: 'center center' }}
                 />
               </div>
 
               {/* Scrim */}
-              <div className={`absolute inset-0 bg-gradient-to-t ${cat?.accent} z-10`} />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10" />
 
               {/* Content */}
               <div className="absolute inset-0 flex flex-col justify-end p-8 sm:p-10 z-20">
