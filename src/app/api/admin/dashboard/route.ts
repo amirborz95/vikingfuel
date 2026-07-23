@@ -1,22 +1,9 @@
-import fs from 'fs/promises';
-import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
-import { readSessions, readUsers, AuthLog } from '@/lib/auth';
+import { readSessions, readUsers, readAuthLogs } from '@/lib/auth';
 import { readAnalytics } from '@/lib/analytics';
 import { readWaitlistEmails } from '@/lib/waitlist';
 
 const ADMIN_PASSWORD = process.env.ADMIN_PANEL_PASSWORD || 'Viking2026Fuel!';
-const dataDir = path.join(process.cwd(), 'data');
-const logsFile = path.join(dataDir, 'authLogs.json');
-
-async function readJson<T = any>(filePath: string): Promise<T> {
-  try {
-    const raw = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(raw) as T;
-  } catch {
-    return [] as unknown as T;
-  }
-}
 
 export async function GET() {
   return NextResponse.json({ error: 'Use POST with password in body.' }, { status: 405 });
@@ -32,7 +19,7 @@ export async function POST(req: NextRequest) {
     }
 
     const users = await readUsers();
-    const logs = await readJson<AuthLog[]>(logsFile);
+    const logs = await readAuthLogs();
     const sessions = await readSessions();
     const analytics = await readAnalytics();
 

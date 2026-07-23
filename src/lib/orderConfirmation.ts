@@ -70,9 +70,16 @@ function buildEmailText(session: Stripe.Checkout.Session) {
   return `Hej!\n\nTack för din beställning hos Vikingfuel. Här är ditt kvitto och orderbekräftelse på svenska.\n\nOrdernummer: ${session.id}\nE-post: ${customerEmail}\n\nLeveransalternativ: ${shippingOptionLabel}\n${shippingDetailsLine}\nOrderdetaljer:\n${itemsText}\n\nMoms (6%): ${formatAmount(taxAmount)} kr\nTotal att betala: ${formatAmount(totalAmount)} kr\n\nVi meddelar dig när din order har skickats.\n\nTack för att du handlar hos Vikingfuel!\n\nMed vänlig hälsning,\nVikingfuel\n`;
 }
 
+export function isSmtpConfigured() {
+  return Boolean(smtpHost && smtpUser && smtpPass);
+}
+
+const SMTP_MISSING_MESSAGE =
+  'E-postutskick är inte konfigurerat. Lägg till miljövariablerna SMTP_HOST, SMTP_PORT, SMTP_USER och SMTP_PASS i Netlify för att aktivera order- och leveransmejl.';
+
 function getTransporter() {
-  if (!smtpHost || !smtpUser || !smtpPass) {
-    throw new Error('SMTP is not configured');
+  if (!isSmtpConfigured()) {
+    throw new Error(SMTP_MISSING_MESSAGE);
   }
 
   return nodemailer.createTransport({

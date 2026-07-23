@@ -1,0 +1,26 @@
+<!doctype html>
+<!--
+  Static form skeleton for Netlify Forms build-time detection.
+
+  This app renders the real contact form client-side (React), and Netlify's
+  build bot cannot see client-rendered forms. This hidden static copy lets the
+  build register the "contact" form so submissions are captured. The React form
+  in src/app/contact/ContactContent.tsx AJAX-posts to /__forms.html with the
+  same field names.
+-->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Vikingfuel forms</title>
+  </head>
+  <body>
+    <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="contact" />
+      <input type="hidden" name="subject" value="Ny kontaktförfrågan från Vikingfuel" />
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <textarea name="message"></textarea>
+      <input name="bot-field" />
+    </form>
+  </body>
+</html>
