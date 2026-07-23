@@ -1,52 +1,22 @@
 'use server';
 
-import fs from 'fs';
-import fsPromises from 'fs/promises';
-import os from 'os';
-import path from 'path';
+import { readData, writeData } from './store';
 
-const dataDir = path.join(process.cwd(), 'data');
-const tmpDir = os.tmpdir();
-const dataPath = path.join(dataDir, 'waitlist.json');
-const tmpPath = path.join(tmpDir, 'waitlist.json');
-
-function getWaitlistFilePath(): string {
-  try {
-    fs.accessSync(dataDir, fs.constants.W_OK);
-    return dataPath;
-  } catch {
-    return tmpPath;
-  }
-}
-
-async function readJson<T = any>(filePath: string): Promise<T> {
-  try {
-    const raw = await fsPromises.readFile(filePath, 'utf-8');
-    return JSON.parse(raw) as T;
-  } catch (err: any) {
-    if (err.code === 'ENOENT') {
-      return [] as unknown as T;
-    }
-    return [] as unknown as T;
-  }
-}
+const WAITLIST_KEY = 'waitlist';
 
 export async function readWaitlistEmails(): Promise<string[]> {
-  const filePath = getWaitlistFilePath();
-  return readJson<string[]>(filePath);
+  return await readData<string[]>(WAITLIST_KEY, []);
 }
 
 export async function saveWaitlistEmail(email: string): Promise<string[]> {
-  const filePath = getWaitlistFilePath();
-  const emails = await readJson<string[]>(filePath);
+  const emails = await readWaitlistEmails();
   const normalized = email.trim().toLowerCase();
   const uniqueEmails = Array.from(new Set([...emails.map((item) => item.toLowerCase()), normalized]));
 
   try {
-    await fsPromises.mkdir(path.dirname(filePath), { recursive: true });
-    await fsPromises.writeFile(filePath, JSON.stringify(uniqueEmails, null, 2), 'utf-8');
+    await writeData(WAITLIST_KEY, uniqueEmails);
   } catch (err) {
-    console.error('Failed to save waitlist file:', err);
+    console.error('Failed to save waitlist:', err);
   }
 
   return uniqueEmails;

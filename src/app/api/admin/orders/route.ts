@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 import Stripe from 'stripe';
 import {
   sendOrderConfirmationEmailForSessionId,
@@ -8,15 +6,14 @@ import {
   sendShippingNotificationForSessionId,
   sendShippingNotificationForStoredOrder,
 } from '@/lib/orderConfirmation';
+import { readUsers, writeUsers } from '@/lib/auth';
 
-const USERS_FILE = path.join(process.cwd(), 'data/users.json');
 const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
 const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: '2026-04-22.dahlia' }) : null;
 
 export async function GET(req: NextRequest) {
   try {
-    const raw = fs.readFileSync(USERS_FILE, 'utf-8');
-    const users = JSON.parse(raw);
+    const users = await readUsers();
 
     const orders: Array<any> = [];
     users.forEach((u: any) => {
@@ -48,9 +45,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'userEmail and orderId are required' }, { status: 400 });
     }
 
-    const usersRaw = fs.readFileSync(USERS_FILE, 'utf-8');
-    const users = JSON.parse(usersRaw);
-    const user = users.find((u: any) => u.email === userEmail);
+    const usersData = await readUsers();
+    const user = usersData.find((u: any) => u.email === userEmail);
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
     const order = (user.orders || []).find((o: any) => o.id === orderId || o.sessionId === orderId);
     if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
@@ -84,7 +80,7 @@ export async function POST(req: NextRequest) {
       }
 
       // persist
-      fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+      await writeUsers(usersData);
 
       // update stripe session metadata if possible
       if (stripe && order.sessionId) {

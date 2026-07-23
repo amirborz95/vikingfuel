@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import fs from 'fs';
-import path from 'path';
 import {
   sendOrderConfirmationEmailForSessionId,
   sendShippingNotificationForSessionId,
 } from '@/lib/orderConfirmation';
 import { createPostNordShipment } from '@/lib/postnord.server';
+import { readUsers, writeUsers } from '@/lib/auth';
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
-const USERS_FILE = path.join(process.cwd(), 'data/users.json');
 
 function getShippingDetails(session: Stripe.Checkout.Session) {
   return (
@@ -27,14 +25,13 @@ const stripe = new Stripe(stripeSecret, {
 
 async function saveOrderToUser(email: string, session: Stripe.Checkout.Session) {
   try {
-    const users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
-    let user = users.find((u: any) => u.email === email);
+    const users = await readUsers();
+    let user: any = users.find((u: any) => u.email === email);
 
     if (!user) {
       console.log(`User with email ${email} not found — creating a guest user entry`);
       user = { email, name: null, orders: [] };
       users.push(user);
-      fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
     }
 
     if (!user.orders) {
@@ -134,7 +131,7 @@ async function saveOrderToUser(email: string, session: Stripe.Checkout.Session) 
     }
 
     user.orders.push(order);
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+    await writeUsers(users);
     console.log(`Order saved for user ${email}`);
   } catch (error: any) {
     console.error('Error saving order to user:', error);

@@ -1,13 +1,11 @@
-import fs from 'fs/promises';
-import path from 'path';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { NextRequest } from 'next/server';
+import { readData, writeData } from './store';
 
-const dataDir = path.join(process.cwd(), 'data');
-const usersFile = path.join(dataDir, 'users.json');
-const logsFile = path.join(dataDir, 'authLogs.json');
-const sessionsFile = path.join(dataDir, 'sessions.json');
+const USERS_KEY = 'users';
+const LOGS_KEY = 'authLogs';
+const SESSIONS_KEY = 'sessions';
 
 export const SESSION_COOKIE_NAME = 'sessionToken';
 export const SESSION_LIFETIME_SECONDS = 60 * 60 * 24 * 7; // 7 days
@@ -40,32 +38,22 @@ export interface SessionRecord {
   expiresAt: string;
 }
 
-async function readJson<T = any>(filePath: string): Promise<T> {
-  try {
-    const raw = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(raw) as T;
-  } catch {
-    return [] as unknown as T;
-  }
-}
-
-async function writeJson(filePath: string, data: any) {
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
-}
-
 export async function readUsers(): Promise<UserRecord[]> {
-  return await readJson<UserRecord[]>(usersFile);
+  return await readData<UserRecord[]>(USERS_KEY, []);
 }
 
 export async function writeUsers(users: UserRecord[]) {
-  await writeJson(usersFile, users);
+  await writeData(USERS_KEY, users);
+}
+
+export async function readAuthLogs(): Promise<AuthLog[]> {
+  return await readData<AuthLog[]>(LOGS_KEY, []);
 }
 
 export async function appendAuthLog(logEntry: AuthLog) {
-  const logs = await readJson<AuthLog[]>(logsFile);
+  const logs = await readAuthLogs();
   logs.push(logEntry);
-  await writeJson(logsFile, logs);
+  await writeData(LOGS_KEY, logs);
 }
 
 export async function findUserByEmail(email: string): Promise<UserRecord | undefined> {
@@ -109,11 +97,11 @@ export async function comparePassword(password: string, hashed: string) {
 }
 
 export async function readSessions(): Promise<SessionRecord[]> {
-  return await readJson<SessionRecord[]>(sessionsFile);
+  return await readData<SessionRecord[]>(SESSIONS_KEY, []);
 }
 
 export async function writeSessions(sessions: SessionRecord[]) {
-  await writeJson(sessionsFile, sessions);
+  await writeData(SESSIONS_KEY, sessions);
 }
 
 export async function createSession(email: string): Promise<SessionRecord> {

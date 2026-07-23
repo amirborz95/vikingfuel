@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 import bcrypt from 'bcryptjs';
-
-const USERS_FILE = path.join(process.cwd(), 'data/users.json');
+import { readUsers, writeUsers } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,7 +20,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
+    const users = await readUsers();
     const user = users.find((u: any) => u.email === email);
 
     if (!user) {
@@ -43,7 +40,7 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+    await writeUsers(users);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

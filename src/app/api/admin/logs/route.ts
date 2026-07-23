@@ -1,19 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ADMIN_EMAILS, getAuthenticatedUser } from '@/lib/auth';
-import fs from 'fs/promises';
-import path from 'path';
-
-const dataDir = path.join(process.cwd(), 'data');
-const logsFile = path.join(dataDir, 'authLogs.json');
-
-async function readJson(filePath: string) {
-  try {
-    const raw = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(raw);
-  } catch (err) {
-    return [];
-  }
-}
+import { ADMIN_EMAILS, getAuthenticatedUser, readAuthLogs } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
@@ -22,7 +8,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const logs = await readJson(logsFile);
+    const logs = await readAuthLogs();
     return NextResponse.json({ logs });
   } catch (err: any) {
     console.error('Get logs error:', err);

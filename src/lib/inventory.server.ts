@@ -1,30 +1,14 @@
-import fs from 'fs/promises';
-import path from 'path';
 import { MAX_STOCK } from './inventory';
+import { readData, writeData } from './store';
 
-const dataDir = path.join(process.cwd(), 'data');
-const inventoryFile = path.join(dataDir, 'inventory.json');
+const INVENTORY_KEY = 'inventory';
 
 export interface InventoryState {
   remainingUnits: number;
 }
 
-async function readJson<T = any>(filePath: string): Promise<T> {
-  try {
-    const raw = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(raw) as T;
-  } catch {
-    return null as unknown as T;
-  }
-}
-
-async function writeJson(filePath: string, data: any) {
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
-}
-
 export async function getInventoryState(): Promise<InventoryState> {
-  const saved = await readJson<InventoryState>(inventoryFile);
+  const saved = await readData<InventoryState | null>(INVENTORY_KEY, null);
   if (!saved || typeof saved.remainingUnits !== 'number') {
     return { remainingUnits: MAX_STOCK };
   }
@@ -42,7 +26,7 @@ export async function adjustInventoryUnits(delta: number): Promise<InventoryStat
   const nextInventory = {
     remainingUnits: Math.max(0, Math.min(MAX_STOCK, nextValue)),
   };
-  await writeJson(inventoryFile, nextInventory);
+  await writeData(INVENTORY_KEY, nextInventory);
   return nextInventory;
 }
 
