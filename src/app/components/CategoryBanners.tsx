@@ -52,20 +52,24 @@ export default function CategoryBanners() {
               className="group relative rounded-3xl overflow-hidden aspect-[5/3]"
             >
               {/* Image */}
-              <AppImage
-                src={cat?.image}
-                alt={cat?.alt}
-                width={1200}
-                height={720}
-                className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
-                priority={i === 0}
-              />
+              <div className="absolute inset-0">
+                <AppImage
+                  src={cat?.image}
+                  alt={cat?.alt}
+                  width={1200}
+                  height={720}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
+                  priority={i === 0}
+                />
+              </div>
 
               {/* Scrim */}
-              <div className={`absolute inset-0 bg-gradient-to-t ${cat?.accent}`} />
+              <div className={`absolute inset-0 bg-gradient-to-t ${cat?.accent} z-10`} />
 
               {/* Content */}
-              <div className="absolute bottom-0 left-0 right-0 p-8 sm:p-10">
+              <div className="absolute inset-0 flex flex-col justify-end p-8 sm:p-10 z-20">
                 <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">{cat?.title}</h3>
                 <p className="text-base text-white/80 mb-6">{cat?.subtitle}</p>
                 <Link
