@@ -1,5 +1,26 @@
 import Stripe from 'stripe';
 import nodemailer from 'nodemailer';
+import {
+  buildOrderConfirmationHtml,
+  buildShippingHtml,
+  type EmailItem,
+} from './emailTemplates';
+
+function normalizeItems(items: any[]): EmailItem[] {
+  return (items || []).map((it) => ({
+    name: it.name || 'Produkt',
+    quantity: it.quantity || 1,
+    price: typeof it.price === 'number' ? it.price : 0,
+  }));
+}
+
+function storedOrderShippingDetail(order: any, method: 'postnord' | 'pickup'): string {
+  if (method !== 'postnord') return getPickupAddressText();
+  const addr = order.shippingAddress?.address
+    ? Object.values(order.shippingAddress.address).filter(Boolean).join(', ')
+    : '';
+  return addr || 'Adress enligt beställning';
+}
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
 const smtpHost = process.env.SMTP_HOST || '';
@@ -8,6 +29,8 @@ const smtpUser = process.env.SMTP_USER || '';
 const smtpPass = process.env.SMTP_PASS || '';
 const senderEmail = process.env.ORDER_CONFIRMATION_SENDER || `Vikingfuel <${smtpUser || 'info@vikingfuel.se'}>`;
 const replyToEmail = process.env.ORDER_CONFIRMATION_REPLY_TO || smtpUser || 'info@vikingfuel.se';
+// Business owner gets a notification on every new order.
+const orderNotificationRecipient = process.env.ORDER_NOTIFICATION_RECIPIENT || 'smartval.se@gmail.com';
 
 if (!stripeSecret) {
   console.error('Missing STRIPE_SECRET_KEY environment variable');
@@ -106,12 +129,37 @@ export async function sendOrderConfirmationEmail(session: Stripe.Checkout.Sessio
   }
 
   const transporter = getTransporter();
+
+  const method = normalizeShippingOption(
+    session.metadata?.shipping_option || session.metadata?.shipping_option_label
+  );
+  const items: EmailItem[] = (session.line_items?.data || []).map((item) => ({
+    name: getLineItemName(item),
+    quantity: item.quantity || 1,
+    price: (item.price?.unit_amount || 0) / 100,
+  }));
+  const shippingDetail =
+    method === 'postnord'
+      ? `Postnummer: ${session.metadata?.shipping_postcode || 'Ej angivet'}`
+      : getPickupAddressText();
+
+  const html = buildOrderConfirmationHtml({
+    orderId: session.id,
+    customerName: session.customer_details?.name || undefined,
+    items,
+    totalInCents: session.amount_total || 0,
+    taxInCents: session.total_details?.amount_tax || 0,
+    shippingLabel: method === 'postnord' ? 'PostNord' : 'Uthämtning',
+    shippingDetail,
+  });
+
   const mailOptions = {
     from: senderEmail,
     to: session.customer_email,
     replyTo: replyToEmail,
-    subject: 'Orderbekräftelse och kvitto från Vikingfuel',
+    subject: 'Tack för din beställning hos Vikingfuel',
     text: buildEmailText(session),
+    html,
   };
 
   await transporter.sendMail(mailOptions);
@@ -131,6 +179,41 @@ export async function sendOrderConfirmationEmail(session: Stripe.Checkout.Sessio
 export async function sendOrderConfirmationEmailForSessionId(sessionId: string) {
   const session = await retrieveCheckoutSession(sessionId);
   return sendOrderConfirmationEmail(session);
+}
+
+/**
+ * Notify the business owner that a new order has come in.
+ * Sent once per order (from order creation).
+ */
+export async function sendNewOrderAdminNotification(order: any, customerEmail: string) {
+  const transporter = getTransporter();
+
+  const itemsText = (order.items || [])
+    .map((it: any) => `• ${it.name} x${it.quantity} — ${formatAmount((it.price || 0) * (it.quantity || 1) * 100)} kr`)
+    .join('\n');
+
+  const shippingMethod = normalizeShippingOption(order.shippingOption);
+  const shippingLabel = shippingMethod === 'postnord' ? 'PostNord' : 'Uthämtning';
+  const address = order.shippingAddress?.address
+    ? Object.values(order.shippingAddress.address).filter(Boolean).join(', ')
+    : shippingMethod === 'postnord'
+      ? 'Ingen adress angiven'
+      : 'Uthämtning (ingen adress)';
+
+  const totalText = formatAmount((order.totalAmount || 0) * 100);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vikingfuel.se';
+
+  const text = `Ny order mottagen på Vikingfuel!\n\nOrdernummer: ${order.id}\nKund: ${order.shippingAddress?.name || 'Okänd'} <${customerEmail}>\nTelefon: ${order.shippingAddress?.phone || order.billingAddress?.phone || 'Ej angivet'}\nLeveranssätt: ${shippingLabel}\nAdress: ${address}\n\nProdukter:\n${itemsText}\n\nTotalt: ${totalText} kr\n\nHantera ordern i adminpanelen: ${siteUrl}/admin\n`;
+
+  await transporter.sendMail({
+    from: senderEmail,
+    to: orderNotificationRecipient,
+    replyTo: customerEmail,
+    subject: `Ny order: ${totalText} kr — ${order.shippingAddress?.name || customerEmail}`,
+    text,
+  });
+
+  return { sent: true };
 }
 
 export function buildOrderConfirmationTextFromStoredOrder(order: any, recipientEmail: string) {
@@ -158,13 +241,22 @@ export async function sendOrderConfirmationEmailForStoredOrder(order: any, recip
     throw new Error('Recipient email is required for order confirmation');
   }
 
+  const method = normalizeShippingOption(order.shippingOption);
   const transporter = getTransporter();
   await transporter.sendMail({
     from: senderEmail,
     to: recipientEmail,
     replyTo: replyToEmail,
-    subject: 'Orderbekräftelse och kvitto från Vikingfuel',
+    subject: 'Tack för din beställning hos Vikingfuel',
     text: buildOrderConfirmationTextFromStoredOrder(order, recipientEmail),
+    html: buildOrderConfirmationHtml({
+      orderId: order.id,
+      customerName: order.shippingAddress?.name || undefined,
+      items: normalizeItems(order.items),
+      totalInCents: (order.totalAmount || 0) * 100,
+      shippingLabel: method === 'postnord' ? 'PostNord' : 'Uthämtning',
+      shippingDetail: storedOrderShippingDetail(order, method),
+    }),
   });
   return { sent: true };
 }
@@ -185,13 +277,27 @@ export async function sendShippingNotificationForStoredOrder(order: any, recipie
     throw new Error('Recipient email is required for shipping notification');
   }
 
+  const method = normalizeShippingOption(order.shippingOption);
   const transporter = getTransporter();
   await transporter.sendMail({
     from: senderEmail,
     to: recipientEmail,
     replyTo: replyToEmail,
-    subject: 'Din beställning har skickats — spårningsnummer',
+    subject:
+      method === 'postnord'
+        ? 'Din beställning har skickats — spårningsnummer'
+        : 'Din beställning är redo för uthämtning',
     text: buildShippingNotificationTextFromStoredOrder(order, recipientEmail, tracking),
+    html: buildShippingHtml({
+      orderId: order.id,
+      customerName: order.shippingAddress?.name || undefined,
+      items: normalizeItems(order.items),
+      totalInCents: (order.totalAmount || 0) * 100,
+      shippingLabel: method === 'postnord' ? 'PostNord' : 'Uthämtning',
+      shippingDetail: storedOrderShippingDetail(order, method),
+      tracking: tracking || order.postnordTracking || null,
+      isPostNord: method === 'postnord',
+    }),
   });
   return { sent: true };
 }

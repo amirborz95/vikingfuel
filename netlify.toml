@@ -4,5 +4,14 @@
   command = "npm run build"
   publish = ".next"
 
+[functions]
+  directory = "netlify/functions"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# Local `netlify dev` only — the dev script runs Next.js on port 4028.
+[dev]
+  command = "npm run dev"
+  targetPort = 4028
+  framework = "#custom"

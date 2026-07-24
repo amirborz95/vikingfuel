@@ -1,16 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const USERS_FILE = path.join(process.cwd(), 'data/users.json');
-
-function readUsers() {
-  return JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8')) as any[];
-}
-
-function writeUsers(users: any[]) {
-  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-}
+import { readUsers, writeUsers } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
@@ -21,7 +10,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    const users = readUsers();
+    const users = await readUsers();
     const user = users.find((u: any) => u.email === email);
 
     if (!user) {
@@ -53,7 +42,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    const users = readUsers();
+    const users = await readUsers();
     const user = users.find((u: any) => u.email === email);
 
     if (!user) {
@@ -72,7 +61,7 @@ export async function POST(req: NextRequest) {
       user.name = [user.firstName, user.lastName].filter(Boolean).join(' ');
     }
 
-    writeUsers(users);
+    await writeUsers(users);
 
     const { password, orders, ...profile } = user;
     return NextResponse.json({ success: true, user: profile });

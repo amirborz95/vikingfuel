@@ -78,6 +78,7 @@ interface DashboardData {
   pageViewsByUser: VisitorSummary[];
   pageViewsByCountry: CountrySummary[];
   waitlistEmails: string[];
+  newsletterSubscribers?: { email: string; subscribedAt: string }[];
 }
 
 export default function AdminPage() {
@@ -149,56 +150,65 @@ export default function AdminPage() {
     }
   }
 
-  async function resendConfirmation(userEmail: string, orderId: string) {
+  async function setOrderStatus(userEmail: string, orderId: string, status: string) {
     setActionLoading(orderId);
     try {
       const res = await fetch('/api/admin/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'sendConfirmation', userEmail, orderId }),
+        body: JSON.stringify({ action: 'setStatus', userEmail, orderId, status }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || 'Failed');
-      alert('Orderbekräftelse skickad');
-    } catch (e) {
-      console.error(e);
-      alert('Kunde inte skicka orderbekräftelse');
-    } finally {
-      setActionLoading(null);
-    }
-  }
-
-  async function markShipped(userEmail: string, orderId: string, tracking?: string | null) {
-    setActionLoading(orderId);
-    try {
-      const body: any = { action: 'markShipped', userEmail, orderId };
-      if (tracking) body.tracking = tracking;
-
-      const res = await fetch('/api/admin/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || 'Failed');
-      alert('Order markerad som skickad och kund mejlad');
+      if (json?.warning) {
+        alert('Status uppdaterad.\n\nOBS: ' + json.warning);
+      } else if (status === 'shipped' && json?.emailed) {
+        const tn = json?.order?.postnordTracking;
+        alert('Order markerad som skickad — kund mejlad.' + (tn ? `\nSpårningsnummer: ${tn}` : ''));
+      }
       fetchOrders();
     } catch (e) {
       console.error(e);
-      alert('Kunde inte markera order som skickad');
+      alert('Kunde inte uppdatera orderstatus');
     } finally {
       setActionLoading(null);
     }
   }
   
   useEffect(() => {
-    if (unlocked) fetchOrders();
+    if (!unlocked) return;
+    fetchOrders();
+    // Auto-refresh so shipped/not-shipped status updates itself without any action.
+    const id = setInterval(fetchOrders, 30000);
+    return () => clearInterval(id);
   }, [unlocked]);
 
   const normalizeShippingOption = (value?: string | null) => {
     if (!value) return 'pickup';
     const normalized = value.toLowerCase();
     return normalized === 'postnord' ? 'postnord' : 'pickup';
+  };
+
+  const STATUS_OPTIONS = [
+    { value: 'not_shipped', label: 'Ej skickad' },
+    { value: 'progress', label: 'Pågår' },
+    { value: 'shipped', label: 'Skickad' },
+  ];
+
+  const normalizeStatus = (value?: string | null) => {
+    if (value === 'shipped') return 'shipped';
+    if (value === 'progress') return 'progress';
+    return 'not_shipped'; // legacy 'completed'/undefined => not shipped
+  };
+
+  const statusLabelOf = (value?: string | null) =>
+    STATUS_OPTIONS.find((o) => o.value === normalizeStatus(value))?.label || 'Ej skickad';
+
+  const statusBadgeClass = (value?: string | null) => {
+    const s = normalizeStatus(value);
+    if (s === 'shipped') return 'bg-emerald-100 text-emerald-700 border border-emerald-300';
+    if (s === 'progress') return 'bg-blue-100 text-blue-700 border border-blue-300';
+    return 'bg-amber-100 text-amber-700 border border-amber-300';
   };
 
   const getShippingSummary = (order: any) => {
@@ -310,6 +320,7 @@ export default function AdminPage() {
                       <a href="#auth-history" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Auth</a>
                       <a href="#live-users" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Live</a>
                       <a href="#waitlist" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Waitlist</a>
+                      <a href="#newsletter" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Nyhetsbrev</a>
                       <a href="#insights" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Insights</a>
                     </div>
                   </div>
@@ -411,7 +422,7 @@ export default function AdminPage() {
                           const itemsText = (o.items || []).map((it: any) => `${it.name} x${it.quantity}`).join(', ');
                           const shippingSummary = getShippingSummary(o);
                           const isLoading = actionLoading === o.id;
-                          const statusLabel = o.status === 'shipped' ? 'Shipped' : 'Pending';
+                          const statusValue = normalizeStatus(o.status);
                           const isPostNord = normalizeShippingOption(o.shippingOption) === 'postnord';
 
                           return (
@@ -423,8 +434,8 @@ export default function AdminPage() {
                                   <p className="mt-1 text-sm text-slate-600">{row.userName || 'Customer'} • {row.userEmail}</p>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-3">
-                                  <span className={`rounded-lg px-3 py-1 text-xs font-semibold whitespace-nowrap ${o.status === 'shipped' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}`}>
-                                    {statusLabel}
+                                  <span className={`rounded-lg px-3 py-1 text-xs font-semibold whitespace-nowrap ${statusBadgeClass(o.status)}`}>
+                                    {statusLabelOf(o.status)}
                                   </span>
                                   {o.createdAt && (
                                     <span className="text-sm text-slate-600 whitespace-nowrap">{new Date(o.createdAt).toLocaleDateString()}</span>
@@ -448,28 +459,48 @@ export default function AdminPage() {
                                 </div>
                               </div>
 
-                              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <div className="text-sm text-slate-600">
-                                  <p className="font-semibold text-slate-900">Actions</p>
+                              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                                <div className="text-sm text-slate-600 space-y-1">
+                                  {o.postnordTracking && (
+                                    <p className="text-slate-700"><span className="font-semibold text-slate-900">Spårning:</span> {o.postnordTracking}</p>
+                                  )}
+                                  {o.postnordLabelUrl && (
+                                    <a href={o.postnordLabelUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700 underline">
+                                      Skriv ut fraktsedel (PostNord)
+                                    </a>
+                                  )}
+                                  {isPostNord && !o.postnordShipmentId && (
+                                    <p className="text-xs text-amber-600">Ingen PostNord-etikett skapad ännu.</p>
+                                  )}
                                 </div>
 
-                                <div className="flex flex-wrap gap-2">
-                                  <button
-                                    type="button"
-                                    disabled={isLoading}
-                                    onClick={() => resendConfirmation(row.userEmail, o.id)}
-                                    className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                                  >
-                                    Send Confirmation
-                                  </button>
-                                  <button
-                                    type="button"
-                                    disabled={isLoading}
-                                    onClick={() => markShipped(row.userEmail, o.id, o.postnordTracking)}
-                                    className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-slate-100 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                                  >
-                                    {isPostNord ? 'Mark Shipped' : 'Markera som redo för uthämtning'}
-                                  </button>
+                                <div className="flex flex-col items-start gap-1 sm:items-end">
+                                  {isPostNord ? (
+                                    <>
+                                      <span className={`rounded-lg px-3 py-1 text-xs font-semibold ${statusBadgeClass(o.status)}`}>
+                                        {statusLabelOf(o.status)}
+                                      </span>
+                                      <span className="text-xs text-slate-500">
+                                        {normalizeStatus(o.status) === 'shipped'
+                                          ? 'Skickad – spårning mejlad till kund'
+                                          : `Uppdateras automatiskt via PostNord${o.postnordStatus ? ` · ${o.postnordStatus}` : ''}`}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">Uthämtning – status</label>
+                                      <select
+                                        value={statusValue}
+                                        disabled={isLoading}
+                                        onChange={(e) => setOrderStatus(row.userEmail, o.id, e.target.value)}
+                                        className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      >
+                                        {STATUS_OPTIONS.map((opt) => (
+                                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                        ))}
+                                      </select>
+                                    </>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -589,6 +620,61 @@ export default function AdminPage() {
                   ) : (
                     <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-12 text-center text-sm text-slate-500">
                       Inga e-postadresser hittades för väntelistan.
+                    </div>
+                  )}
+                </div>
+
+                <div id="newsletter" className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
+                  <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">Nyhetsbrev</p>
+                      <h2 className="mt-2 text-2xl font-bold text-slate-900">Nyhetsbrev-prenumeranter</h2>
+                      <p className="mt-2 text-sm text-slate-600">Alla som anmält sig via popupen på sajten.</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold uppercase tracking-wider text-emerald-700 whitespace-nowrap">
+                        {data?.newsletterSubscribers?.length ?? 0} prenumeranter
+                      </span>
+                      {data?.newsletterSubscribers?.length ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const emails = (data.newsletterSubscribers || []).map((s) => s.email).join(', ');
+                            navigator.clipboard?.writeText(emails);
+                            alert('Alla e-postadresser kopierade.');
+                          }}
+                          className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-white whitespace-nowrap"
+                        >
+                          Kopiera alla
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  {data?.newsletterSubscribers?.length ? (
+                    <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-slate-50 p-2">
+                      <table className="w-full text-left text-sm border-separate border-spacing-0">
+                        <thead>
+                          <tr className="border-b border-slate-200 text-slate-600 uppercase tracking-[0.15em] text-xs">
+                            <th className="px-4 py-3">E-post</th>
+                            <th className="px-4 py-3">Anmäld</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {[...data.newsletterSubscribers]
+                            .sort((a, b) => new Date(b.subscribedAt).getTime() - new Date(a.subscribedAt).getTime())
+                            .map((s, index) => (
+                              <tr key={`${s.email}-${index}`} className="border-b border-slate-200 bg-white">
+                                <td className="px-4 py-3 text-slate-700 break-all">{s.email}</td>
+                                <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{s.subscribedAt ? new Date(s.subscribedAt).toLocaleString('sv-SE') : '–'}</td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-12 text-center text-sm text-slate-500">
+                      Inga prenumeranter ännu.
                     </div>
                   )}
                 </div>

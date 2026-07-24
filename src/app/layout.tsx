@@ -6,6 +6,7 @@ import '../styles/tailwind.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import AnalyticsTracker from '@/components/AnalyticsTracker';
+import NewsletterPopup from '@/app/components/NewsletterPopup';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -46,6 +47,7 @@ export default function RootLayout({
           <CartProvider>
             <AnalyticsTracker />
             {children}
+            <NewsletterPopup />
           </CartProvider>
         </AuthProvider>
       </body>

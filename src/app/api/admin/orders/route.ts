@@ -1,22 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 import Stripe from 'stripe';
-import {
-  sendOrderConfirmationEmailForSessionId,
-  sendOrderConfirmationEmailForStoredOrder,
-  sendShippingNotificationForSessionId,
-  sendShippingNotificationForStoredOrder,
-} from '@/lib/orderConfirmation';
+import { readUsers, writeUsers } from '@/lib/auth';
+import { createPostNordShipment } from '@/lib/postnord.server';
+import { sendShippingNotificationForStoredOrder } from '@/lib/orderConfirmation';
 
-const USERS_FILE = path.join(process.cwd(), 'data/users.json');
 const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
 const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: '2026-04-22.dahlia' }) : null;
 
+const VALID_STATUSES = ['not_shipped', 'progress', 'shipped'];
+
 export async function GET(req: NextRequest) {
   try {
-    const raw = fs.readFileSync(USERS_FILE, 'utf-8');
-    const users = JSON.parse(raw);
+    const users = await readUsers();
 
     const orders: Array<any> = [];
     users.forEach((u: any) => {
@@ -39,90 +34,106 @@ export async function GET(req: NextRequest) {
   }
 }
 
+/**
+ * Update an order's shipping status.
+ * Body: { action?: 'setStatus', userEmail, orderId, status: 'not_shipped' | 'progress' | 'shipped' }
+ *
+ * The customer is emailed a shipping confirmation ONLY when an order first
+ * transitions into "shipped". Other status changes are silent.
+ */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { action, userEmail, orderId, tracking } = body;
+    const { action, userEmail, orderId } = body;
+    const requestedStatus = String(body.status || '').trim();
 
     if (!userEmail || !orderId) {
       return NextResponse.json({ error: 'userEmail and orderId are required' }, { status: 400 });
     }
+    if (action && action !== 'setStatus') {
+      return NextResponse.json({ error: 'Unsupported action' }, { status: 400 });
+    }
+    if (!VALID_STATUSES.includes(requestedStatus)) {
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+    }
 
-    const usersRaw = fs.readFileSync(USERS_FILE, 'utf-8');
-    const users = JSON.parse(usersRaw);
+    const users = await readUsers();
     const user = users.find((u: any) => u.email === userEmail);
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
     const order = (user.orders || []).find((o: any) => o.id === orderId || o.sessionId === orderId);
     if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
 
-    if (action === 'sendConfirmation') {
-      const customerEmail = user.email;
-      if (order.sessionId) {
+    const wasShipped = order.status === 'shipped';
+    order.status = requestedStatus;
+
+    let warning: string | null = null;
+    let emailed = false;
+
+    // Only act (label fallback + customer email) on the transition INTO shipped.
+    if (requestedStatus === 'shipped' && !wasShipped) {
+      if (!order.shippedAt) order.shippedAt = new Date().toISOString();
+
+      const isPostNord = String(order.shippingOption || '').toLowerCase().includes('postnord');
+
+      // Fallback: if the PostNord label wasn't created at order time, create it now.
+      if (isPostNord && !order.postnordShipmentId && order.shippingAddress?.address) {
         try {
-          await sendOrderConfirmationEmailForSessionId(order.sessionId);
-          return NextResponse.json({ success: true });
+          const shipment = await createPostNordShipment({
+            orderId: order.id,
+            packageDescription: `Order ${order.id}`,
+            items: order.items || [],
+            totalAmount: order.totalAmount || 0,
+            customerEmail: user.email,
+            shippingDetails: {
+              name: order.shippingAddress?.name || user.name || 'Kund',
+              phone: order.shippingAddress?.phone || order.billingAddress?.phone || '',
+              address: order.shippingAddress?.address || null,
+            },
+          });
+          if (shipment) {
+            order.postnordShipmentId = shipment.shipmentId;
+            order.postnordTracking = shipment.trackingNumber || order.postnordTracking || null;
+            order.postnordLabelUrl = shipment.labelUrl || null;
+            order.postnordLabelPdfUrl = shipment.labelPdfUrl || null;
+          }
         } catch (e: any) {
-          console.warn('Stripe session confirmation failed, falling back to stored order email:', e?.message || e);
+          console.error('PostNord fallback booking failed:', e);
+          warning = `PostNord-etikett kunde inte skapas: ${e?.message || e}`;
         }
       }
 
-      try {
-        await sendOrderConfirmationEmailForStoredOrder(order, customerEmail);
-        return NextResponse.json({ success: true, fallback: true });
-      } catch (e: any) {
-        console.error('Failed to send stored order confirmation:', e);
-        return NextResponse.json({ error: e.message || 'Failed to send confirmation' }, { status: 500 });
-      }
-    }
-
-    if (action === 'markShipped') {
-      // tracking is optional but recommended
-      order.status = 'shipped';
-      order.shippedAt = new Date().toISOString();
-      if (tracking) {
-        order.postnordTracking = tracking;
+      // Email the customer their shipping confirmation (once).
+      if (!order.shippingEmailSent) {
+        try {
+          await sendShippingNotificationForStoredOrder(order, user.email, order.postnordTracking);
+          order.shippingEmailSent = true;
+          emailed = true;
+        } catch (e: any) {
+          console.error('Failed to send shipping notification:', e);
+          warning = (warning ? warning + ' ' : '') + `Statusen ändrades men e-post kunde inte skickas: ${e?.message || e}`;
+        }
       }
 
-      // persist
-      fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-
-      // update stripe session metadata if possible
+      // Best-effort: reflect tracking in the Stripe session metadata.
       if (stripe && order.sessionId) {
         try {
           await stripe.checkout.sessions.update(order.sessionId, {
             metadata: {
-              ...(order.metadata || {}),
+              postnord_shipment_id: order.postnordShipmentId || '',
               postnord_tracking: order.postnordTracking || '',
               shipped: 'true',
             },
           });
         } catch (e) {
-          console.error('Failed to update Stripe session metadata on ship:', e);
+          console.error('Failed to update Stripe metadata on ship:', e);
         }
       }
-
-      if (order.sessionId) {
-        try {
-          await sendShippingNotificationForSessionId(order.sessionId);
-          return NextResponse.json({ success: true, order });
-        } catch (e: any) {
-          console.warn('Stripe session shipping notification failed, falling back to stored order email:', e?.message || e);
-        }
-      }
-
-      try {
-        await sendShippingNotificationForStoredOrder(order, user.email, tracking);
-      } catch (e: any) {
-        console.error('Failed to send stored order shipping notification:', e);
-        return NextResponse.json({ error: e.message || 'Failed to send shipping notification' }, { status: 500 });
-      }
-
-      return NextResponse.json({ success: true, order, fallback: true });
     }
 
-    return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
+    await writeUsers(users);
+    return NextResponse.json({ success: true, order, emailed, warning });
   } catch (error: any) {
     console.error('Admin orders POST error:', error);
-    return NextResponse.json({ error: error.message || 'Failed to manage order' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to update order' }, { status: 500 });
   }
 }

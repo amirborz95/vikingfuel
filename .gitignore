@@ -44,3 +44,6 @@ jest-test-results.json
 turbo/
 # Local Netlify folder
 .netlify
+
+# netlify dev / edge runtime artifact
+deno.lock

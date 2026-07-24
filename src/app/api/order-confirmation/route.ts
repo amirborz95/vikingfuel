@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendOrderConfirmationEmailForSessionId } from '@/lib/orderConfirmation';
+import { saveOrderForSession } from '@/lib/orders';
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,6 +9,13 @@ export async function POST(req: NextRequest) {
 
     if (!sessionId) {
       return NextResponse.json({ error: 'Missing sessionId' }, { status: 400 });
+    }
+
+    // Ensure the order exists even if the Stripe webhook was delayed or failed.
+    try {
+      await saveOrderForSession(sessionId);
+    } catch (e) {
+      console.error('Order save on success page failed:', e);
     }
 
     const result = await sendOrderConfirmationEmailForSessionId(sessionId);

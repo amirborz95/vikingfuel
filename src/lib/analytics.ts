@@ -1,5 +1,5 @@
-import fs from 'fs/promises';
 import path from 'path';
+import { readData, writeData } from './dataStore';
 
 const dataDir = path.join(process.cwd(), 'data');
 const analyticsFile = path.join(dataDir, 'analytics.json');
@@ -18,17 +18,11 @@ export interface AnalyticsVisit {
 }
 
 async function readJson<T = any>(filePath: string): Promise<T> {
-  try {
-    const raw = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(raw) as T;
-  } catch {
-    return [] as unknown as T;
-  }
+  return readData<T>(path.basename(filePath), [] as unknown as T);
 }
 
 async function writeJson(filePath: string, data: any) {
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+  await writeData(path.basename(filePath), data);
 }
 
 export async function readAnalytics(): Promise<AnalyticsVisit[]> {
