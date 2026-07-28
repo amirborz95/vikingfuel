@@ -299,7 +299,7 @@ export default function CheckoutPage() {
                     <div className="mt-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                       {country === 'SE' && (
                         <DeliveryOption
-                          selected={method === 'pickup'}
+                          selected={methodChosen && method === 'pickup'}
                           onSelect={() => { setMethod('pickup'); setMethodChosen(true); setDeliveryOpen(false); }}
                           en={en}
                           icon={
@@ -315,7 +315,7 @@ export default function CheckoutPage() {
                       )}
 
                       <DeliveryOption
-                        selected={method === 'postnord'}
+                        selected={methodChosen && method === 'postnord'}
                         onSelect={() => { setMethod('postnord'); setMethodChosen(true); setDeliveryOpen(false); }}
                         en={en}
                         icon={<PostNordLogo />}
