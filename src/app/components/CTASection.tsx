@@ -4,8 +4,10 @@ import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Icon from '@/components/ui/AppIcon';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function CTASection() {
+  const { t } = useLanguage();
   return (
     <section className="py-20 bg-white">
       <div className="container-wide">
@@ -25,28 +27,24 @@ export default function CTASection() {
           <div className="relative z-10">
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 text-primary text-xs font-bold uppercase tracking-wide mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-              Bästa erbjudande
+              {t('home.cta.badge')}
             </span>
 
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white mb-4 text-balance">
-              Börja din resa idag
-            </h2>
-            <p className="text-lg text-white/70 max-w-xl mx-auto mb-10">Gå med tusentals nöjda kunder som har förbättrat sin hälsa och prestation med våra naturliga kosttillskott.</p>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white mb-4 text-balance">{t('home.cta.title')}</h2>
+            <p className="text-lg text-white/70 max-w-xl mx-auto mb-10">{t('home.cta.desc')}</p>
 
             <div className="flex flex-wrap justify-center gap-4">
               <Link
                 href="/products"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-full text-base hover:bg-green-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
-                Handla nu
+                {t('home.cta.shopNow')}
                 <Icon name="ArrowRightIcon" size={18} />
               </Link>
               <Link
                 href="/products"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 border border-white/20 text-white font-bold rounded-full text-base hover:bg-white/20 transition-all"
-              >
-                Se paket
-              </Link>
+              >{t('home.cta.seeBundles')}</Link>
             </div>
           </div>
         </motion.div>

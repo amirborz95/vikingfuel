@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Icon from '@/components/ui/AppIcon';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface WaitlistModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface WaitlistModalProps {
 }
 
 export default function WaitlistModal({ isOpen, onClose, productName = 'Produkten' }: WaitlistModalProps) {
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -22,7 +24,7 @@ export default function WaitlistModal({ isOpen, onClose, productName = 'Produkte
 
     const normalizedEmail = email.trim().toLowerCase();
     if (!normalizedEmail) {
-      setError('Ange en giltig e-postadress.');
+      setError(t('waitlist.invalid'));
       setLoading(false);
       return;
     }
@@ -36,7 +38,7 @@ export default function WaitlistModal({ isOpen, onClose, productName = 'Produkte
 
       const payload = await response.json();
       if (!response.ok) {
-        throw new Error(payload?.error || 'Något gick fel');
+        throw new Error(payload?.error || t('waitlist.error'));
       }
 
       setSubmitted(true);
@@ -46,7 +48,7 @@ export default function WaitlistModal({ isOpen, onClose, productName = 'Produkte
         onClose();
       }, 2000);
     } catch (err: any) {
-      setError(err?.message || 'Något gick fel. Försök igen.');
+      setError(err?.message || t('waitlist.error'));
       setLoading(false);
     }
   };
@@ -69,42 +71,42 @@ export default function WaitlistModal({ isOpen, onClose, productName = 'Produkte
               <div className="mx-auto w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
                 <Icon name="CheckIcon" size={32} className="text-emerald-600" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-2">Tack!</h3>
+              <h3 className="text-2xl font-bold text-foreground mb-2">{t('waitlist.thanks')}</h3>
               <p className="text-muted-foreground">
-                Vi skickar ett meddelande till <strong>{email}</strong> så fort produkterna är tillgängliga.
+                {t('waitlist.thanksBody1')} <strong>{email}</strong> {t('waitlist.thanksBody2')}
               </p>
             </div>
           ) : (
             <>
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-foreground">Produkten kommer snart</h2>
-                  <p className="text-sm text-muted-foreground mt-1">Låt oss veta när du vill köpa</p>
+                  <h2 className="text-2xl font-bold text-foreground">{t('waitlist.title')}</h2>
+                  <p className="text-sm text-muted-foreground mt-1">{t('waitlist.subtitle')}</p>
                 </div>
                 <button
                   onClick={onClose}
                   className="text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Stäng"
+                  aria-label={t('waitlist.close')}
                 >
                   <Icon name="XMarkIcon" size={24} />
                 </button>
               </div>
 
               <p className="text-muted-foreground mb-6">
-                {productName} är snart tillgänglig igen! Skriv din e-postadress nedan så kontaktar vi dig så fort vi får stock. Vi skickar ett email när produkten är redo att beställa.
+                {productName} {t('waitlist.body')}
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label htmlFor="waitlist-email" className="block text-sm font-semibold text-foreground mb-2">
-                    Din e-postadress
+                    {t('waitlist.emailLabel')}
                   </label>
                   <input
                     id="waitlist-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="din.email@example.com"
+                    placeholder={t('waitlist.placeholder')}
                     required
                     className="w-full border border-border bg-white px-4 py-3 rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                     disabled={loading}
@@ -122,18 +124,18 @@ export default function WaitlistModal({ isOpen, onClose, productName = 'Produkte
                   {loading ? (
                     <>
                       <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                      Sparar...
+                      {t('waitlist.saving')}
                     </>
                   ) : (
                     <>
                       <Icon name="HeartIcon" size={16} />
-                      Bevaka produkt
+                      {t('waitlist.watch')}
                     </>
                   )}
                 </button>
 
                 <p className="text-xs text-muted-foreground text-center">
-                  Vi skickar endast ett email när produkten är tillgänglig. Inget spam.
+                  {t('waitlist.noSpamShort')}
                 </p>
               </form>
             </>

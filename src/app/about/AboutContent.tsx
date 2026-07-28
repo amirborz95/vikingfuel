@@ -4,8 +4,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import AppImage from '@/components/ui/AppImage';
 import Icon from '@/components/ui/AppIcon';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function AboutContent() {
+  const { t } = useLanguage();
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
@@ -17,10 +19,10 @@ export default function AboutContent() {
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground mb-6 leading-tight">
-              Om Viking Fuel
+              {t('aboutPage.heroTitle')}
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-              Upptäck vår resa från passion för naturliga kosttillskott till att skapa premiumprodukter som förbättrar människors liv.
+              {t('aboutPage.heroSub')}
             </p>
           </motion.div>
         </div>
@@ -56,15 +58,12 @@ export default function AboutContent() {
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             >
-              <span className="section-label block mb-4">Vår historia</span>
+              <span className="section-label block mb-4">{t('aboutPage.historyTitle')}</span>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-6 leading-tight">
-                Från passion till perfektion
+                {t('aboutPage.storyH2')}
               </h2>
 
-              {[
-                'Viking Fuel började som en dröm om att skapa naturliga kosttillskott som verkligen fungerar. Grundaren, med bakgrund inom idrott och näring, insåg att många produkter på marknaden inte levde upp till sina löften.',
-                'Efter år av forskning och utveckling lanserade vi vår första produkt 2025. Sedan dess har vi hjälpt tusentals människor att nå sina mål genom våra vetenskapligt utformade formler.',
-              ].map((paragraph, index) => (
+              {[t('aboutPage.p1'), t('aboutPage.p2')].map((paragraph, index) => (
                 <p key={index} className="text-lg text-muted-foreground leading-relaxed mb-6">
                   {paragraph}
                 </p>
@@ -72,10 +71,10 @@ export default function AboutContent() {
 
               <ul className="space-y-3 mb-10">
                 {[
-                  '100% naturliga ingredienser',
-                  'Vetenskapligt bevisade resultat',
-                  'Tillverkad i EU',
-                  'GMP-certifierad produktion',
+                  t('aboutPage.b0'),
+                  t('aboutPage.b1'),
+                  t('aboutPage.b2'),
+                  t('aboutPage.b3'),
                 ].map((item, index) => (
                   <li key={index} className="flex items-center gap-3">
                     <span className="w-5 h-5 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
@@ -100,21 +99,21 @@ export default function AboutContent() {
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="text-center mb-16"
           >
-            <span className="section-label block mb-4">Våra värderingar</span>
+            <span className="section-label block mb-4">{t('aboutPage.valuesTitle')}</span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-6 leading-tight">
-              Vad som driver oss
+              {t('aboutPage.valuesH2')}
             </h2>
             <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-              Vi tror på kraften i naturen kombinerat med modern vetenskap för att skapa produkter som verkligen gör skillnad.
+              {t('aboutPage.valuesSub')}
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { title: 'Kvalitet först', description: 'Vi kompromissar aldrig med kvaliteten på våra ingredienser eller tillverkningsprocesser.', icon: 'ShieldCheckIcon' },
-              { title: 'Transparens', description: 'Vi är öppna om våra ingredienser, processer och resultat.', icon: 'EyeIcon' },
-              { title: 'Innovation', description: 'Vi investerar kontinuerligt i forskning för att förbättra våra produkter.', icon: 'LightBulbIcon' },
-              { title: 'Hållbarhet', description: 'Vi arbetar för att minimera vår miljöpåverkan genom hela värdekedjan.', icon: 'LeafIcon' },
+              { title: t('aboutPage.v1t'), description: t('aboutPage.v1d'), icon: 'ShieldCheckIcon' },
+              { title: t('aboutPage.v2t'), description: t('aboutPage.v2d'), icon: 'EyeIcon' },
+              { title: t('aboutPage.v3t'), description: t('aboutPage.v3d'), icon: 'LightBulbIcon' },
+              { title: t('aboutPage.v4t'), description: t('aboutPage.v4d'), icon: 'LeafIcon' },
             ].map((value, index) => (
               <motion.div
                 key={value.title}
@@ -145,20 +144,20 @@ export default function AboutContent() {
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="text-center mb-16"
           >
-            <span className="section-label block mb-4">Vårt uppdrag</span>
+            <span className="section-label block mb-4">{t('aboutPage.missionTitle')}</span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-6 leading-tight">
-              Att förbättra människors liv genom naturliga kosttillskott
+              {t('aboutPage.missionH2')}
             </h2>
             <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-12">
-              Vårt uppdrag är enkelt men djupt: att skapa kosttillskott som hjälper människor att leva hälsosammare, mer energiska liv genom kraften i naturen.
+              {t('aboutPage.missionSub')}
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             {[
-              { title: 'Naturliga lösningar', description: 'Vi använder endast naturliga ingredienser som har bevisad effekt.', icon: 'LeafIcon' },
-              { title: 'Vetenskaplig grund', description: 'Alla våra produkter är baserade på vetenskaplig forskning och kliniska studier.', icon: 'BeakerIcon' },
-              { title: 'Personlig service', description: 'Vi erbjuder personlig rådgivning och support för alla våra kunder.', icon: 'UserGroupIcon' },
+              { title: t('aboutPage.m1t'), description: t('aboutPage.m1d'), icon: 'LeafIcon' },
+              { title: t('aboutPage.m2t'), description: t('aboutPage.m2d'), icon: 'BeakerIcon' },
+              { title: t('aboutPage.m3t'), description: t('aboutPage.m3d'), icon: 'UserGroupIcon' },
             ].map((card, index) => (
               <motion.div
                 key={card.title}
@@ -184,9 +183,9 @@ export default function AboutContent() {
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="text-center bg-gradient-to-r from-primary/5 to-accent/5 rounded-3xl p-12"
           >
-            <h3 className="text-2xl font-bold text-foreground mb-4">Varför välja Viking Fuel?</h3>
-            <p className="text-lg text-muted-foreground mb-4">Med över 10 000 nöjda kunder och 4.8/5 i kundnöjdhet vet vi att våra produkter fungerar. Men det är inte bara resultaten som räknas - det är också resan.</p>
-            <p className="text-lg text-muted-foreground">Varje dag hör vi från människor vars liv har förbättrats tack vare våra kosttillskott. Tillsammans bygger vi framtiden för naturliga kosttillskott i Norden.</p>
+            <h3 className="text-2xl font-bold text-foreground mb-4">{t('aboutPage.whyTitle')}</h3>
+            <p className="text-lg text-muted-foreground mb-4">{t('aboutPage.whyP1')}</p>
+            <p className="text-lg text-muted-foreground">{t('aboutPage.whyP2')}</p>
           </motion.div>
         </div>
       </section>

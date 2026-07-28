@@ -3,16 +3,18 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Icon from '@/components/ui/AppIcon';
+import { useLanguage } from '@/context/LanguageContext';
 
 const benefitIcons = ['TruckIcon', 'LockClosedIcon', 'BoltIcon', 'ArrowPathIcon', 'SparklesIcon'];
 
 export default function TrustBenefits() {
+  const { t } = useLanguage();
   const benefits = [
-    { title: 'Snabb leverans', subtitle: '2-4 arbetsdagar' },
-    { title: 'Fri frakt', subtitle: 'Över 700 kr' },
-    { title: '14 dagar ångerrätt', subtitle: 'Full återbetalning' },
-    { title: 'Säker betalning', subtitle: 'SSL-krypterad' },
-    { title: 'Naturliga ingredienser', subtitle: 'Inga tillsatser' },
+    { title: t('home.trust.fastTitle'), subtitle: t('home.trust.fastSub') },
+    { title: t('home.trust.freeTitle'), subtitle: t('home.trust.freeSub') },
+    { title: t('home.trust.returnsTitle'), subtitle: t('home.trust.returnsSub') },
+    { title: t('home.trust.payTitle'), subtitle: t('home.trust.paySub') },
+    { title: t('home.trust.naturalTitle'), subtitle: t('home.trust.naturalSub') },
   ].map((item, index) => ({
     ...item,
     icon: benefitIcons[index] as any,

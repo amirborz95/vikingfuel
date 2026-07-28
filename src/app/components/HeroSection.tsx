@@ -4,16 +4,18 @@ import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Icon from '@/components/ui/AppIcon';
+import { useLanguage } from '@/context/LanguageContext';
 
 const trustItemIcons = ['TruckIcon', 'ShieldCheckIcon', 'ArrowPathIcon', 'SparklesIcon', 'BoltIcon'];
 
 export default function HeroSection() {
+  const { t } = useLanguage();
   const trustItems = [
-    { title: 'Snabb leverans', subtitle: '2-4 arbetsdagar' },
-    { title: 'Fri frakt', subtitle: 'Över 700 kr' },
-    { title: '14 dagar ångerrätt', subtitle: 'Full återbetalning' },
-    { title: 'Säker betalning', subtitle: 'SSL-krypterad' },
-    { title: 'Naturliga ingredienser', subtitle: 'Inga tillsatser' },
+    { title: t('home.trust.fastTitle'), subtitle: t('home.trust.fastSub') },
+    { title: t('home.trust.freeTitle'), subtitle: t('home.trust.freeSub') },
+    { title: t('home.trust.returnsTitle'), subtitle: t('home.trust.returnsSub') },
+    { title: t('home.trust.payTitle'), subtitle: t('home.trust.paySub') },
+    { title: t('home.trust.naturalTitle'), subtitle: t('home.trust.naturalSub') },
   ].map((item, index) => ({
     ...item,
     icon: trustItemIcons[index] as any,
@@ -82,9 +84,7 @@ export default function HeroSection() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.35 }}
               className="text-[11px] font-bold tracking-[0.18em] uppercase text-[#16a34a] mb-3"
-            >
-              Premium
-            </motion.p>
+            >{t('home.hero.premium')}</motion.p>
 
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
@@ -92,7 +92,7 @@ export default function HeroSection() {
               transition={{ duration: 0.7, delay: 0.42, ease: [0.16, 1, 0.3, 1] }}
               className="text-white font-bold text-xl sm:text-2xl lg:text-3xl leading-[1.2] tracking-[-0.01em] mb-3"
             >
-              Naturliga kosttillskott för daglig prestation
+              {t('home.hero.heading')}
             </motion.h2>
 
             <motion.p
@@ -101,7 +101,7 @@ export default function HeroSection() {
               transition={{ duration: 0.7, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
               className="text-[#e2e8f0] text-sm sm:text-base leading-relaxed mb-7"
             >
-              Viking Fuel erbjuder naturliga kosttillskott som hjälper dig att prestera bättre varje dag. Utvecklat för idrottare och aktiva människor.
+              {t('home.hero.desc')}
             </motion.p>
 
             <motion.div
@@ -114,15 +114,13 @@ export default function HeroSection() {
                 href="/products"
                 className="inline-flex items-center gap-2 bg-white hover:bg-[#f1f5f9] text-[#0a0a0a] font-bold text-sm px-6 py-3 rounded-none transition-all duration-200 hover:-translate-y-0.5"
               >
-                Handla nu
+                {t('home.hero.shopNow')}
                 <Icon name="ArrowRightIcon" size={15} />
               </Link>
               <Link
                 href="/about"
                 className="inline-flex items-center gap-2 border border-white/40 hover:border-white/80 text-white font-semibold text-sm px-6 py-3 rounded-none transition-all duration-200 hover:-translate-y-0.5"
-              >
-                Läs mer
-              </Link>
+              >{t('home.hero.readMore')}</Link>
             </motion.div>
           </div>
         </div>

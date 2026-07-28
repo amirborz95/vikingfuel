@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import AnnouncementBar from '../components/AnnouncementBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -11,6 +12,7 @@ import Footer from '@/components/Footer';
 export default function RegisterPage() {
   const router = useRouter();
   const { user, register } = useAuth();
+  const { t } = useLanguage();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,25 +36,25 @@ export default function RegisterPage() {
             <div className="container-wide">
               <div className="max-w-3xl mx-auto">
                 <div className="text-center mb-10">
-                  <h1 className="text-4xl font-extrabold text-foreground mb-4">Registrera dig</h1>
+                  <h1 className="text-4xl font-extrabold text-foreground mb-4">{t('auth.registerTitle')}</h1>
                   <p className="text-lg text-muted-foreground">
-                    Skapa ett konto med din e-postadress och ett lösenord.
+                    {t('auth.registerSub')}
                   </p>
                 </div>
 
                 <div className="bg-muted/30 rounded-3xl p-8 shadow-sm">
                   {user ? (
                     <div className="space-y-6 text-center">
-                      <p className="text-foreground text-lg font-medium">Du är redan inloggad som {user.name}.</p>
+                      <p className="text-foreground text-lg font-medium">{t('auth.alreadyLoggedIn')} {user.name}.</p>
                       <Link href="/account" className="inline-flex items-center justify-center rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors">
-                        Gå till mitt konto
+                        {t('auth.goToAccount')}
                       </Link>
                     </div>
                   ) : (
                     <>
                       <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
                         <div>
-                          <label className="block text-sm font-medium text-foreground mb-2">Namn</label>
+                          <label className="block text-sm font-medium text-foreground mb-2">{t('auth.name')}</label>
                           <input
                             type="text"
                             value={name}
@@ -60,11 +62,11 @@ export default function RegisterPage() {
                             required
                             autoComplete="name"
                             className="w-full rounded-2xl border border-border px-4 py-3 text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                            placeholder="Ditt namn"
+                            placeholder={t('auth.namePh')}
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-foreground mb-2">E-post</label>
+                          <label className="block text-sm font-medium text-foreground mb-2">{t('auth.email')}</label>
                           <input
                             type="email"
                             value={email}
@@ -72,11 +74,11 @@ export default function RegisterPage() {
                             required
                             autoComplete="email"
                             className="w-full rounded-2xl border border-border px-4 py-3 text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                            placeholder="example@exempel.se"
+                            placeholder={t('auth.emailPh')}
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-foreground mb-2">Lösenord</label>
+                          <label className="block text-sm font-medium text-foreground mb-2">{t('auth.password')}</label>
                           <input
                             type="password"
                             value={password}
@@ -84,14 +86,14 @@ export default function RegisterPage() {
                             required
                             autoComplete="new-password"
                             className="w-full rounded-2xl border border-border px-4 py-3 text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                            placeholder="Ditt lösenord"
+                            placeholder={t('auth.passwordPh')}
                           />
                         </div>
                         <button
                           type="submit"
                           className="w-full rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors"
                         >
-                          Registrera dig
+                          {t('auth.registerBtn')}
                         </button>
                       </form>
                       {feedback && (
@@ -106,15 +108,15 @@ export default function RegisterPage() {
                         </div>
                       )}
                       <div className="mt-8 text-center text-sm text-muted-foreground">
-                        Har du redan ett konto?{' '}
+                        {t('auth.haveAccount')}{' '}
                         <Link href="/login" className="font-bold text-foreground hover:text-primary">
-                          Logga in
+                          {t('auth.loginLink')}
                         </Link>
                       </div>
                       <div className="mt-4 text-center text-sm text-muted-foreground">
-                        Eller fortsätt som{' '}
+                        {t('auth.orContinue')}{' '}
                         <Link href="/" className="font-bold text-foreground hover:text-primary">
-                          gäst
+                          {t('auth.guest')}
                         </Link>
                       </div>
                     </>

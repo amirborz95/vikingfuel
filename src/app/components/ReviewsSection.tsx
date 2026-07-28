@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import AppImage from '@/components/ui/AppImage';
 import Icon from '@/components/ui/AppIcon';
+import { useLanguage } from '@/context/LanguageContext';
 
 const reviews = [
   {
@@ -140,6 +141,7 @@ const reviews = [
 ];
 
 export default function ReviewsSection() {
+  const { t } = useLanguage();
   const [visibleReviews, setVisibleReviews] = useState(10);
 
   const showMoreReviews = () => {
@@ -163,9 +165,9 @@ export default function ReviewsSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <span className="section-label block mb-3">Recensioner</span>
+          <span className="section-label block mb-3">{t('reviewsSection.label')}</span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4">
-            Vad våra kunder säger
+            {t('reviewsSection.heading')}
           </h2>
           <div className="flex items-center justify-center gap-2">
             <div className="flex text-yellow-400">
@@ -173,8 +175,8 @@ export default function ReviewsSection() {
                 <Icon key={i} name="StarIcon" size={18} variant="solid" />
               ))}
             </div>
-            <span className="text-sm font-semibold text-foreground">4.9 av 5</span>
-            <span className="text-sm text-muted-foreground">({reviews.length} recensioner)</span>
+            <span className="text-sm font-semibold text-foreground">4.9 {t('reviewsSection.outOf')}</span>
+            <span className="text-sm text-muted-foreground">({reviews.length} {t('reviewsSection.reviews')})</span>
           </div>
         </motion.div>
 
@@ -224,7 +226,7 @@ export default function ReviewsSection() {
               onClick={showMoreReviews}
               className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-full text-base hover:bg-green-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
-              Visa mer recensioner
+              {t('reviewsSection.showMore')}
               <Icon name="ChevronDownIcon" size={18} />
             </button>
           </div>

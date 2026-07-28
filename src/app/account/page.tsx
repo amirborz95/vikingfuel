@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import AnnouncementBar from '../components/AnnouncementBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -13,6 +14,7 @@ type TabType = 'personal' | 'orders' | 'history';
 
 export default function AccountPage() {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = React.useState<TabType>('personal');
   const [refreshTrigger, setRefreshTrigger] = React.useState(0);
 
@@ -28,22 +30,22 @@ export default function AccountPage() {
         <div className="container-wide">
           {!user ? (
             <div className="max-w-3xl mx-auto bg-muted/30 rounded-3xl p-10 text-center">
-              <h1 className="text-4xl font-extrabold text-foreground mb-4">Logga in på ditt konto</h1>
+              <h1 className="text-4xl font-extrabold text-foreground mb-4">{t('account.loginPrompt')}</h1>
               <p className="text-lg text-muted-foreground mb-6">
-                Du måste vara inloggad för att komma åt denna sida.
+                {t('account.mustLogin')}
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <a href="/login" className="rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors inline-block">
-                  Logga in
+                  {t('account.login')}
                 </a>
                 <a href="/register" className="rounded-2xl border border-border px-6 py-3 text-sm font-bold text-foreground hover:bg-muted transition-colors inline-block">
-                  Registrera dig
+                  {t('account.register')}
                 </a>
               </div>
             </div>
           ) : (
             <div className="max-w-6xl mx-auto">
-              <h1 className="text-4xl font-extrabold text-foreground mb-8">Mina inställningar</h1>
+              <h1 className="text-4xl font-extrabold text-foreground mb-8">{t('account.settings')}</h1>
               
               <div className="flex flex-col lg:flex-row gap-8">
                 {/* Sidebar */}
@@ -65,7 +67,7 @@ export default function AccountPage() {
                             : 'text-foreground hover:bg-muted'
                         }`}
                       >
-                        Personliga uppgifter
+                        {t('account.personal')}
                       </button>
                       <button
                         onClick={() => setActiveTab('orders')}

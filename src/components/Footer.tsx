@@ -5,8 +5,10 @@ import Link from 'next/link';
 import AppLogo from './ui/AppLogo';
 import Icon from './ui/AppIcon';
 import PaymentLogos from './ui/PaymentLogos';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Footer() {
+  const { t } = useLanguage();
   type FooterLink = {
     label: string;
     href: string;
@@ -19,33 +21,33 @@ export default function Footer() {
 
   const footerLinks: Record<string, FooterColumn> = {
     shop: {
-      title: 'Butik',
+      title: t('footer.shopTitle'),
       links: [
-        { label: 'Alla produkter', href: '/products' },
-        { label: 'Paket', href: '/products' },
+        { label: t('common.allProducts'), href: '/products' },
+        { label: t('footer.bundles'), href: '/products' },
       ],
     },
     info: {
-      title: 'Information',
+      title: t('footer.infoTitle'),
       links: [
-        { label: 'Om oss', href: '/about' },
-        { label: 'Vanliga frågor', href: '/faq' },
-        { label: 'Recensioner', href: '/reviews' },
+        { label: t('footer.about'), href: '/about' },
+        { label: t('footer.faq'), href: '/faq' },
+        { label: t('footer.reviews'), href: '/reviews' },
       ],
     },
     service: {
-      title: 'Kundservice',
+      title: t('footer.serviceTitle'),
       links: [
-        { label: 'Kontakt', href: '/contact' },
-        { label: 'Frakt & leverans', href: '/frakt-leverans' },
-        { label: 'Returpolicy', href: '/returpolicy' },
+        { label: t('footer.contact'), href: '/contact' },
+        { label: t('footer.shipping'), href: '/frakt-leverans' },
+        { label: t('footer.returns'), href: '/returpolicy' },
       ],
     },
     legal: {
-      title: 'Juridik',
+      title: t('footer.legalTitle'),
       links: [
-        { label: 'Köpvillkor', href: '/kopvillkor' },
-        { label: 'Integritetspolicy', href: '/integritetspolicy' },
+        { label: t('footer.terms'), href: '/kopvillkor' },
+        { label: t('footer.privacy'), href: '/integritetspolicy' },
       ],
     },
   };
@@ -64,7 +66,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-[240px]">
-              Nordiska premiumtillskott för daglig prestation. Tillverkat i EU med naturliga ingredienser.
+              {t('footer.tagline2')}
             </p>
             <p className="text-sm text-muted-foreground mt-3">
               <a href="mailto:info@vikingfuel.se" className="hover:text-primary transition-colors">
@@ -96,7 +98,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-border">
           <p className="text-xs text-muted-foreground">
-            © 2026 SmartVal Sverige AB. Alla rättigheter förbehållna.
+            {t('footer.copyright')}
           </p>
           <div className="flex items-center justify-center sm:justify-end w-full sm:w-auto">
             <PaymentLogos />

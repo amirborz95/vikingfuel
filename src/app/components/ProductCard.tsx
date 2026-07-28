@@ -8,6 +8,7 @@ import { useCart } from '@/context/CartContext';
 import { MAX_STOCK } from '@/lib/inventory';
 import { useInventory } from '@/hooks/useInventory';
 import Icon from '@/components/ui/AppIcon';
+import { useLanguage } from '@/context/LanguageContext';
 
 export interface Product {
   id: string;
@@ -33,7 +34,13 @@ interface ProductCardProps {
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const { addItem } = useCart();
   const inventory = useInventory();
+  const { t } = useLanguage();
   const [added, setAdded] = useState(false);
+
+  const tInfo = t(`products.items.${product.id}.info`);
+  const displayInfo = tInfo.startsWith('products.items') ? product.info : tInfo;
+  const tBadge = t(`products.items.${product.id}.badge`);
+  const displayBadge = tBadge.startsWith('products.items') ? product.badge : tBadge;
 
   const remainingUnits = inventory?.remainingUnits ?? MAX_STOCK;
   const productUnits = product.units ?? 1;
@@ -75,7 +82,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
               product.badgeColor || 'bg-primary text-white'
             }`}
           >
-            {product.badge}
+            {displayBadge}
           </span>
         )}
         {discount > 0 && (
@@ -102,7 +109,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
             {product.name}
           </h3>
         </Link>
-        <p className="text-xs text-muted-foreground mb-3">{product.info}</p>
+        <p className="text-xs text-muted-foreground mb-3">{displayInfo}</p>
 
         {/* Stars */}
         <div className="flex items-center gap-1.5 mb-3">
@@ -111,14 +118,14 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
               <Icon key={i} name="StarIcon" size={13} variant="solid" />
             ))}
           </div>
-          <span className="text-xs text-muted-foreground">({product.reviews} recensioner)</span>
+          <span className="text-xs text-muted-foreground">({product.reviews} {t('products.reviews')})</span>
         </div>
 
         {/* Price */}
         <div className="mb-4">
           <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.24em] font-semibold text-muted-foreground mb-2">
-            <span>{remainingUnits > 0 ? `${remainingUnits} burkar kvar` : 'Slut i lager'}</span>
-            <span>{productUnits} burkar/paket</span>
+            <span>{remainingUnits > 0 ? `${remainingUnits} ${t('products.cansLeft')}` : t('products.outOfStock')}</span>
+            <span>{productUnits} {t('products.cansPerPack')}</span>
           </div>
           <div className="h-2 rounded-full bg-border overflow-hidden">
             <div
@@ -134,7 +141,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
             <span className="text-sm text-muted-foreground line-through">{product.oldPrice} kr</span>
           )}
         </div>
-        <p className="text-xs text-muted-foreground mb-3">6% moms ingår i priset.</p>
+        <p className="text-xs text-muted-foreground mb-3">{t('products.vat')}</p>
 
         {/* Button */}
         <button
@@ -147,7 +154,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
           }`}
         >
           <Icon name="ShoppingCartIcon" size={16} />
-          {added ? 'Tillagd i varukorg' : itemAvailable ? 'Lägg till i varukorg' : 'Slut i lager'}
+          {added ? t('products.added') : itemAvailable ? t('products.addToCart') : t('products.outOfStock')}
         </button>
       </div>
     </motion.div>

@@ -5,6 +5,7 @@ declare module '../styles/tailwind.css';
 import '../styles/tailwind.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
+import { LanguageProvider } from '@/context/LanguageContext';
 import AnalyticsTracker from '@/components/AnalyticsTracker';
 import NewsletterPopup from '@/app/components/NewsletterPopup';
 
@@ -43,13 +44,15 @@ export default function RootLayout({
   return (
     <html lang="sv" className={plusJakartaSans.variable}>
       <body className={plusJakartaSans.className}>
-        <AuthProvider>
-          <CartProvider>
-            <AnalyticsTracker />
-            {children}
-            <NewsletterPopup />
-          </CartProvider>
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <CartProvider>
+              <AnalyticsTracker />
+              {children}
+              <NewsletterPopup />
+            </CartProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

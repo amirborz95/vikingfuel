@@ -3,51 +3,27 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Icon from '@/components/ui/AppIcon';
+import { useLanguage } from '@/context/LanguageContext';
 
-const ingredients = [
-  {
-    name: 'Maca',
-    desc: 'Andinska superrot för uthållighet och energi',
-    icon: 'SunIcon',
-  },
-  {
-    name: 'Ashwagandha',
-    desc: 'Adaptogen som reducerar stress och ökar styrka',
-    icon: 'SparklesIcon',
-  },
-  {
-    name: 'Tribulus',
-    desc: 'Stödjer testosteronnivåer och vitalitet',
-    icon: 'BoltIcon',
-  },
-  {
-    name: 'Panax Ginseng',
-    desc: 'Klassisk ört för mental klarhet och fokus',
-    icon: 'BeakerIcon',
-  },
-  {
-    name: 'Ingefära',
-    desc: 'Anti-inflammatorisk och stödjer matsmältning',
-    icon: 'FireIcon',
-  },
-  {
-    name: 'Zink',
-    desc: 'Essentiellt mineral för immunförsvar och hormoner',
-    icon: 'ShieldCheckIcon',
-  },
-  {
-    name: 'Selen',
-    desc: 'Antioxidant som skyddar celler mot oxidativ stress',
-    icon: 'StarIcon',
-  },
-  {
-    name: 'Piperin',
-    desc: 'Svartpepparextrakt som ökar biotillgängligheten',
-    icon: 'ArrowUpIcon',
-  },
+const ingredientMeta: { key: string; icon: string }[] = [
+  { key: 'maca', icon: 'SunIcon' },
+  { key: 'ashwagandha', icon: 'SparklesIcon' },
+  { key: 'tribulus', icon: 'BoltIcon' },
+  { key: 'ginseng', icon: 'BeakerIcon' },
+  { key: 'ginger', icon: 'FireIcon' },
+  { key: 'zinc', icon: 'ShieldCheckIcon' },
+  { key: 'selenium', icon: 'StarIcon' },
+  { key: 'piperine', icon: 'ArrowUpIcon' },
 ];
 
 export default function IngredientsSection() {
+  const { t } = useLanguage();
+  const ingredients = ingredientMeta.map((m) => ({
+    key: m.key,
+    icon: m.icon,
+    name: t(`ingredients.items.${m.key}.name`),
+    desc: t(`ingredients.items.${m.key}.desc`),
+  }));
   return (
     <section id="ingredients" className="py-20 bg-muted/30">
       <div className="container-wide">
@@ -58,12 +34,12 @@ export default function IngredientsSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <span className="section-label block mb-3">Ingredienser</span>
+          <span className="section-label block mb-3">{t('ingredients.label')}</span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4 text-balance">
-            Naturliga ingredienser med premiumkänsla
+            {t('ingredients.heading')}
           </h2>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Varje ingrediens är noggrant utvald för maximal effekt och transparens.
+            {t('ingredients.sub')}
           </p>
         </motion.div>
 
@@ -71,7 +47,7 @@ export default function IngredientsSection() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {ingredients.map((ing, i) => (
             <motion.div
-              key={ing.name}
+              key={ing.key}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-40px' }}

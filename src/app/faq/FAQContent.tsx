@@ -1,30 +1,22 @@
 'use client';
 
 import React from 'react';
-
-const faqs = [
-  {
-    question: 'Hur snabbt levereras min beställning?',
-    answer: 'Vi skickar din order inom 1–2 arbetsdagar. Leveranstiden i Sverige är normalt 2–4 dagar efter leveransbekräftelse.',
-  },
-  {
-    question: 'Finns era produkter i Sverige?',
-    answer: 'Ja, alla våra produkter finns lagerförda i Sverige och skickas från svensk lagercentral.',
-  },
-  {
-    question: 'Kan jag ångra mitt köp?',
-    answer: 'Du har 14 dagars ångerrätt enligt distansköplagen. Kontakta vår kundservice för returinstruktioner.',
-  },
-];
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function FAQContent() {
+  const { t } = useLanguage();
+  const faqs = [
+    { question: t('faqPage.q1'), answer: t('faqPage.a1') },
+    { question: t('faqPage.q2'), answer: t('faqPage.a2') },
+    { question: t('faqPage.q3'), answer: t('faqPage.a3') },
+  ];
 
   return (
     <main className="py-20">
       <div className="container-wide">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-extrabold text-foreground mb-4">Vanliga frågor</h1>
-          <p className="text-lg text-muted-foreground">Här hittar du svar på de vanligaste frågorna om beställning, leverans och produkter.</p>
+          <h1 className="text-4xl font-extrabold text-foreground mb-4">{t('faqPage.title')}</h1>
+          <p className="text-lg text-muted-foreground">{t('faqPage.sub')}</p>
         </div>
         <div className="max-w-3xl mx-auto space-y-6">
           {faqs.map((faq, index) => (

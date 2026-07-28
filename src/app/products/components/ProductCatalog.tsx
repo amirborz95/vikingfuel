@@ -6,26 +6,25 @@ import Link from 'next/link';
 import Icon from '@/components/ui/AppIcon';
 import ProductCard from '@/app/components/ProductCard';
 import { allProducts } from '@/app/components/ProductsSection';
-
-const categories = [
-  { value: 'all', label: 'Alla produkter' },
-  { value: 'testo-support', label: 'Testo-support' },
-];
-
-const priceRanges = [
-  { label: 'Alla priser', range: [0, 2200] },
-  { label: 'Under 700 kr', range: [0, 700] },
-  { label: '700–1000 kr', range: [700, 1000] },
-  { label: 'Över 1000 kr', range: [1000, 2200] },
-];
-
-const sortOptions = [
-  { value: 'popular', label: 'Rekommenderade' },
-  { value: 'price-asc', label: 'Pris stigande' },
-  { value: 'price-desc', label: 'Pris fallande' },
-];
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function ProductCatalog() {
+  const { t } = useLanguage();
+  const categories = [
+    { value: 'all', label: t('catalog.allProducts'), disabled: false, comingSoon: '' },
+    { value: 'testo-support', label: t('catalog.testoSupport'), disabled: false, comingSoon: '' },
+  ];
+  const priceRanges = [
+    { label: t('catalog.allPrices'), range: [0, 2200] as [number, number] },
+    { label: t('catalog.under700'), range: [0, 700] as [number, number] },
+    { label: t('catalog.p700_1000'), range: [700, 1000] as [number, number] },
+    { label: t('catalog.over1000'), range: [1000, 2200] as [number, number] },
+  ];
+  const sortOptions = [
+    { value: 'popular', label: t('catalog.recommended') },
+    { value: 'price-asc', label: t('catalog.priceAsc') },
+    { value: 'price-desc', label: t('catalog.priceDesc') },
+  ];
   const [activeCategory, setActiveCategory] = useState(categories[0]?.value || '');
   const [sortBy, setSortBy] = useState('popular');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2200]);
@@ -50,16 +49,16 @@ export default function ProductCatalog() {
         <div className="container-wide">
           <nav className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
             <Link href="/" className="hover:text-primary transition-colors">
-              Hem
+              {t('catalog.home')}
             </Link>
             <Icon name="ChevronRightIcon" size={12} />
-            <span className="text-foreground font-medium">Produkter</span>
+            <span className="text-foreground font-medium">{t('catalog.title')}</span>
           </nav>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-2">
-            Produkter
+            {t('catalog.title')}
           </h1>
           <p className="text-muted-foreground">
-            Visar {filtered.length} produkter i vårt sortiment.
+            {t('catalog.showing1')} {filtered.length} {t('catalog.showing2')}
           </p>
         </div>
       </div>
@@ -69,7 +68,7 @@ export default function ProductCatalog() {
           {/* Sidebar */}
           <aside className="lg:w-64 flex-shrink-0">
             <div className="bg-white rounded-2xl border border-border p-6 sticky top-24">
-              <h3 className="font-bold text-foreground mb-4">Filtrera</h3>
+              <h3 className="font-bold text-foreground mb-4">{t('catalog.filter')}</h3>
               <div className="space-y-1 mb-8">
                 {categories.map((cat) => (
                   cat.disabled ? (
@@ -96,7 +95,7 @@ export default function ProductCatalog() {
                 ))}
               </div>
 
-              <h3 className="font-bold text-foreground mb-4">Prisintervall</h3>
+              <h3 className="font-bold text-foreground mb-4">{t('catalog.priceRange')}</h3>
               <div className="space-y-3">
                 {priceRanges.map((opt) => (
                   <button
@@ -135,7 +134,7 @@ export default function ProductCatalog() {
                 ))}
               </div>
               <div className="flex items-center gap-2 ml-auto">
-                <label className="text-xs text-muted-foreground hidden sm:block">Sortera efter</label>
+                <label className="text-xs text-muted-foreground hidden sm:block">{t('catalog.sortBy')}</label>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
@@ -153,7 +152,7 @@ export default function ProductCatalog() {
             {filtered.length === 0 ? (
               <div className="text-center py-20 text-muted-foreground">
                 <Icon name="ArchiveBoxXMarkIcon" size={40} className="mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Inga produkter hittades för de valda filtret.</p>
+                <p className="text-sm">{t('catalog.noResults')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">

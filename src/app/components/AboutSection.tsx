@@ -5,15 +5,16 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import AppImage from '@/components/ui/AppImage';
 import Icon from '@/components/ui/AppIcon';
-
-const stats = [
-  { label: 'Nöjda kunder', value: '20K+' },
-  { label: 'Naturliga ingredienser', value: '100%' },
-  { label: 'EU-tillverkning', value: 'GMP' },
-  { label: 'Snabb leverans', value: 'Inom 2–4 dagar' },
-];
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function AboutSection() {
+  const { t } = useLanguage();
+  const stats = [
+    { label: t('about.stats.customers'), value: '20K+' },
+    { label: t('about.stats.natural'), value: '100%' },
+    { label: t('about.stats.euMfg'), value: 'GMP' },
+    { label: t('about.stats.fastDelivery'), value: t('about.stats.fastValue') },
+  ];
   return (
     <section id="about" className="py-20 bg-white">
       <div className="container-wide">
@@ -52,23 +53,23 @@ export default function AboutSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="section-label block mb-4">Om Viking Fuel</span>
+            <span className="section-label block mb-4">{t('about.label')}</span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-6 leading-tight text-balance">
-              Byggt för daglig prestanda
+              {t('about.heading')}
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-              Viking Fuel är ett nordiskt premiumtillskottsmärke. Vi kombinerar stark identitet, tydliga ingredienser och modern design för människor som vill ha mer energi, uthållighet och vitalitet i vardagen.
+              {t('about.p1')}
             </p>
             <p className="text-base text-muted-foreground leading-relaxed mb-8">
-              Varje kapsel innehåller noggrant utvalda naturliga ingredienser i rätt dos — utan onödiga tillsatser. Tillverkad i EU enligt GMP-standard.
+              {t('about.p2')}
             </p>
 
             <ul className="space-y-3 mb-10">
               {[
-                'Naturliga ingredienser',
-                'Tillverkad i EU',
-                'Fri från onödiga tillsatser',
-                'Stödjer daglig återhämtning',
+                t('about.checks.c1'),
+                t('about.checks.c2'),
+                t('about.checks.c3'),
+                t('about.checks.c4'),
               ].map((item) => (
                 <li key={item} className="flex items-center gap-3">
                   <span className="w-5 h-5 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
@@ -80,7 +81,7 @@ export default function AboutSection() {
             </ul>
 
             <Link href="/#about" className="btn-primary">
-              Läs mer
+              {t('about.readMore')}
               <Icon name="ArrowRightIcon" size={16} />
             </Link>
           </motion.div>

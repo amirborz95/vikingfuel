@@ -7,10 +7,12 @@ import React from 'react';
 import Link from 'next/link';
 import Icon from './ui/AppIcon';
 import AppImage from './ui/AppImage';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQuantity, totalPrice, clearCart } = useCart();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   return (
     <AnimatePresence>
@@ -35,7 +37,7 @@ export default function CartDrawer() {
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-border">
-              <h2 className="text-lg font-bold text-foreground">Din varukorg</h2>
+              <h2 className="text-lg font-bold text-foreground">{t('cart.title')}</h2>
               <button
                 onClick={closeCart}
                 className="p-2 rounded-lg hover:bg-muted transition-colors"
@@ -49,9 +51,9 @@ export default function CartDrawer() {
               {items?.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full gap-4 text-muted-foreground">
                   <Icon name="ShoppingCartIcon" size={48} className="opacity-20" />
-                  <p className="text-sm">Din varukorg är tom</p>
+                  <p className="text-sm">{t('cart.empty')}</p>
                   <button onClick={closeCart} className="btn-primary text-sm">
-                    Handla nu
+                    {t('cart.shopNow')}
                   </button>
                 </div>
               ) : (
@@ -112,14 +114,14 @@ export default function CartDrawer() {
             {items?.length > 0 && (
               <div className="px-6 py-5 border-t border-border space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Totalt</span>
+                  <span className="text-sm text-muted-foreground">{t('cart.total')}</span>
                   <span className="text-xl font-bold text-foreground">{totalPrice} kr</span>
                 </div>
                 <p className="text-xs text-muted-foreground bg-accent rounded-lg px-3 py-2">
-                  Uthämtning är gratis. PostNord är gratis vid 700 kr eller mer, annars kostar frakten 49 kr.
+                  {t('cart.shippingNote')}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  6% moms ingår i totalsumman.
+                  {t('cart.vatNote')}
                 </p>
                 <div className="grid gap-3">
                   <button
@@ -130,14 +132,14 @@ export default function CartDrawer() {
                     }}
                     className="w-full rounded-2xl border border-border px-4 py-3 text-sm font-bold text-foreground bg-white hover:bg-muted transition-colors"
                   >
-                    Töm varukorg
+                    {t('cart.clear')}
                   </button>
                   <Link
                     href="/checkout"
                     onClick={closeCart}
                     className="btn-primary w-full justify-center text-base py-4"
                   >
-                    Gå till kassa
+                    {t('cart.checkout')}
                     <Icon name="ArrowRightIcon" size={18} />
                   </Link>
                 </div>

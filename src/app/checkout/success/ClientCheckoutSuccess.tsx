@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import Icon from '@/components/ui/AppIcon';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface Props {
   sessionId?: string | null;
@@ -11,6 +12,7 @@ interface Props {
 
 export default function ClientCheckoutSuccess({ sessionId }: Props) {
   const { clearCart } = useCart();
+  const { t } = useLanguage();
   const [confirmationStatus, setConfirmationStatus] = useState<string>('');
   const [confirmationError, setConfirmationError] = useState<string>('');
 
@@ -33,13 +35,13 @@ export default function ClientCheckoutSuccess({ sessionId }: Props) {
         const result = await response.json();
 
         if (!response.ok) {
-          setConfirmationError(result.error || 'Kunde inte skicka orderbekräftelse.');
+          setConfirmationError(result.error || t('checkoutResult.confErr'));
           return;
         }
 
-        setConfirmationStatus(result.message || 'Orderbekräftelse har skickats till din e-post.');
+        setConfirmationStatus(result.message || t('checkoutResult.confOk'));
       } catch (error: any) {
-        setConfirmationError(error?.message || 'Något gick fel vid försök att skicka orderbekräftelse.');
+        setConfirmationError(error?.message || t('checkoutResult.confErrGeneric'));
       }
     }
 
@@ -56,19 +58,19 @@ export default function ClientCheckoutSuccess({ sessionId }: Props) {
             </div>
           </div>
 
-          <h1 className="text-3xl font-bold text-foreground mb-2">Beställning genomförd!</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t('checkoutResult.orderDone')}</h1>
           <p className="text-muted-foreground mb-6">
-            Tack för ditt köp. Stripe skickar automatiskt orderbekräftelse och kvitto till din e-post.
+            {t('checkoutResult.thankYou')}
           </p>
 
           <div className="bg-muted rounded-lg p-4 mb-4 text-sm text-muted-foreground">
-            <p>Kontrollera din inkorg för e-post från Stripe eller Vikingfuel.</p>
+            <p>{t('checkoutResult.checkInbox')}</p>
             {confirmationStatus && <p className="mt-2 text-sm text-emerald-700">{confirmationStatus}</p>}
             {confirmationError && <p className="mt-2 text-sm text-rose-600">{confirmationError}</p>}
           </div>
 
           <Link href="/" className="btn-primary inline-flex gap-2">
-            Tillbaka till startsida
+            {t('checkoutResult.backHome')}
             <Icon name="ArrowRightIcon" size={16} />
           </Link>
         </div>

@@ -6,18 +6,21 @@ import AppLogo from '@/components/ui/AppLogo';
 import Icon from '@/components/ui/AppIcon';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageToggle from '@/components/LanguageToggle';
 import { useRouter } from 'next/navigation';
 import CartDrawer from '@/components/CartDrawer';
-
-const megaCategories = [
-  { label: 'Testo-support', href: '/products', disabled: false },
-  { label: 'Tillbehör', href: '#', disabled: true },
-];
 
 export default function Header() {
   const { totalItems, openCart } = useCart();
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
+
+  const megaCategories = [
+    { label: t('nav.testoSupport'), href: '/products', disabled: false },
+    { label: t('nav.accessories'), href: '#', disabled: true },
+  ];
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
@@ -41,10 +44,10 @@ export default function Header() {
   }, [mobileOpen]);
 
   const navItems = [
-    { label: 'Hem', href: '/' },
-    { label: 'Produkter', href: '/products', hasMega: true },
-    { label: 'Vanliga frågor', href: '/faq' },
-    { label: 'Kontakt', href: '/contact' },
+    { label: t('nav.home'), href: '/' },
+    { label: t('nav.products'), href: '/products', hasMega: true },
+    { label: t('nav.faq'), href: '/faq' },
+    { label: t('nav.contact'), href: '/contact' },
   ];
 
   return (
@@ -99,7 +102,7 @@ export default function Header() {
                               <span className="text-sm font-medium text-muted-foreground">
                                 {cat?.label}
                               </span>
-                              <span className="text-xs text-muted-foreground block">Kommer snart</span>
+                              <span className="text-xs text-muted-foreground block">{t('nav.comingSoon')}</span>
                             </div>
                           </div>
                         ) : cat.href && cat.href !== '#' ? (
@@ -134,6 +137,7 @@ export default function Header() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-1">
+              <LanguageToggle className="mr-1 hidden sm:inline-flex" />
               <button
                 onClick={openCart}
                 className="relative p-2 rounded-lg hover:bg-muted transition-colors text-foreground/70 hover:text-foreground"
@@ -149,9 +153,9 @@ export default function Header() {
               {/* User area */}
               {!user ? (
                 <div className="hidden lg:flex items-center gap-2">
-                  <Link href="/" className="px-3 py-2 text-sm rounded-lg hover:bg-muted">Gäst</Link>
-                  <Link href="/login" className="px-3 py-2 text-sm rounded-lg hover:bg-muted">Logga in</Link>
-                  <Link href="/register" className="px-3 py-2 text-sm rounded-lg bg-primary text-primary-foreground">Registrera</Link>
+                  <Link href="/" className="px-3 py-2 text-sm rounded-lg hover:bg-muted">{t('nav.guest')}</Link>
+                  <Link href="/login" className="px-3 py-2 text-sm rounded-lg hover:bg-muted">{t('nav.login')}</Link>
+                  <Link href="/register" className="px-3 py-2 text-sm rounded-lg bg-primary text-primary-foreground">{t('nav.register')}</Link>
                 </div>
               ) : (
                 <div className="relative hidden lg:flex">
@@ -168,7 +172,7 @@ export default function Header() {
                   {userMenuOpen && (
                     <div className="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg border border-border p-2">
                       <Link href="/account" className="block px-3 py-2 text-sm hover:bg-muted rounded">
-                        Mitt konto
+                        {t('nav.myAccount')}
                       </Link>
                       <button
                         onClick={() => {
@@ -178,7 +182,7 @@ export default function Header() {
                         }}
                         className="w-full text-left px-3 py-2 text-sm hover:bg-muted rounded"
                       >
-                        Logga ut
+                        {t('nav.logout')}
                       </button>
                     </div>
                   )}
@@ -211,10 +215,13 @@ export default function Header() {
               <button
                 onClick={() => setMobileOpen(false)}
                 className="p-2 rounded-lg hover:bg-muted"
-                aria-label="Stäng meny"
+                aria-label={t('nav.closeMenu')}
               >
                 <Icon name="XMarkIcon" size={22} />
               </button>
+            </div>
+            <div className="mb-4">
+              <LanguageToggle />
             </div>
             <nav className="flex flex-col gap-1">
               {navItems?.map((item) => (
@@ -230,29 +237,19 @@ export default function Header() {
             </nav>
             <div className="mt-6">
               <p className="text-sm text-muted-foreground">
-                Hitta våra produkter, läs mer om oss och kontakta oss direkt.
+                {t('nav.mobileBlurb')}
               </p>
               <div className="mt-4 flex gap-3">
                 {!user ? (
                   <>
-                    <Link href="/" onClick={() => setMobileOpen(false)} className="w-full inline-flex justify-center rounded-2xl border border-border px-4 py-3 text-sm font-bold text-foreground bg-white hover:bg-muted transition-colors">
-                      Gäst
-                    </Link>
-                    <Link href="/login" onClick={() => setMobileOpen(false)} className="w-full inline-flex justify-center rounded-2xl border border-border px-4 py-3 text-sm font-bold text-foreground bg-white hover:bg-muted transition-colors">
-                      Logga in
-                    </Link>
-                    <Link href="/register" onClick={() => setMobileOpen(false)} className="w-full inline-flex justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors">
-                      Registrera
-                    </Link>
+                    <Link href="/" onClick={() => setMobileOpen(false)} className="w-full inline-flex justify-center rounded-2xl border border-border px-4 py-3 text-sm font-bold text-foreground bg-white hover:bg-muted transition-colors">{t('nav.guest')}</Link>
+                    <Link href="/login" onClick={() => setMobileOpen(false)} className="w-full inline-flex justify-center rounded-2xl border border-border px-4 py-3 text-sm font-bold text-foreground bg-white hover:bg-muted transition-colors">{t('nav.login')}</Link>
+                    <Link href="/register" onClick={() => setMobileOpen(false)} className="w-full inline-flex justify-center rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors">{t('nav.register')}</Link>
                   </>
                 ) : (
                   <>
-                    <Link href="/account" onClick={() => setMobileOpen(false)} className="w-full inline-flex justify-center rounded-2xl border border-border px-4 py-3 text-sm font-bold text-foreground bg-white hover:bg-muted transition-colors">
-                      Mitt konto
-                    </Link>
-                    <button onClick={() => { logout(); setMobileOpen(false); router.push('/'); }} className="w-full inline-flex justify-center rounded-2xl bg-rose-500 px-4 py-3 text-sm font-bold text-white hover:bg-rose-600">
-                      Logga ut
-                    </button>
+                    <Link href="/account" onClick={() => setMobileOpen(false)} className="w-full inline-flex justify-center rounded-2xl border border-border px-4 py-3 text-sm font-bold text-foreground bg-white hover:bg-muted transition-colors">{t('nav.myAccount')}</Link>
+                    <button onClick={() => { logout(); setMobileOpen(false); router.push('/'); }} className="w-full inline-flex justify-center rounded-2xl bg-rose-500 px-4 py-3 text-sm font-bold text-white hover:bg-rose-600">{t('nav.logout')}</button>
                   </>
                 )}
               </div>

@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function ContactContent() {
+  const { t } = useLanguage();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -26,7 +28,7 @@ export default function ContactContent() {
         setIsLoading(false);
         const data = await res.json();
         if (!res.ok || data.error) {
-          throw new Error(data.error || 'Ett fel uppstod när meddelandet skulle skickas.');
+          throw new Error(data.error || t('contact.errSend'));
         }
         setIsSubmitted(true);
         setName('');
@@ -34,7 +36,7 @@ export default function ContactContent() {
         setMessage('');
       })
       .catch((err) => {
-        setError(err.message || 'Ett fel uppstod. Försök igen senare.');
+        setError(err.message || t('contact.errGeneric'));
       });
   };
 
@@ -42,16 +44,14 @@ export default function ContactContent() {
     <main className="py-20">
       <div className="container-wide">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-extrabold text-foreground mb-4">Kontakt</h1>
-          <p className="text-lg text-muted-foreground">Fyll i ditt namn, e-post och meddelande så skickas det direkt till info@vikingfuel.se.</p>
+          <h1 className="text-4xl font-extrabold text-foreground mb-4">{t('contact.title')}</h1>
+          <p className="text-lg text-muted-foreground">{t('contact.sub')}</p>
         </div>
         <div className="max-w-2xl mx-auto">
           <div className="bg-muted/30 rounded-2xl p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-semibold text-foreground mb-2" htmlFor="name">
-                  Namn
-                </label>
+                <label className="block text-sm font-semibold text-foreground mb-2" htmlFor="name">{t('contact.name')}</label>
                 <input
                   id="name"
                   name="Namn"
@@ -60,13 +60,11 @@ export default function ContactContent() {
                   onChange={(event) => setName(event.target.value)}
                   required
                   className="w-full rounded-2xl border border-border bg-white px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-                  placeholder="Ditt namn"
+                  placeholder={t('contact.namePh')}
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-foreground mb-2" htmlFor="email">
-                  E-post
-                </label>
+                <label className="block text-sm font-semibold text-foreground mb-2" htmlFor="email">{t('contact.email')}</label>
                 <input
                   id="email"
                   name="E-post"
@@ -75,13 +73,11 @@ export default function ContactContent() {
                   onChange={(event) => setEmail(event.target.value)}
                   required
                   className="w-full rounded-2xl border border-border bg-white px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-                  placeholder="info@exempel.se"
+                  placeholder={t('contact.emailPh')}
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-foreground mb-2" htmlFor="message">
-                  Beskrivning
-                </label>
+                <label className="block text-sm font-semibold text-foreground mb-2" htmlFor="message">{t('contact.message')}</label>
                 <textarea
                   id="message"
                   name="Meddelande"
@@ -90,12 +86,12 @@ export default function ContactContent() {
                   onChange={(event) => setMessage(event.target.value)}
                   required
                   className="w-full rounded-2xl border border-border bg-white px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-                  placeholder="Skriv ditt meddelande här"
+                  placeholder={t('contact.messagePh')}
                 />
               </div>
               {isSubmitted && (
                 <p className="rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
-                  Tack för ditt meddelande, vi återkommer så snart som möjligt.
+                  {t('contact.success')}
                 </p>
               )}
               {error && (
@@ -109,7 +105,7 @@ export default function ContactContent() {
                   className="inline-flex items-center justify-center rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-green-700"
                   disabled={isLoading}
                 >
-                  {isLoading ? 'Skickar...' : 'Skicka'}
+                  {isLoading ? t('contact.sending') : t('contact.send')}
                 </button>
               </div>
             </form>
