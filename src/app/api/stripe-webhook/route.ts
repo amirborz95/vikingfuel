@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { saveOrderForSession } from '@/lib/orders';
-import { sendOrderConfirmationEmailForSessionId } from '@/lib/orderConfirmation';
+import { saveOrderForSession, finalizeOrderFromPaymentIntent } from '@/lib/orders';
+import {
+  sendOrderConfirmationEmailForSessionId,
+  sendOrderConfirmationEmailForStoredOrder,
+} from '@/lib/orderConfirmation';
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
@@ -52,6 +55,26 @@ export async function POST(req: NextRequest) {
       await sendOrderConfirmationEmailForSessionId(sessionEvent.id);
     } catch (e) {
       console.error('Failed to send order confirmation email:', e);
+    }
+  }
+
+  // On-site (embedded) checkout: order is finalized when the PaymentIntent succeeds.
+  if (event.type === 'payment_intent.succeeded') {
+    const pi = event.data.object as Stripe.PaymentIntent;
+    try {
+      const result = await finalizeOrderFromPaymentIntent(pi.id);
+      console.log(
+        `PI order ${result.created ? 'created' : 'already existed'} for ${pi.id} (${result.email})`
+      );
+      if (result.created && result.order && result.email) {
+        try {
+          await sendOrderConfirmationEmailForStoredOrder(result.order, result.email);
+        } catch (e) {
+          console.error('Failed to send PI order confirmation email:', e);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to finalize order from payment intent:', e);
     }
   }
 

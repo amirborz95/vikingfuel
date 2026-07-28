@@ -8,9 +8,10 @@ import { useLanguage } from '@/context/LanguageContext';
 
 interface Props {
   sessionId?: string | null;
+  paymentIntentId?: string | null;
 }
 
-export default function ClientCheckoutSuccess({ sessionId }: Props) {
+export default function ClientCheckoutSuccess({ sessionId, paymentIntentId }: Props) {
   const { clearCart } = useCart();
   const { t } = useLanguage();
   const [confirmationStatus, setConfirmationStatus] = useState<string>('');
@@ -22,14 +23,14 @@ export default function ClientCheckoutSuccess({ sessionId }: Props) {
   }, [clearCart]);
 
   useEffect(() => {
-    if (!sessionId) return;
+    if (!sessionId && !paymentIntentId) return;
 
     async function sendConfirmation() {
       try {
         const response = await fetch('/api/order-confirmation', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId }),
+          body: JSON.stringify(paymentIntentId ? { paymentIntentId } : { sessionId }),
         });
 
         const result = await response.json();
@@ -46,7 +47,7 @@ export default function ClientCheckoutSuccess({ sessionId }: Props) {
     }
 
     sendConfirmation();
-  }, [sessionId]);
+  }, [sessionId, paymentIntentId]);
 
   return (
     <div className="min-h-screen bg-white pt-24 pb-12">

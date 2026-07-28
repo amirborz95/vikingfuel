@@ -1,65 +1,104 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { MAX_STOCK } from '@/lib/inventory';
+import { getShippingCost } from '@/lib/shipping';
+import { COUNTRIES } from '@/lib/countries';
 import AppImage from '@/components/ui/AppImage';
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+
+function kr(n: number) {
+  return `${n.toLocaleString('sv-SE')} kr`;
+}
+
+function PaymentSection({ total, en, onBack }: { total: number; en: boolean; onBack: () => void }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handlePay = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+    setLoading(true);
+    setError('');
+    const { error } = await stripe.confirmPayment({
+      elements,
+      confirmParams: { return_url: `${window.location.origin}/checkout/success` },
+    });
+    if (error) {
+      setError(error.message || (en ? 'Payment failed.' : 'Betalningen misslyckades.'));
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handlePay} className="space-y-5">
+      <PaymentElement />
+      {error && <p className="text-sm text-rose-600">{error}</p>}
+      <button
+        type="submit"
+        disabled={loading || !stripe}
+        className="w-full bg-foreground px-5 py-4 text-base font-bold text-white hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl"
+      >
+        {loading ? (en ? 'Processing...' : 'Bearbetar...') : `${en ? 'Pay' : 'Betala'} ${kr(total)}`}
+      </button>
+      <button type="button" onClick={onBack} className="w-full text-center text-sm text-muted-foreground hover:text-foreground">
+        {en ? '← Back to details' : '← Tillbaka till uppgifter'}
+      </button>
+      <p className="text-center text-xs text-muted-foreground">
+        {en ? 'Secure payment powered by Stripe.' : 'Säker betalning via Stripe.'}
+      </p>
+    </form>
+  );
+}
 
 export default function CheckoutPage() {
   const { user } = useAuth();
-  const { t } = useLanguage();
-  const { items, totalPrice, totalUnits, removeItem, updateQuantity, clearCart } = useCart();
-  const [loading, setLoading] = useState(false);
+  const { items, totalPrice, totalUnits } = useCart();
+  const { lang } = useLanguage();
+  const en = lang === 'en';
+
   const [hasMounted, setHasMounted] = useState(false);
-  const [inventoryState, setInventoryState] = useState<{ remainingUnits: number; maxStock: number } | null>(null);
-  const [shippingOption, setShippingOption] = useState<'pickup' | 'postnord'>('pickup');
-  const [postcode, setPostcode] = useState('');
-  const [isPostcodeValid, setIsPostcodeValid] = useState(false);
-  const [postcodeChecking, setPostcodeChecking] = useState(false);
-  const [postcodeError, setPostcodeError] = useState('');
-  const [formData, setFormData] = useState({
-    email: '',
-  });
+  const [country, setCountry] = useState('SE');
+  const [method, setMethod] = useState<'pickup' | 'postnord'>('pickup');
+  const [form, setForm] = useState({ email: '', name: '', phone: '', line1: '', line2: '', postcode: '', city: '' });
+  const [clientSecret, setClientSecret] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
+  useEffect(() => setHasMounted(true), []);
   useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (user?.email) {
-      setFormData((prev) => ({ ...prev, email: user.email }));
-    }
+    if (user?.email) setForm((p) => ({ ...p, email: user.email, name: p.name || user.name || '' }));
   }, [user]);
 
+  // Pickup only exists for Sweden; force PostNord for other countries.
   useEffect(() => {
-    fetch('/api/inventory')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.remainingUnits != null && data?.maxStock != null) {
-          setInventoryState({ remainingUnits: data.remainingUnits, maxStock: data.maxStock });
-        }
-      })
-      .catch(() => {
-        setInventoryState(null);
-      });
-  }, []);
+    if (country !== 'SE' && method === 'pickup') setMethod('postnord');
+  }, [country, method]);
 
-  if (!hasMounted) {
-    return null;
-  }
+  const subtotal = totalPrice;
+  const shippingCost = useMemo(() => getShippingCost(method, country, subtotal), [method, country, subtotal]);
+  const total = subtotal + shippingCost;
+  const vat = Math.round((total - total / 1.06) * 100) / 100;
+
+  if (!hasMounted) return null;
 
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-white pt-24">
         <div className="container-wide">
           <div className="text-center py-12">
-            <h1 className="text-3xl font-bold text-foreground mb-4">{t('checkout.emptyTitle')}</h1>
-            <p className="text-muted-foreground mb-8">{t('checkout.emptySub')}</p>
+            <h1 className="text-3xl font-bold text-foreground mb-4">{en ? 'Your cart is empty' : 'Din varukorg är tom'}</h1>
+            <p className="text-muted-foreground mb-8">{en ? 'Add some products to continue to checkout.' : 'Lägg till några produkter för att fortsätta till kassan.'}</p>
             <Link href="/products" className="inline-flex border border-foreground px-6 py-3 text-sm font-bold text-foreground hover:bg-slate-100 transition-colors">
-              {t('checkout.shopNow')}
+              {en ? 'Shop now' : 'Handla nu'}
             </Link>
           </div>
         </div>
@@ -67,341 +106,176 @@ export default function CheckoutPage() {
     );
   }
 
-  const shippingCost = shippingOption === 'pickup' ? 0 : totalPrice >= 700 ? 0 : 49;
-  const totalWithShipping = totalPrice + shippingCost;
-  const totalWithShippingCents = Math.round(totalWithShipping * 100);
-  const taxAmount = Math.round(totalWithShippingCents - totalWithShippingCents / 1.06) / 100;
-  const outOfStock = inventoryState
-    ? totalUnits > inventoryState.remainingUnits
-    : totalUnits > MAX_STOCK;
-  const stockRemaining = inventoryState
-    ? Math.max(0, inventoryState.remainingUnits)
-    : Math.max(0, MAX_STOCK - totalUnits);
+  const set = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
+  const needsAddress = method === 'postnord';
+  const canPay =
+    !!form.email &&
+    (!needsAddress || (form.name && form.line1 && form.postcode && form.city));
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const startPayment = async () => {
+    setError('');
     setLoading(true);
-
     try {
-      const response = await fetch('/api/checkout', {
+      const res = await fetch('/api/create-payment-intent', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: items.map((item) => ({
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            image: item.image,
-          })),
-          customer: {
-            email: formData.email,
-          },
-          shippingOption,
-          shippingPostcode: postcode.replace(/\s+/g, ''),
+          items: items.map((it) => ({ name: it.name, price: it.price, quantity: it.quantity, image: it.image })),
+          customer: { email: form.email, name: form.name, phone: form.phone },
+          shipping: { method, country, line1: form.line1, line2: form.line2, postcode: form.postcode, city: form.city },
         }),
       });
-
-      if (!response.ok) {
-        const err = await response.json().catch(() => null);
-        const msg = err?.error || t('checkout.errNoSession');
-        throw new Error(msg);
-      }
-
-      const { url } = await response.json();
-
-      if (url) {
-        window.location.href = url;
-      } else {
-        throw new Error(t('checkout.errNoUrl'));
-      }
-    } catch (error: any) {
-      console.error('Checkout error:', error);
-      alert(t('checkout.errFailed') + ' ' + (error.message || t('checkout.errRetry')));
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Failed to start payment');
+      setClientSecret(data.clientSecret);
+    } catch (e: any) {
+      setError(e?.message || (en ? 'Something went wrong.' : 'Något gick fel.'));
+    } finally {
       setLoading(false);
     }
   };
+
+  const inputCls = 'w-full border border-border bg-white px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary rounded-xl';
 
   return (
     <div className="min-h-screen bg-white pt-24 pb-12">
       <div className="container-wide">
         <div className="mb-10">
-          <p className="mb-3 text-sm uppercase tracking-[0.2em] text-muted-foreground">{t('checkout.kicker')}</p>
-          <h1 className="text-4xl font-bold text-foreground">{t('checkout.title')}</h1>
-          <p className="mt-3 max-w-3xl text-base text-muted-foreground">
-            {t('checkout.intro')}
-          </p>
+          <p className="mb-3 text-sm uppercase tracking-[0.2em] text-muted-foreground">{en ? 'Checkout' : 'Kassa'}</p>
+          <h1 className="text-4xl font-bold text-foreground">{en ? 'Complete your purchase' : 'Slutför ditt köp'}</h1>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[2.5fr_1.5fr]">
           <div className="space-y-8">
-            <section className="border border-border bg-slate-50 p-8">
-              <div className="mb-6">
-                <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">{t('checkout.step1')}</p>
-                <h2 className="mt-2 text-3xl font-semibold text-foreground">{t('checkout.yourEmail')}</h2>
-              </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                {t('checkout.emailHelp')}
-              </p>
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-semibold text-foreground mb-2">
-                    {t('checkout.emailLabel')}
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    name="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    autoComplete="email"
-                    className="w-full border border-border bg-white px-5 py-4 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="din.email@example.com"
-                  />
-                </div>
-
-                {/* Postcode input with auto-validation */}
-                <div>
-                  <label htmlFor="postcode" className="block text-sm font-semibold text-foreground mb-2">
-                    {t('checkout.postcode')}
-                  </label>
-                  <input
-                    id="postcode"
-                    type="text"
-                    inputMode="text"
-                    maxLength={20}
-                    value={postcode}
-                    onChange={(e) => {
-                      const cleaned = e.target.value.replace(/\s+/g, '');
-                      setPostcode(cleaned);
-                      setPostcodeError('');
-
-                      const isSwedishPostcode = /^\d{5}$/.test(cleaned);
-                      if (isSwedishPostcode) {
-                        setIsPostcodeValid(true);
-                      } else if (cleaned.length > 0) {
-                        setIsPostcodeValid(false);
-                      } else {
-                        setIsPostcodeValid(false);
-                      }
-                    }}
-                    placeholder="12345"
-                    className="w-full border border-border bg-white px-5 py-4 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  {postcodeError && <p className="mt-2 text-sm text-rose-600">{postcodeError}</p>}
-                  {isPostcodeValid && <p className="mt-2 text-sm text-emerald-700">{t('checkout.postcodeOk')}</p>}
-                  {postcode.length > 0 && !isPostcodeValid && (
-                    <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                      <p className="text-sm font-semibold text-amber-800">
-                        {t('checkout.postcodeHelp')}
-                      </p>
-                      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                        <Link
-                          href="/contact"
-                          className="inline-flex items-center justify-center rounded-xl bg-foreground px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-900"
-                        >
-                          Kontakta oss
-                        </Link>
-                        <a
-                          href="https://t.me/Vikinfuel_bot"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center rounded-xl border border-foreground px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-white"
-                        >
-                          Kontakta via Telegram
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Shipping options shown after postcode validation */}
-                {isPostcodeValid && (
+            {!clientSecret ? (
+              <section className="border border-border bg-slate-50 p-6 sm:p-8 rounded-2xl">
+                <h2 className="text-2xl font-semibold text-foreground mb-5">{en ? 'Your details' : 'Dina uppgifter'}</h2>
+                <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-3">
-                      {t('checkout.shippingOptions')}
-                    </label>
-                    <div className="space-y-3">
-                      <label className={`flex items-center gap-3 rounded-2xl border p-4 cursor-pointer transition-all ${shippingOption === 'pickup' ? 'border-foreground bg-primary/5' : 'border-border'}`}>
-                        <input
-                          type="radio"
-                          name="shippingOption"
-                          value="pickup"
-                          checked={shippingOption === 'pickup'}
-                          onChange={() => setShippingOption('pickup')}
-                          className="h-4 w-4"
-                        />
-                        <div>
-                          <div className="font-semibold text-foreground">{t('checkout.pickup')}</div>
-                          <div className="text-sm text-muted-foreground">{t('checkout.pickupDesc')}</div>
-                        </div>
-                      </label>
+                    <label className="block text-sm font-semibold text-foreground mb-2">{en ? 'Email' : 'E-post'}</label>
+                    <input type="email" value={form.email} onChange={(e) => set('email', e.target.value)} required className={inputCls} placeholder="din.email@example.com" />
+                  </div>
 
-                      <label className={`flex items-center gap-3 rounded-2xl border p-4 cursor-pointer transition-all ${shippingOption === 'postnord' ? 'border-foreground bg-primary/5' : 'border-border'}`}>
-                        <input
-                          type="radio"
-                          name="shippingOption"
-                          value="postnord"
-                          checked={shippingOption === 'postnord'}
-                          onChange={() => setShippingOption('postnord')}
-                          className="h-4 w-4"
-                        />
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">{en ? 'Country' : 'Land'}</label>
+                    <select value={country} onChange={(e) => setCountry(e.target.value)} className={inputCls}>
+                      {COUNTRIES.map((c) => (
+                        <option key={c.code} value={c.code}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">{en ? 'Delivery method' : 'Leveranssätt'}</label>
+                    <div className="space-y-3">
+                      {country === 'SE' && (
+                        <label className={`flex items-center gap-3 rounded-xl border p-4 cursor-pointer ${method === 'pickup' ? 'border-foreground bg-primary/5' : 'border-border'}`}>
+                          <input type="radio" checked={method === 'pickup'} onChange={() => setMethod('pickup')} className="h-4 w-4" />
+                          <div>
+                            <div className="font-semibold text-foreground">{en ? 'Pickup on location' : 'Hämta varan på plats'}</div>
+                            <div className="text-sm text-muted-foreground">{en ? 'Always free.' : 'Alltid gratis.'}</div>
+                          </div>
+                        </label>
+                      )}
+                      <label className={`flex items-center gap-3 rounded-xl border p-4 cursor-pointer ${method === 'postnord' ? 'border-foreground bg-primary/5' : 'border-border'}`}>
+                        <input type="radio" checked={method === 'postnord'} onChange={() => setMethod('postnord')} className="h-4 w-4" />
                         <div>
-                          <div className="font-semibold text-foreground">{t('checkout.postnord')}</div>
-                          <div className="text-sm text-muted-foreground">{t('checkout.postnordDesc')}</div>
+                          <div className="font-semibold text-foreground">{en ? 'PostNord shipping' : 'PostNord frakt'}</div>
+                          <div className="text-sm text-muted-foreground">{shippingCost === 0 ? (en ? 'Free' : 'Gratis') : kr(shippingCost)}</div>
                         </div>
                       </label>
                     </div>
                   </div>
-                )}
 
-                <p className="text-sm text-muted-foreground">
-                  {t('checkout.stripeNote')}
-                </p>
-              </form>
-            </section>
+                  {needsAddress && (
+                    <div className="space-y-4 border-t border-border pt-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-foreground mb-2">{en ? 'Full name' : 'Namn'}</label>
+                        <input value={form.name} onChange={(e) => set('name', e.target.value)} className={inputCls} placeholder={en ? 'Your name' : 'Ditt namn'} />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-foreground mb-2">{en ? 'Phone' : 'Telefon'}</label>
+                        <input value={form.phone} onChange={(e) => set('phone', e.target.value)} className={inputCls} placeholder="+46 70 123 45 67" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-foreground mb-2">{en ? 'Street address' : 'Gatuadress'}</label>
+                        <input value={form.line1} onChange={(e) => set('line1', e.target.value)} className={inputCls} placeholder={en ? 'Street and number' : 'Gata och nummer'} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-sm font-semibold text-foreground mb-2">{en ? 'Postcode' : 'Postnummer'}</label>
+                          <input value={form.postcode} onChange={(e) => set('postcode', e.target.value)} className={inputCls} placeholder="123 45" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-foreground mb-2">{en ? 'City' : 'Ort'}</label>
+                          <input value={form.city} onChange={(e) => set('city', e.target.value)} className={inputCls} placeholder="Stockholm" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
-            <section className="border border-border bg-slate-50 p-8">
-              <div className="mb-6 flex items-center justify-between">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">{t('checkout.step2')}</p>
-                  <h2 className="mt-2 text-3xl font-semibold text-foreground">{t('checkout.yourCart')}</h2>
+                  {error && <p className="text-sm text-rose-600">{error}</p>}
+
+                  <button
+                    type="button"
+                    onClick={startPayment}
+                    disabled={!canPay || loading}
+                    className="w-full bg-primary px-5 py-4 text-base font-bold text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl"
+                  >
+                    {loading ? (en ? 'Loading...' : 'Laddar...') : (en ? 'Continue to payment' : 'Fortsätt till betalning')}
+                  </button>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  {items.length} {items.length === 1 ? t('checkout.itemOne') : t('checkout.itemMany')}
-                </div>
-              </div>
+              </section>
+            ) : (
+              <section className="border border-border bg-slate-50 p-6 sm:p-8 rounded-2xl">
+                <h2 className="text-2xl font-semibold text-foreground mb-5">{en ? 'Payment' : 'Betalning'}</h2>
+                <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
+                  <PaymentSection total={total} en={en} onBack={() => setClientSecret('')} />
+                </Elements>
+              </section>
+            )}
 
-              <div className="overflow-x-auto">
-                <table className="w-full border-separate border-spacing-y-3 text-left text-sm">
-                  <thead>
-                    <tr className="text-muted-foreground uppercase tracking-[0.15em]">
-                      <th className="px-4 py-3">{t('checkout.colProduct')}</th>
-                      <th className="px-4 py-3">{t('checkout.colPrice')}</th>
-                      <th className="px-4 py-3">{t('checkout.colQty')}</th>
-                      <th className="px-4 py-3">{t('checkout.colSum')}</th>
-                      <th className="px-4 py-3">{t('checkout.colAction')}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-foreground">
-                    {items.map((item) => (
-                      <tr key={item.id} className="border-t border-border bg-white">
-                        <td className="px-4 py-4 align-top">
-                          <div className="flex items-start gap-4">
-                            <div className="h-16 w-16 overflow-hidden border border-border bg-slate-100">
-                              <AppImage
-                                src={item.image}
-                                alt={item.name}
-                                width={64}
-                                height={64}
-                                className="h-full w-full object-contain"
-                              />
-                            </div>
-                            <div>
-                              <p className="font-semibold">{item.name}</p>
-                              <p className="text-xs text-muted-foreground mt-1">{item.size}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-4 align-top">{item.price.toLocaleString('sv-SE')} kr</td>
-                        <td className="px-4 py-4 align-top">
-                          <div className="inline-flex items-center border border-border">
-                            <button
-                              type="button"
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              className="px-3 py-2 text-sm text-muted-foreground hover:bg-slate-100"
-                            >
-                              -
-                            </button>
-                            <span className="px-4 py-2 text-sm text-foreground">{item.quantity}</span>
-                            <button
-                              type="button"
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              className="px-3 py-2 text-sm text-muted-foreground hover:bg-slate-100"
-                            >
-                              +
-                            </button>
-                          </div>
-                        </td>
-                        <td className="px-4 py-4 align-top font-semibold">{(item.price * item.quantity).toLocaleString('sv-SE')} kr</td>
-                        <td className="px-4 py-4 align-top">
-                          <button
-                            type="button"
-                            onClick={() => removeItem(item.id)}
-                            className="text-sm text-rose-600 hover:text-rose-700"
-                          >
-                            {t('checkout.remove')}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <section className="border border-border bg-slate-50 p-6 sm:p-8 rounded-2xl">
+              <h2 className="text-xl font-semibold text-foreground mb-4">{en ? 'Your cart' : 'Din varukorg'}</h2>
+              <div className="space-y-3">
+                {items.map((item) => (
+                  <div key={item.id} className="flex items-center gap-4">
+                    <div className="h-14 w-14 overflow-hidden border border-border bg-white rounded-lg flex-shrink-0">
+                      <AppImage src={item.image} alt={item.name} width={56} height={56} className="h-full w-full object-contain" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-foreground truncate">{item.name}</p>
+                      <p className="text-xs text-muted-foreground">{item.size} · × {item.quantity}</p>
+                    </div>
+                    <p className="text-sm font-semibold text-foreground whitespace-nowrap">{kr(item.price * item.quantity)}</p>
+                  </div>
+                ))}
               </div>
             </section>
           </div>
 
           <aside className="space-y-6">
-            <div className="border border-border bg-slate-50 p-8">
-              <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">{t('checkout.orderDetails')}</p>
+            <div className="border border-border bg-slate-50 p-8 rounded-2xl">
+              <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">{en ? 'Order details' : 'Orderdetaljer'}</p>
               <div className="mt-4 space-y-4 text-sm text-foreground">
                 <div className="flex justify-between border-b border-border pb-3">
-                  <span>{t('checkout.subtotal')}</span>
-                  <span>{totalPrice.toLocaleString('sv-SE')} kr</span>
+                  <span>{en ? 'Subtotal' : 'Delbelopp'}</span>
+                  <span>{kr(subtotal)}</span>
                 </div>
                 <div className="flex justify-between border-b border-border pb-3">
-                  <span>{t('checkout.shipping')}</span>
-                  <span>{shippingCost === 0 ? t('checkout.free') : `${shippingCost.toLocaleString('sv-SE')} kr`}</span>
+                  <span>{en ? 'Shipping' : 'Frakt'}</span>
+                  <span>{shippingCost === 0 ? (en ? 'Free' : 'Gratis') : kr(shippingCost)}</span>
                 </div>
                 <div className="flex justify-between border-b border-border pb-3">
-                  <span>{t('checkout.vat')}</span>
-                  <span>{taxAmount.toLocaleString('sv-SE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kr</span>
+                  <span>{en ? 'VAT (6%)' : 'Moms (6%)'}</span>
+                  <span>{vat.toLocaleString('sv-SE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kr</span>
                 </div>
                 <div className="flex justify-between pt-3 text-lg font-semibold text-foreground">
-                  <span>{t('checkout.total')}</span>
-                  <span>{totalWithShipping.toLocaleString('sv-SE')} kr</span>
+                  <span>{en ? 'Total' : 'Total'}</span>
+                  <span>{kr(total)}</span>
                 </div>
               </div>
             </div>
-
-            <div className="border border-border bg-slate-50 p-8">
-              <h3 className="text-base font-semibold text-foreground mb-3">{t('checkout.whatsNext')}</h3>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li>{t('checkout.next1')}</li>
-                <li>{t('checkout.next2')}</li>
-                <li>{t('checkout.next3')}</li>
-              </ul>
-              <p className="mt-4 text-xs text-muted-foreground">
-                {t('checkout.loggedInNote')}
-              </p>
-              {outOfStock ? (
-                <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
-                  {t('checkout.outOfStock1')} {stockRemaining} {t('checkout.cans')}.
-                </div>
-              ) : (
-                <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
-                  {t('checkout.inStock1')} {stockRemaining} {t('checkout.inStock2')}
-                </div>
-              )}
-            </div>
-
-            <button
-              type="button"
-              onClick={handleSubmit}
-                disabled={loading || !formData.email || outOfStock || !isPostcodeValid}
-              className="w-full border border-border bg-foreground px-5 py-4 text-base font-bold text-white hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? t('checkout.processing') : t('checkout.pay')}
-            </button>
           </aside>
         </div>
       </div>
