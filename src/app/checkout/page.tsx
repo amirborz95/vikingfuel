@@ -78,6 +78,7 @@ export default function CheckoutPage() {
   const [hasMounted, setHasMounted] = useState(false);
   const [country, setCountry] = useState('SE');
   const [method, setMethod] = useState<'pickup' | 'postnord'>('pickup');
+  const [deliveryOpen, setDeliveryOpen] = useState(false);
   const [form, setForm] = useState({ email: '', name: '', phone: '', line1: '', line2: '', postcode: '', city: '' });
   const [clientSecret, setClientSecret] = useState('');
   const [loading, setLoading] = useState(false);
@@ -234,40 +235,68 @@ export default function CheckoutPage() {
 
                 {/* Delivery method — under postcode/address */}
                 <section className="rounded-2xl border border-border bg-white p-6 shadow-card sm:p-8">
-                  <div className="mb-6 flex items-center gap-3">
+                  {/* Clickable header — toggles the alternatives open/closed */}
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryOpen((o) => !o)}
+                    aria-expanded={deliveryOpen}
+                    className="flex w-full items-center gap-3 text-left"
+                  >
                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">2</span>
-                    <h2 className="text-xl font-bold text-foreground">{en ? 'Delivery method' : 'Leveranssätt'}</h2>
-                  </div>
+                    <span className="flex-1">
+                      <span className="block text-xl font-bold text-foreground">{en ? 'Delivery method' : 'Leveranssätt'}</span>
+                      {!deliveryOpen && (
+                        <span className="mt-0.5 block text-sm text-muted-foreground">
+                          {method === 'pickup'
+                            ? (en ? 'Pickup on location' : 'Hämta varan på plats')
+                            : (en ? 'PostNord home delivery' : 'PostNord hemleverans')}
+                          {' · '}
+                          <span className={shippingCost === 0 ? 'font-semibold text-primary' : 'font-semibold text-foreground'}>
+                            {shippingCost === 0 ? (en ? 'Free' : 'Gratis') : kr(shippingCost)}
+                          </span>
+                        </span>
+                      )}
+                    </span>
+                    <svg
+                      className={`h-5 w-5 flex-shrink-0 text-muted-foreground transition-transform duration-300 ${deliveryOpen ? 'rotate-180' : ''}`}
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
 
-                  <div className="space-y-4">
-                    {country === 'SE' && (
+                  {/* Alternatives — revealed when the header is clicked */}
+                  {deliveryOpen && (
+                    <div className="mt-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                      {country === 'SE' && (
+                        <DeliveryOption
+                          selected={method === 'pickup'}
+                          onSelect={() => { setMethod('pickup'); setDeliveryOpen(false); }}
+                          en={en}
+                          icon={
+                            <svg className="h-6 w-6 text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M3 9l1-5h16l1 5" /><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9" /><path d="M9 13h6" />
+                            </svg>
+                          }
+                          title={en ? 'Pickup on location' : 'Hämta varan på plats'}
+                          desc={en ? 'Collect your order at our warehouse.' : 'Hämta din order på vårt lager.'}
+                          priceLabel={en ? 'Free' : 'Gratis'}
+                          free
+                        />
+                      )}
+
                       <DeliveryOption
-                        selected={method === 'pickup'}
-                        onSelect={() => setMethod('pickup')}
+                        selected={method === 'postnord'}
+                        onSelect={() => { setMethod('postnord'); setDeliveryOpen(false); }}
                         en={en}
-                        icon={
-                          <svg className="h-6 w-6 text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 9l1-5h16l1 5" /><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9" /><path d="M9 13h6" />
-                          </svg>
-                        }
-                        title={en ? 'Pickup on location' : 'Hämta varan på plats'}
-                        desc={en ? 'Collect your order at our warehouse.' : 'Hämta din order på vårt lager.'}
-                        priceLabel={en ? 'Free' : 'Gratis'}
-                        free
+                        icon={<PostNordLogo />}
+                        title={en ? 'PostNord home delivery' : 'PostNord hemleverans'}
+                        desc={en ? 'Delivered to your door in 2–4 business days.' : 'Levereras hem till dig på 2–4 arbetsdagar.'}
+                        priceLabel={shippingCost === 0 ? (en ? 'Free' : 'Gratis') : kr(shippingCost)}
+                        free={shippingCost === 0}
                       />
-                    )}
-
-                    <DeliveryOption
-                      selected={method === 'postnord'}
-                      onSelect={() => setMethod('postnord')}
-                      en={en}
-                      icon={<PostNordLogo />}
-                      title={en ? 'PostNord home delivery' : 'PostNord hemleverans'}
-                      desc={en ? 'Delivered to your door in 2–4 business days.' : 'Levereras hem till dig på 2–4 arbetsdagar.'}
-                      priceLabel={shippingCost === 0 ? (en ? 'Free' : 'Gratis') : kr(shippingCost)}
-                      free={shippingCost === 0}
-                    />
-                  </div>
+                    </div>
+                  )}
 
                   {needsAddress && !canPay && (
                     <p className="mt-4 flex items-center gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-700">
