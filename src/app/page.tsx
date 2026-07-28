@@ -6,7 +6,6 @@ import Header from '@/components/Header';
 import HeroSection from './components/HeroSection';
 import CategoryBanners from './components/CategoryBanners';
 import ProductsSection from './components/ProductsSection';
-import TrustBenefits from './components/TrustBenefits';
 import CTASection from './components/CTASection';
 import Footer from '@/components/Footer';
 
@@ -17,7 +16,6 @@ export default function HomePage() {
       <Header />
       <main>
         <HeroSection />
-        <TrustBenefits />
         <CategoryBanners />
         <ProductsSection />
         <CTASection />

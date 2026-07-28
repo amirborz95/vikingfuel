@@ -27,6 +27,18 @@ export default function NewsletterPopup() {
     return () => clearTimeout(timer);
   }, [pathname]);
 
+  // Allow other components (e.g. the "Subscribe" button on the accessories
+  // card) to re-open the popup on demand, even after it has been dismissed.
+  useEffect(() => {
+    function openHandler() {
+      setDone('');
+      setError('');
+      setOpen(true);
+    }
+    window.addEventListener('open-newsletter', openHandler);
+    return () => window.removeEventListener('open-newsletter', openHandler);
+  }, []);
+
   function dismiss() {
     setOpen(false);
     try {

@@ -137,6 +137,9 @@ export const translations: Record<Lang, any> = {
       showMore: 'Visa mer recensioner',
     },
     banners: {
+      label: 'Utforska sortimentet',
+      heading: 'Hitta din kraft',
+      sub: 'Från daglig energi till kompletta paket — allt du behöver för bättre prestation.',
       energyTitle: 'Energi & Vitalitet',
       energySub: 'Naturliga ingredienser för maximal energi',
       energyBtn: 'Handla nu',
@@ -146,6 +149,7 @@ export const translations: Record<Lang, any> = {
       accTitle: 'Tillbehör',
       accSub: 'Kommer snart — prenumerera för uppdateringar',
       accBtn: 'Kommer snart',
+      notifyBtn: 'Prenumerera',
     },
     cart: {
       title: 'Din varukorg', empty: 'Din varukorg är tom', shopNow: 'Handla nu', total: 'Totalt',
@@ -422,6 +426,9 @@ export const translations: Record<Lang, any> = {
       showMore: 'Show more reviews',
     },
     banners: {
+      label: 'Explore the range',
+      heading: 'Find your fuel',
+      sub: 'From daily energy to complete bundles — everything you need for better performance.',
       energyTitle: 'Energy & Vitality',
       energySub: 'Natural ingredients for maximum energy',
       energyBtn: 'Shop now',
@@ -431,6 +438,7 @@ export const translations: Record<Lang, any> = {
       accTitle: 'Accessories',
       accSub: 'Coming soon — subscribe for updates',
       accBtn: 'Coming soon',
+      notifyBtn: 'Subscribe',
     },
     cart: {
       title: 'Your cart', empty: 'Your cart is empty', shopNow: 'Shop now', total: 'Total',

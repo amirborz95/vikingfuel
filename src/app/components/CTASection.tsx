@@ -16,17 +16,20 @@ export default function CTASection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="relative overflow-hidden bg-foreground rounded-3xl px-8 py-16 md:px-16 md:py-20 text-center"
+          className="relative overflow-hidden bg-foreground rounded-3xl px-8 py-20 md:px-16 md:py-28 text-center ring-1 ring-white/10"
         >
-          {/* Background decoration */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-primary/20 rounded-full blur-[80px] -translate-y-1/2" />
-            <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] bg-primary/10 rounded-full blur-[60px] translate-y-1/2" />
-          </div>
+          {/* Background image */}
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: "url('/assets/images/cta-viking.png')" }}
+          />
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
 
           <div className="relative z-10">
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 text-primary text-xs font-bold uppercase tracking-wide mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 text-primary text-xs font-bold uppercase tracking-wide mb-6 ring-1 ring-primary/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               {t('home.cta.badge')}
             </span>
 
@@ -36,7 +39,7 @@ export default function CTASection() {
             <div className="flex flex-wrap justify-center gap-4">
               <Link
                 href="/products"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-full text-base hover:bg-green-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-full text-base shadow-lg shadow-primary/30 hover:bg-green-500 transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 {t('home.cta.shopNow')}
                 <Icon name="ArrowRightIcon" size={18} />
