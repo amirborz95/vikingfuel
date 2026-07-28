@@ -1,4 +1,5 @@
 'use client';
+import { useLanguage } from '@/context/LanguageContext';
 
 import React from 'react';
 
@@ -59,7 +60,7 @@ export default function HistorySection({
 
   const getPaymentMethodLabel = (method: string) => {
     const labels: Record<string, string> = {
-      card: 'Kortbetalning',
+      card: (en ? 'Card payment' : 'Kortbetalning'),
       klarna: 'Klarna',
       stripe: 'Stripe',
     };
@@ -78,10 +79,10 @@ export default function HistorySection({
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
-      completed: 'Slutförd',
-      pending: 'Väntar',
-      failed: 'Misslyckad',
-      cancelled: 'Avbruten',
+      completed: (en ? 'Completed' : 'Slutförd'),
+      pending: (en ? 'Pending' : 'Väntar'),
+      failed: (en ? 'Failed' : 'Misslyckad'),
+      cancelled: (en ? 'Cancelled' : 'Avbruten'),
     };
     return labels[status] || status;
   };
@@ -89,16 +90,16 @@ export default function HistorySection({
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-3xl border border-border p-8 shadow-sm">
-        <h2 className="text-2xl font-bold text-foreground mb-6">Köphistorik</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-6">{en ? 'Purchase history' : 'Köphistorik'}</h2>
 
         {isLoading ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Laddar historik...</p>
+            <p className="text-muted-foreground">{en ? 'Loading history...' : 'Laddar historik...'}</p>
           </div>
         ) : orders.length === 0 ? (
           <div className="text-center py-12 bg-muted/30 rounded-2xl">
-            <p className="text-lg text-muted-foreground font-medium">Du har ingen köphistorik än</p>
-            <p className="text-sm text-muted-foreground mt-2">Din köphistorik kommer att visas här</p>
+            <p className="text-lg text-muted-foreground font-medium">{en ? 'You have no purchase history yet' : 'Du har ingen köphistorik än'}</p>
+            <p className="text-sm text-muted-foreground mt-2">{en ? 'Your purchase history will appear here' : 'Din köphistorik kommer att visas här'}</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -157,7 +158,7 @@ export default function HistorySection({
 
                       {/* Items list */}
                       <div className="mb-4 bg-white rounded-xl p-4">
-                        <h4 className="font-semibold text-sm text-foreground mb-3">Produkter:</h4>
+                        <h4 className="font-semibold text-sm text-foreground mb-3">{en ? 'Products:' : 'Produkter:'}</h4>
                         <ul className="space-y-2">
                           {order.items.map((item, idx) => (
                             <li key={idx} className="flex justify-between text-sm">
@@ -172,7 +173,7 @@ export default function HistorySection({
                           ))}
                         </ul>
                         <div className="border-t border-border mt-3 pt-3 flex justify-between">
-                          <span className="font-bold text-foreground">Totalt:</span>
+                          <span className="font-bold text-foreground">{en ? 'Total:' : 'Totalt:'}</span>
                           <span className="font-bold text-foreground text-lg">
                             {order.totalAmount.toFixed(2)} {order.currency}
                           </span>
@@ -182,12 +183,12 @@ export default function HistorySection({
                       {/* Additional info */}
                       <div className="text-xs text-muted-foreground space-y-1">
                         <p>
-                          <span className="font-semibold">Betalningsmetod:</span>{' '}
+                          <span className="font-semibold">{en ? 'Payment method:' : 'Betalningsmetod:'}</span>{' '}
                           {getPaymentMethodLabel(order.paymentMethod)}
                         </p>
                         {order.shippingAddress?.name && (
                           <p>
-                            <span className="font-semibold">Mottakare:</span> {order.shippingAddress.name}
+                            <span className="font-semibold">{en ? 'Recipient:' : 'Mottakare:'}</span> {order.shippingAddress.name}
                           </p>
                         )}
                       </div>

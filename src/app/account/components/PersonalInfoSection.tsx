@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface PersonalInfoSectionProps {
   user: {
@@ -23,6 +24,8 @@ export default function PersonalInfoSection({
   onDataUpdated,
 }: PersonalInfoSectionProps) {
   const { updateUser } = useAuth();
+  const { lang } = useLanguage();
+  const en = lang === 'en';
   const [isEditingUsername, setIsEditingUsername] = React.useState(false);
   const [newUsername, setNewUsername] = React.useState(user.name);
   const [isChangingPassword, setIsChangingPassword] = React.useState(false);
@@ -74,7 +77,7 @@ export default function PersonalInfoSection({
   const handleUpdateUsername = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUsername.trim()) {
-      setMessage({ type: 'error', text: 'Användarnamn kan inte vara tomt' });
+      setMessage({ type: 'error', text: (en ? 'Username cannot be empty' : 'Användarnamn kan inte vara tomt') });
       return;
     }
 
@@ -88,14 +91,14 @@ export default function PersonalInfoSection({
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || 'Misslyckades att uppdatera användarnamn');
+        throw new Error(error.error || (en ? 'Failed to update username' : 'Misslyckades att uppdatera användarnamn'));
       }
 
       const data = await res.json();
       if (updateUser) {
         updateUser({ ...user, name: data.name });
       }
-      setMessage({ type: 'success', text: 'Användarnamn uppdaterat framgångsrikt!' });
+      setMessage({ type: 'success', text: (en ? 'Username updated successfully!' : 'Användarnamn uppdaterat framgångsrikt!') });
       setIsEditingUsername(false);
       onDataUpdated();
     } catch (error: any) {
@@ -108,12 +111,12 @@ export default function PersonalInfoSection({
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setMessage({ type: 'error', text: 'Lösenorden matchar inte' });
+      setMessage({ type: 'error', text: (en ? 'Passwords do not match' : 'Lösenorden matchar inte') });
       return;
     }
 
     if (newPassword.length < 6) {
-      setMessage({ type: 'error', text: 'Lösenordet måste vara minst 6 tecken' });
+      setMessage({ type: 'error', text: (en ? 'Password must be at least 6 characters' : 'Lösenordet måste vara minst 6 tecken') });
       return;
     }
 
@@ -131,10 +134,10 @@ export default function PersonalInfoSection({
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || 'Misslyckades att uppdatera lösenord');
+        throw new Error(error.error || (en ? 'Failed to update password' : 'Misslyckades att uppdatera lösenord'));
       }
 
-      setMessage({ type: 'success', text: 'Lösenord uppdaterat framgångsrikt!' });
+      setMessage({ type: 'success', text: (en ? 'Password updated successfully!' : 'Lösenord uppdaterat framgångsrikt!') });
       setIsChangingPassword(false);
       setCurrentPassword('');
       setNewPassword('');
@@ -170,17 +173,17 @@ export default function PersonalInfoSection({
 
       {/* Email Section */}
       <div className="bg-white rounded-3xl border border-border p-8 shadow-sm">
-        <h2 className="text-2xl font-bold text-foreground mb-6">Din e-postadress</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-6">{en ? 'Your email address' : 'Din e-postadress'}</h2>
         <div className="space-y-2">
-          <label className="block text-sm font-semibold text-muted-foreground">E-post</label>
+          <label className="block text-sm font-semibold text-muted-foreground">{en ? 'Email' : 'E-post'}</label>
           <div className="p-4 bg-muted/30 rounded-xl text-foreground font-medium">{user.email}</div>
-          <p className="text-xs text-muted-foreground mt-2">Din e-postadress kan inte ändras</p>
+          <p className="text-xs text-muted-foreground mt-2">{en ? 'Your email address cannot be changed' : 'Din e-postadress kan inte ändras'}</p>
         </div>
       </div>
 
       {/* Profile Section */}
       <div className="bg-white rounded-3xl border border-border p-8 shadow-sm">
-        <h2 className="text-2xl font-bold text-foreground mb-6">Kontakt & adress</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-6">{en ? 'Contact & address' : 'Kontakt & adress'}</h2>
         <form onSubmit={async (e) => {
           e.preventDefault();
           setIsLoading(true);
@@ -202,7 +205,7 @@ export default function PersonalInfoSection({
 
             if (!res.ok) {
               const error = await res.json();
-              throw new Error(error.error || 'Misslyckades att uppdatera profilen');
+              throw new Error(error.error || (en ? 'Failed to update profile' : 'Misslyckades att uppdatera profilen'));
             }
 
             const data = await res.json();
@@ -220,7 +223,7 @@ export default function PersonalInfoSection({
               });
             }
 
-            setMessage({ type: 'success', text: 'Din profil har sparats.' });
+            setMessage({ type: 'success', text: (en ? 'Your profile has been saved.' : 'Din profil har sparats.') });
             onDataUpdated();
           } catch (error: any) {
             setMessage({ type: 'error', text: error.message });
@@ -230,30 +233,30 @@ export default function PersonalInfoSection({
         }} className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="block text-sm font-semibold text-muted-foreground mb-2">Förnamn</label>
+              <label className="block text-sm font-semibold text-muted-foreground mb-2">{en ? 'First name' : 'Förnamn'}</label>
               <input
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 className="w-full rounded-2xl border border-border px-4 py-3 text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Förnamn"
+                placeholder={en ? 'First name' : 'Förnamn'}
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-muted-foreground mb-2">Efternamn</label>
+              <label className="block text-sm font-semibold text-muted-foreground mb-2">{en ? 'Last name' : 'Efternamn'}</label>
               <input
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 className="w-full rounded-2xl border border-border px-4 py-3 text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Efternamn"
+                placeholder={en ? 'Last name' : 'Efternamn'}
               />
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="block text-sm font-semibold text-muted-foreground mb-2">Telefonnummer</label>
+              <label className="block text-sm font-semibold text-muted-foreground mb-2">{en ? 'Phone number' : 'Telefonnummer'}</label>
               <input
                 type="tel"
                 value={phone}
@@ -263,20 +266,20 @@ export default function PersonalInfoSection({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-muted-foreground mb-2">Gatuadress</label>
+              <label className="block text-sm font-semibold text-muted-foreground mb-2">{en ? 'Street address' : 'Gatuadress'}</label>
               <input
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 className="w-full rounded-2xl border border-border px-4 py-3 text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Exempelgatan 1"
+                placeholder={en ? 'Example Street 1' : 'Exempelgatan 1'}
               />
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
             <div>
-              <label className="block text-sm font-semibold text-muted-foreground mb-2">Postnummer</label>
+              <label className="block text-sm font-semibold text-muted-foreground mb-2">{en ? 'Postcode' : 'Postnummer'}</label>
               <input
                 type="text"
                 value={postalCode}
@@ -286,7 +289,7 @@ export default function PersonalInfoSection({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-muted-foreground mb-2">Ort</label>
+              <label className="block text-sm font-semibold text-muted-foreground mb-2">{en ? 'City' : 'Ort'}</label>
               <input
                 type="text"
                 value={city}
@@ -296,7 +299,7 @@ export default function PersonalInfoSection({
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-muted-foreground mb-2">Län / stat</label>
+              <label className="block text-sm font-semibold text-muted-foreground mb-2">{en ? 'County / state' : 'Län / stat'}</label>
               <input
                 type="text"
                 value={state}
@@ -313,20 +316,20 @@ export default function PersonalInfoSection({
               disabled={isLoading}
               className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
-              {isLoading ? 'Sparar...' : 'Spara profil'}
+              {isLoading ? (en ? 'Saving...' : 'Sparar...') : (en ? 'Save profile' : 'Spara profil')}
             </button>
-            <p className="text-sm text-muted-foreground">Dina uppgifter sparas för snabbare checkout och bättre service.</p>
+            <p className="text-sm text-muted-foreground">{en ? 'Your details are saved for faster checkout and better service.' : 'Dina uppgifter sparas för snabbare checkout och bättre service.'}</p>
           </div>
         </form>
       </div>
 
       {/* Username Section */}
       <div className="bg-white rounded-3xl border border-border p-8 shadow-sm">
-        <h2 className="text-2xl font-bold text-foreground mb-6">Användarnamn</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-6">{en ? 'Username' : 'Användarnamn'}</h2>
         {!isEditingUsername ? (
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-muted-foreground">Ditt användarnamn</label>
+              <label className="block text-sm font-semibold text-muted-foreground">{en ? 'Your username' : 'Ditt användarnamn'}</label>
               <div className="p-4 bg-muted/30 rounded-xl text-foreground font-medium">{user.name}</div>
             </div>
             <button
@@ -339,13 +342,13 @@ export default function PersonalInfoSection({
         ) : (
           <form onSubmit={handleUpdateUsername} className="space-y-4">
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-muted-foreground">Nytt användarnamn</label>
+              <label className="block text-sm font-semibold text-muted-foreground">{en ? 'New username' : 'Nytt användarnamn'}</label>
               <input
                 type="text"
                 value={newUsername}
                 onChange={(e) => setNewUsername(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Ange nytt användarnamn"
+                placeholder={en ? 'Enter new username' : 'Ange nytt användarnamn'}
               />
             </div>
             <div className="flex gap-3">
@@ -354,7 +357,7 @@ export default function PersonalInfoSection({
                 disabled={isLoading}
                 className="px-6 py-3 rounded-xl bg-green-600 text-white font-bold text-sm hover:bg-green-700 transition-colors disabled:opacity-50"
               >
-                {isLoading ? 'Sparar...' : 'Spara'}
+                {isLoading ? (en ? 'Saving...' : 'Sparar...') : 'Spara'}
               </button>
               <button
                 type="button"
@@ -373,7 +376,7 @@ export default function PersonalInfoSection({
 
       {/* Password Section */}
       <div className="bg-white rounded-3xl border border-border p-8 shadow-sm">
-        <h2 className="text-2xl font-bold text-foreground mb-6">Lösenord</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-6">{en ? 'Password' : 'Lösenord'}</h2>
         {!isChangingPassword ? (
           <button
             onClick={() => setIsChangingPassword(true)}
@@ -384,33 +387,33 @@ export default function PersonalInfoSection({
         ) : (
           <form onSubmit={handleUpdatePassword} className="space-y-4">
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-muted-foreground">Nuvarande lösenord</label>
+              <label className="block text-sm font-semibold text-muted-foreground">{en ? 'Current password' : 'Nuvarande lösenord'}</label>
               <input
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Ange ditt nuvarande lösenord"
+                placeholder={en ? 'Enter your current password' : 'Ange ditt nuvarande lösenord'}
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-muted-foreground">Nytt lösenord</label>
+              <label className="block text-sm font-semibold text-muted-foreground">{en ? 'New password' : 'Nytt lösenord'}</label>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Ange nytt lösenord"
+                placeholder={en ? 'Enter new password' : 'Ange nytt lösenord'}
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-muted-foreground">Bekräfta lösenord</label>
+              <label className="block text-sm font-semibold text-muted-foreground">{en ? 'Confirm password' : 'Bekräfta lösenord'}</label>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-border bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="Bekräfta nytt lösenord"
+                placeholder={en ? 'Confirm new password' : 'Bekräfta nytt lösenord'}
               />
             </div>
             <div className="flex gap-3">
@@ -419,7 +422,7 @@ export default function PersonalInfoSection({
                 disabled={isLoading}
                 className="px-6 py-3 rounded-xl bg-green-600 text-white font-bold text-sm hover:bg-green-700 transition-colors disabled:opacity-50"
               >
-                {isLoading ? 'Sparar...' : 'Spara lösenord'}
+                {isLoading ? (en ? 'Saving...' : 'Sparar...') : (en ? 'Save password' : 'Spara lösenord')}
               </button>
               <button
                 type="button"

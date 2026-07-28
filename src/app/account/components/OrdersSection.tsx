@@ -1,4 +1,5 @@
 'use client';
+import { useLanguage } from '@/context/LanguageContext';
 
 import React from 'react';
 import { useCart } from '@/context/CartContext';
@@ -38,6 +39,8 @@ export default function OrdersSection({
   onDataUpdated,
 }: OrdersSectionProps) {
   const { addItem } = useCart();
+  const { lang } = useLanguage();
+  const en = lang === 'en';
   const [orders, setOrders] = React.useState<Order[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [message, setMessage] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -72,7 +75,7 @@ export default function OrdersSection({
           quantity: item.quantity,
         });
       });
-      setMessage({ type: 'success', text: 'Beställning tillagd i varukorgen!' });
+      setMessage({ type: 'success', text: (en ? 'Order added to cart!' : 'Beställning tillagd i varukorgen!') });
     }
   };
 
@@ -93,10 +96,10 @@ export default function OrdersSection({
       });
 
       if (!res.ok) {
-        throw new Error('Misslyckades att ta bort beställning');
+        throw new Error((en ? 'Failed to remove order' : 'Misslyckades att ta bort beställning'));
       }
 
-      setMessage({ type: 'success', text: 'Beställning borttagen!' });
+      setMessage({ type: 'success', text: (en ? 'Order removed!' : 'Beställning borttagen!') });
       fetchOrders();
       onDataUpdated();
     } catch (error: any) {
@@ -126,16 +129,16 @@ export default function OrdersSection({
       )}
 
       <div className="bg-white rounded-3xl border border-border p-8 shadow-sm">
-        <h2 className="text-2xl font-bold text-foreground mb-6">Mina beställningar</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-6">{en ? 'My orders' : 'Mina beställningar'}</h2>
 
         {isLoading ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Laddar beställningar...</p>
+            <p className="text-muted-foreground">{en ? 'Loading orders...' : 'Laddar beställningar...'}</p>
           </div>
         ) : orders.length === 0 ? (
           <div className="text-center py-12 bg-muted/30 rounded-2xl">
-            <p className="text-lg text-muted-foreground font-medium">Du har inga beställningar än</p>
-            <p className="text-sm text-muted-foreground mt-2">När du gör en beställning kommer den att visas här</p>
+            <p className="text-lg text-muted-foreground font-medium">{en ? 'You have no orders yet' : 'Du har inga beställningar än'}</p>
+            <p className="text-sm text-muted-foreground mt-2">{en ? 'When you place an order it will appear here' : 'När du gör en beställning kommer den att visas här'}</p>
             <a
               href="/products"
               className="inline-block mt-4 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-colors"
@@ -174,7 +177,7 @@ export default function OrdersSection({
                 </div>
 
                 <div className="bg-muted/30 rounded-xl p-4 mb-4">
-                  <h4 className="font-semibold text-foreground text-sm mb-3">Produkter:</h4>
+                  <h4 className="font-semibold text-foreground text-sm mb-3">{en ? 'Products:' : 'Produkter:'}</h4>
                   <ul className="space-y-2">
                     {order.items.map((item, idx) => (
                       <li key={idx} className="flex justify-between text-sm">
@@ -191,7 +194,7 @@ export default function OrdersSection({
 
                 {order.shippingAddress && (
                   <div className="bg-muted/20 rounded-xl p-4 mb-4">
-                    <h4 className="font-semibold text-foreground text-sm mb-2">Leveransadress:</h4>
+                    <h4 className="font-semibold text-foreground text-sm mb-2">{en ? 'Delivery address:' : 'Leveransadress:'}</h4>
                     <p className="text-sm text-foreground">{order.shippingAddress.name}</p>
                     {order.shippingAddress.address && (
                       <>
@@ -211,7 +214,7 @@ export default function OrdersSection({
                 )}
                 {order.shippingOption && (
                   <div className="bg-muted/20 rounded-xl p-4 mb-4">
-                    <h4 className="font-semibold text-foreground text-sm mb-2">Leverans:</h4>
+                    <h4 className="font-semibold text-foreground text-sm mb-2">{en ? 'Delivery:' : 'Leverans:'}</h4>
                     <p className="text-sm text-foreground">{order.shippingOption}</p>
                     {order.shippingPostcode && (
                       <p className="text-sm text-muted-foreground mt-1">Postnummer: {order.shippingPostcode}</p>
@@ -227,7 +230,7 @@ export default function OrdersSection({
                       </a>
                     )}
                     {!order.postnordLabelUrl && order.shippingOption === 'PostNord' && (
-                      <p className="mt-3 text-sm text-muted-foreground">Fraktsedel skapas inom kort.</p>
+                      <p className="mt-3 text-sm text-muted-foreground">{en ? 'Shipping label will be created shortly.' : 'Fraktsedel skapas inom kort.'}</p>
                     )}
                   </div>
                 )}
