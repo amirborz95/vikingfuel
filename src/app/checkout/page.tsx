@@ -78,6 +78,7 @@ export default function CheckoutPage() {
   const [hasMounted, setHasMounted] = useState(false);
   const [country, setCountry] = useState('SE');
   const [method, setMethod] = useState<'pickup' | 'postnord'>('pickup');
+  const [methodChosen, setMethodChosen] = useState(false);
   const [deliveryOpen, setDeliveryOpen] = useState(false);
   const [form, setForm] = useState({ email: '', name: '', phone: '', line1: '', line2: '', postcode: '', city: '' });
   const [clientSecret, setClientSecret] = useState('');
@@ -125,12 +126,34 @@ export default function CheckoutPage() {
 
   const set = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
   const needsAddress = method === 'postnord';
-  const canPay =
-    !!form.email &&
-    (!needsAddress || (form.name && form.line1 && form.postcode && form.city));
 
   const startPayment = async () => {
     setError('');
+
+    // Validate required fields (everything except optional line2) and that a
+    // delivery method has actually been chosen. Show a clear message on click.
+    const missing: string[] = [];
+    if (!form.name.trim()) missing.push(en ? 'name' : 'namn');
+    if (!form.email.trim()) missing.push(en ? 'email' : 'e-post');
+    if (!form.phone.trim()) missing.push(en ? 'phone' : 'telefon');
+    if (needsAddress) {
+      if (!form.line1.trim()) missing.push(en ? 'street address' : 'gatuadress');
+      if (!form.postcode.trim()) missing.push(en ? 'postcode' : 'postnummer');
+      if (!form.city.trim()) missing.push(en ? 'city' : 'ort');
+    }
+
+    const parts: string[] = [];
+    if (missing.length) parts.push((en ? 'fill in ' : 'fyll i ') + missing.join(', '));
+    if (!methodChosen) {
+      parts.push(en ? 'select a delivery method' : 'välj leveranssätt');
+      setDeliveryOpen(true);
+    }
+    if (parts.length) {
+      const joined = parts.join(en ? ' and ' : ' och ');
+      setError((en ? 'Please ' : 'Vänligen ') + joined + '.');
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch('/api/create-payment-intent', {
@@ -246,15 +269,21 @@ export default function CheckoutPage() {
                     <span className="flex-1">
                       <span className="block text-xl font-bold text-foreground">{en ? 'Delivery method' : 'Leveranssätt'}</span>
                       {!deliveryOpen && (
-                        <span className="mt-0.5 block text-sm text-muted-foreground">
-                          {method === 'pickup'
-                            ? (en ? 'Pickup on location' : 'Hämta varan på plats')
-                            : (en ? 'PostNord home delivery' : 'PostNord hemleverans')}
-                          {' · '}
-                          <span className={shippingCost === 0 ? 'font-semibold text-primary' : 'font-semibold text-foreground'}>
-                            {shippingCost === 0 ? (en ? 'Free' : 'Gratis') : kr(shippingCost)}
+                        methodChosen ? (
+                          <span className="mt-0.5 block text-sm text-muted-foreground">
+                            {method === 'pickup'
+                              ? (en ? 'Pickup on location' : 'Hämta varan på plats')
+                              : (en ? 'PostNord home delivery' : 'PostNord hemleverans')}
+                            {' · '}
+                            <span className={shippingCost === 0 ? 'font-semibold text-primary' : 'font-semibold text-foreground'}>
+                              {shippingCost === 0 ? (en ? 'Free' : 'Gratis') : kr(shippingCost)}
+                            </span>
                           </span>
-                        </span>
+                        ) : (
+                          <span className="mt-0.5 block text-sm font-medium text-amber-600">
+                            {en ? 'Tap to choose a delivery method' : 'Tryck för att välja leveranssätt'}
+                          </span>
+                        )
                       )}
                     </span>
                     <svg
@@ -271,7 +300,7 @@ export default function CheckoutPage() {
                       {country === 'SE' && (
                         <DeliveryOption
                           selected={method === 'pickup'}
-                          onSelect={() => { setMethod('pickup'); setDeliveryOpen(false); }}
+                          onSelect={() => { setMethod('pickup'); setMethodChosen(true); setDeliveryOpen(false); }}
                           en={en}
                           icon={
                             <svg className="h-6 w-6 text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -287,7 +316,7 @@ export default function CheckoutPage() {
 
                       <DeliveryOption
                         selected={method === 'postnord'}
-                        onSelect={() => { setMethod('postnord'); setDeliveryOpen(false); }}
+                        onSelect={() => { setMethod('postnord'); setMethodChosen(true); setDeliveryOpen(false); }}
                         en={en}
                         icon={<PostNordLogo />}
                         title={en ? 'PostNord home delivery' : 'PostNord hemleverans'}
@@ -298,21 +327,19 @@ export default function CheckoutPage() {
                     </div>
                   )}
 
-                  {needsAddress && !canPay && (
-                    <p className="mt-4 flex items-center gap-2 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                  {error && (
+                    <p className="mt-4 flex items-center gap-2 rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
                       <svg className="h-4 w-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
                       </svg>
-                      {en ? 'Fill in name, address, postcode and city for PostNord delivery.' : 'Fyll i namn, adress, postnummer och ort för PostNord-leverans.'}
+                      {error}
                     </p>
                   )}
-
-                  {error && <p className="mt-4 text-sm text-rose-600">{error}</p>}
 
                   <button
                     type="button"
                     onClick={startPayment}
-                    disabled={!canPay || loading}
+                    disabled={loading}
                     className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-foreground px-5 py-4 text-base font-bold text-white shadow-lg transition-all hover:bg-slate-900 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {loading ? (en ? 'Loading...' : 'Laddar...') : (en ? 'Continue to payment' : 'Fortsätt till betalning')}
