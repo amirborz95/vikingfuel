@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { getShippingCost, type ShippingMethod } from '@/lib/shipping';
+import { type ShippingMethod } from '@/lib/shipping';
+import { getCarrier, carrierCost, type CarrierId } from '@/lib/carriers';
 import { totalUnits } from '@/lib/inventory';
 import { getInventoryState, reserveUnits } from '@/lib/inventory.server';
 import { savePendingOrder } from '@/lib/orders';
@@ -16,19 +17,25 @@ export async function POST(req: NextRequest) {
     if (!stripeSecret) {
       return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });
     }
-    if (!Array.isArray(items) || items.length === 0 || !customer?.email || !shipping?.method) {
+    const carrierId = (shipping?.carrier || shipping?.method) as CarrierId | undefined;
+    if (!Array.isArray(items) || items.length === 0 || !customer?.email || !carrierId) {
       return NextResponse.json({ error: 'Missing items, customer email or shipping option' }, { status: 400 });
     }
 
-    const method: ShippingMethod = shipping.method === 'postnord' ? 'postnord' : 'pickup';
+    const carrier = getCarrier(carrierId);
+    if (!carrier) {
+      return NextResponse.json({ error: 'Unknown shipping option' }, { status: 400 });
+    }
+    // Legacy field kept for downstream code that still expects pickup/postnord.
+    const method: ShippingMethod = carrier.provider === 'pickup' ? 'pickup' : 'postnord';
     const country = (shipping.country || 'SE').toUpperCase();
 
-    // Pickup is only valid within Sweden.
-    if (method === 'pickup' && country !== 'SE') {
-      return NextResponse.json({ error: 'Pickup is only available in Sweden' }, { status: 400 });
+    // Some carriers are only offered within Sweden.
+    if (carrier.seOnly && country !== 'SE') {
+      return NextResponse.json({ error: `${carrier.brand} is only available in Sweden` }, { status: 400 });
     }
-    // For PostNord we need a delivery address.
-    if (method === 'postnord' && (!shipping.line1 || !shipping.postcode || !shipping.city)) {
+    // Carriers that ship to an address need one.
+    if (carrier.needsAddress && (!shipping.line1 || !shipping.postcode || !shipping.city)) {
       return NextResponse.json({ error: 'Missing delivery address' }, { status: 400 });
     }
 
@@ -46,7 +53,7 @@ export async function POST(req: NextRequest) {
       (sum: number, it: any) => sum + Number(it.price) * Number(it.quantity),
       0
     );
-    const shippingCost = getShippingCost(method, country, subtotal);
+    const shippingCost = carrierCost(carrierId, country, subtotal);
     const total = Math.round((subtotal + shippingCost) * 100) / 100;
     const amountInCents = Math.round(total * 100);
 
@@ -60,6 +67,8 @@ export async function POST(req: NextRequest) {
         email: customer.email,
         name: (customer.name || '').slice(0, 200),
         shipping_method: method,
+        shipping_carrier: carrierId,
+        shipping_option_label: carrier.brand,
         shipping_country: country,
         source: 'onsite-checkout',
       },
@@ -80,6 +89,7 @@ export async function POST(req: NextRequest) {
       },
       shipping: {
         method,
+        carrier: carrierId,
         country,
         line1: shipping.line1 || '',
         line2: shipping.line2 || '',

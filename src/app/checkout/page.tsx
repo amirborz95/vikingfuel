@@ -7,7 +7,7 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { getShippingCost } from '@/lib/shipping';
+import { availableCarriers, carrierCost, getCarrier, type CarrierDef } from '@/lib/carriers';
 import { COUNTRIES } from '@/lib/countries';
 import AppImage from '@/components/ui/AppImage';
 import PostNordLogo from '@/components/ui/PostNordLogo';
@@ -77,26 +77,32 @@ export default function CheckoutPage() {
 
   const [hasMounted, setHasMounted] = useState(false);
   const [country, setCountry] = useState('SE');
-  const [method, setMethod] = useState<'pickup' | 'postnord'>('pickup');
-  const [methodChosen, setMethodChosen] = useState(false);
+  const [carrierId, setCarrierId] = useState('');
   const [deliveryOpen, setDeliveryOpen] = useState(false);
   const [form, setForm] = useState({ email: '', name: '', phone: '', line1: '', line2: '', postcode: '', city: '' });
   const [clientSecret, setClientSecret] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const carriers = useMemo(() => availableCarriers(country), [country]);
+  const carrier = getCarrier(carrierId);
+  const methodChosen = !!carrier;
+
   useEffect(() => setHasMounted(true), []);
   useEffect(() => {
     if (user?.email) setForm((p) => ({ ...p, email: user.email, name: p.name || user.name || '' }));
   }, [user]);
 
-  // Pickup only exists for Sweden; force PostNord for other countries.
+  // If the chosen carrier isn't available for the selected country, clear it.
   useEffect(() => {
-    if (country !== 'SE' && method === 'pickup') setMethod('postnord');
-  }, [country, method]);
+    if (carrierId && !carriers.some((c) => c.id === carrierId)) setCarrierId('');
+  }, [carriers, carrierId]);
 
   const subtotal = totalPrice;
-  const shippingCost = useMemo(() => getShippingCost(method, country, subtotal), [method, country, subtotal]);
+  const shippingCost = useMemo(
+    () => (carrierId ? carrierCost(carrierId, country, subtotal) : 0),
+    [carrierId, country, subtotal]
+  );
   const total = subtotal + shippingCost;
   const vat = Math.round((total - total / 1.06) * 100) / 100;
 
@@ -125,7 +131,7 @@ export default function CheckoutPage() {
   }
 
   const set = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
-  const needsAddress = method === 'postnord';
+  const needsAddress = carrier?.needsAddress ?? false;
 
   const startPayment = async () => {
     setError('');
@@ -162,7 +168,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           items: items.map((it) => ({ name: it.name, price: it.price, quantity: it.quantity, image: it.image })),
           customer: { email: form.email, name: form.name, phone: form.phone },
-          shipping: { method, country, line1: form.line1, line2: form.line2, postcode: form.postcode, city: form.city },
+          shipping: { carrier: carrierId, country, line1: form.line1, line2: form.line2, postcode: form.postcode, city: form.city },
         }),
       });
       const data = await res.json();
@@ -269,11 +275,9 @@ export default function CheckoutPage() {
                     <span className="flex-1">
                       <span className="block text-xl font-bold text-foreground">{en ? 'Delivery method' : 'Leveranssätt'}</span>
                       {!deliveryOpen && (
-                        methodChosen ? (
+                        carrier ? (
                           <span className="mt-0.5 block text-sm text-muted-foreground">
-                            {method === 'pickup'
-                              ? (en ? 'Pickup on location' : 'Hämta varan på plats')
-                              : (en ? 'PostNord home delivery' : 'PostNord hemleverans')}
+                            {carrier.brand}
                             {' · '}
                             <span className={shippingCost === 0 ? 'font-semibold text-primary' : 'font-semibold text-foreground'}>
                               {shippingCost === 0 ? (en ? 'Free' : 'Gratis') : kr(shippingCost)}
@@ -297,33 +301,22 @@ export default function CheckoutPage() {
                   {/* Alternatives — revealed when the header is clicked */}
                   {deliveryOpen && (
                     <div className="mt-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                      {country === 'SE' && (
-                        <DeliveryOption
-                          selected={methodChosen && method === 'pickup'}
-                          onSelect={() => { setMethod('pickup'); setMethodChosen(true); setDeliveryOpen(false); }}
-                          en={en}
-                          icon={
-                            <svg className="h-6 w-6 text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M3 9l1-5h16l1 5" /><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9" /><path d="M9 13h6" />
-                            </svg>
-                          }
-                          title={en ? 'Pickup on location' : 'Hämta varan på plats'}
-                          desc={en ? 'Collect your order at our warehouse.' : 'Hämta din order på vårt lager.'}
-                          priceLabel={en ? 'Free' : 'Gratis'}
-                          free
-                        />
-                      )}
-
-                      <DeliveryOption
-                        selected={methodChosen && method === 'postnord'}
-                        onSelect={() => { setMethod('postnord'); setMethodChosen(true); setDeliveryOpen(false); }}
-                        en={en}
-                        icon={<PostNordLogo />}
-                        title={en ? 'PostNord home delivery' : 'PostNord hemleverans'}
-                        desc={en ? 'Delivered to your door in 2–4 business days.' : 'Levereras hem till dig på 2–4 arbetsdagar.'}
-                        priceLabel={shippingCost === 0 ? (en ? 'Free' : 'Gratis') : kr(shippingCost)}
-                        free={shippingCost === 0}
-                      />
+                      {carriers.map((c) => {
+                        const cost = carrierCost(c.id, country, subtotal);
+                        return (
+                          <DeliveryOption
+                            key={c.id}
+                            selected={carrierId === c.id}
+                            onSelect={() => { setCarrierId(c.id); setDeliveryOpen(false); }}
+                            en={en}
+                            icon={<CarrierMark carrier={c} />}
+                            title={c.brand}
+                            desc={en ? c.descEn : c.descSv}
+                            priceLabel={cost === 0 ? (en ? 'Free' : 'Gratis') : kr(cost)}
+                            free={cost === 0}
+                          />
+                        );
+                      })}
                     </div>
                   )}
 
@@ -431,6 +424,30 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+/* ── Carrier icon/badge ──────────────────────────────────────────────── */
+function CarrierMark({ carrier }: { carrier: CarrierDef }) {
+  if (carrier.id === 'postnord') return <PostNordLogo />;
+  if (carrier.provider === 'pickup') {
+    return (
+      <svg className="h-6 w-6 text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 9l1-5h16l1 5" /><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9" /><path d="M9 13h6" />
+      </svg>
+    );
+  }
+  // Brand-coloured text badge for the Shipmondo carriers.
+  const styles: Record<string, string> = {
+    dhl: 'bg-[#FFCC00] text-[#D40511]',
+    earlybird: 'bg-slate-900 text-white',
+    budbee: 'bg-[#0A1D3B] text-white',
+    schenker: 'bg-[#00A5A7] text-white',
+  };
+  return (
+    <span className={`inline-flex items-center justify-center rounded-lg px-3 py-2 text-xs font-extrabold shadow-sm ${styles[carrier.id] || 'bg-foreground text-white'}`}>
+      {carrier.brand}
+    </span>
   );
 }
 

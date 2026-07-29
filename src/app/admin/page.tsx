@@ -4,6 +4,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import AnnouncementBar from '@/app/components/AnnouncementBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { getCarrier } from '@/lib/carriers';
 
 interface DashboardUser {
   name: string;
@@ -212,23 +213,21 @@ export default function AdminPage() {
   };
 
   const getShippingSummary = (order: any) => {
-    const shippingMethod = normalizeShippingOption(order?.shippingOption);
+    const carrier = getCarrier(order?.carrier);
+    const provider =
+      order?.carrierProvider ||
+      carrier?.provider ||
+      (normalizeShippingOption(order?.shippingOption) === 'postnord' ? 'postnord' : 'pickup');
+    const brand = order?.shippingOption || carrier?.brand || (provider === 'postnord' ? 'PostNord' : 'Uthämtning');
 
-    if (shippingMethod === 'postnord') {
+    if (provider !== 'pickup') {
       const address = order?.shippingAddress?.address
         ? Object.values(order.shippingAddress.address).filter(Boolean).join(', ')
         : '';
-
-      return {
-        label: 'PostNord',
-        detail: address || 'Ingen adress angiven',
-      };
+      return { label: brand, detail: address || 'Ingen adress angiven', needsLabel: true };
     }
 
-    return {
-      label: 'Uthämtning',
-      detail: 'Ingen adress behövs – kunden hämtar själv',
-    };
+    return { label: brand, detail: 'Ingen adress behövs – kunden hämtar själv', needsLabel: false };
   };
 
   const authEvents = useMemo(() => {
@@ -461,16 +460,21 @@ export default function AdminPage() {
 
                               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                                 <div className="text-sm text-slate-600 space-y-1">
-                                  {o.postnordTracking && (
-                                    <p className="text-slate-700"><span className="font-semibold text-slate-900">Spårning:</span> {o.postnordTracking}</p>
+                                  {(o.postnordTracking || o.shipmondoTracking) && (
+                                    <p className="text-slate-700"><span className="font-semibold text-slate-900">Spårning:</span> {o.postnordTracking || o.shipmondoTracking}</p>
                                   )}
-                                  {o.postnordLabelUrl && (
-                                    <a href={o.postnordLabelUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700 underline">
-                                      Skriv ut fraktsedel (PostNord)
+                                  {(o.postnordLabelUrl || o.shipmondoShipmentId) && (
+                                    <a
+                                      href={`/api/admin/label?email=${encodeURIComponent(row.userEmail)}&order=${encodeURIComponent(o.id)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700 underline"
+                                    >
+                                      Skriv ut fraktsedel{o.shippingOption ? ` (${o.shippingOption})` : ''}
                                     </a>
                                   )}
-                                  {isPostNord && !o.postnordShipmentId && (
-                                    <p className="text-xs text-amber-600">Ingen PostNord-etikett skapad ännu.</p>
+                                  {shippingSummary.needsLabel && !o.postnordShipmentId && !o.shipmondoShipmentId && (
+                                    <p className="text-xs text-amber-600">Ingen etikett skapad ännu.</p>
                                   )}
                                 </div>
 

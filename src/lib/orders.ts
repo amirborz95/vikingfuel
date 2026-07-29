@@ -1,6 +1,8 @@
 import Stripe from 'stripe';
 import { readUsers, writeUsers } from './auth';
 import { createPostNordShipment } from './postnord.server';
+import { createShipmondoShipment } from './shipmondo.server';
+import { getCarrier, type CarrierId } from './carriers';
 import { sendNewOrderAdminNotification } from './orderConfirmation';
 import { readData, writeData } from './dataStore';
 
@@ -14,6 +16,7 @@ export interface OrderDraft {
   customer: { email: string; name: string; phone?: string };
   shipping: {
     method: 'pickup' | 'postnord';
+    carrier?: CarrierId;
     country: string;
     line1?: string;
     line2?: string;
@@ -56,7 +59,11 @@ export async function finalizeOrderFromPaymentIntent(
   const existing = user.orders.find((o: any) => o.id === piId || o.sessionId === piId);
   if (existing) return { order: existing, created: false, email };
 
-  const isPostNord = draft.shipping.method === 'postnord';
+  const carrierId = (draft.shipping.carrier || draft.shipping.method) as CarrierId;
+  const carrier = getCarrier(carrierId);
+  const provider = carrier?.provider || (draft.shipping.method === 'postnord' ? 'postnord' : 'pickup');
+  const needsAddress = carrier ? carrier.needsAddress : draft.shipping.method === 'postnord';
+
   const order: any = {
     id: piId,
     sessionId: piId,
@@ -71,7 +78,7 @@ export async function finalizeOrderFromPaymentIntent(
     shippingAddress: {
       name: draft.customer.name || null,
       phone: draft.customer.phone || null,
-      address: isPostNord
+      address: needsAddress
         ? {
             line1: draft.shipping.line1 || '',
             line2: draft.shipping.line2 || '',
@@ -81,7 +88,9 @@ export async function finalizeOrderFromPaymentIntent(
           }
         : null,
     },
-    shippingOption: isPostNord ? 'PostNord' : 'Uthämtning',
+    carrier: carrierId,
+    carrierProvider: provider,
+    shippingOption: carrier?.brand || (draft.shipping.method === 'postnord' ? 'PostNord' : 'Uthämtning'),
     shippingPostcode: draft.shipping.postcode || null,
     shippingCountry: draft.shipping.country || 'SE',
     shippingCost: draft.shippingCost,
@@ -89,31 +98,53 @@ export async function finalizeOrderFromPaymentIntent(
     postnordLabelUrl: null,
     postnordLabelPdfUrl: null,
     postnordTracking: null,
+    shipmondoShipmentId: null,
+    shipmondoTracking: null,
     createdAt: new Date().toISOString(),
   };
 
-  if (isPostNord && order.shippingAddress?.address) {
+  // Auto-book the shipment/label at order time so it's ready to print.
+  // Non-fatal: the order is still created and the admin can retry from the panel.
+  if (needsAddress && order.shippingAddress?.address) {
     try {
-      const shipment = await createPostNordShipment({
-        orderId: order.id,
-        packageDescription: `Order ${order.id}`,
-        items: order.items,
-        totalAmount: order.totalAmount,
-        customerEmail: email,
-        shippingDetails: {
-          name: order.shippingAddress.name,
-          phone: order.shippingAddress.phone || '',
-          address: order.shippingAddress.address,
-        },
-      });
-      if (shipment) {
-        order.postnordShipmentId = shipment.shipmentId;
-        order.postnordTracking = shipment.trackingNumber || null;
-        order.postnordLabelUrl = shipment.labelUrl || null;
-        order.postnordLabelPdfUrl = shipment.labelPdfUrl || null;
+      if (provider === 'postnord') {
+        const shipment = await createPostNordShipment({
+          orderId: order.id,
+          packageDescription: `Order ${order.id}`,
+          items: order.items,
+          totalAmount: order.totalAmount,
+          customerEmail: email,
+          shippingDetails: {
+            name: order.shippingAddress.name,
+            phone: order.shippingAddress.phone || '',
+            address: order.shippingAddress.address,
+          },
+        });
+        if (shipment) {
+          order.postnordShipmentId = shipment.shipmentId;
+          order.postnordTracking = shipment.trackingNumber || null;
+          order.postnordLabelUrl = shipment.labelUrl || null;
+          order.postnordLabelPdfUrl = shipment.labelPdfUrl || null;
+        }
+      } else if (provider === 'shipmondo') {
+        const productCode = carrier?.productEnv ? process.env[carrier.productEnv] || '' : '';
+        const shipment = await createShipmondoShipment({
+          orderId: order.id,
+          productCode,
+          customerEmail: email,
+          recipient: {
+            name: order.shippingAddress.name,
+            phone: order.shippingAddress.phone || '',
+            address: order.shippingAddress.address,
+          },
+        });
+        if (shipment) {
+          order.shipmondoShipmentId = shipment.shipmentId;
+          order.shipmondoTracking = shipment.trackingNumber || null;
+        }
       }
     } catch (e) {
-      console.error(`PostNord auto-booking failed for PI order ${order.id} (non-fatal):`, e);
+      console.error(`Shipment auto-booking (${provider}) failed for PI order ${order.id} (non-fatal):`, e);
     }
   }
 
