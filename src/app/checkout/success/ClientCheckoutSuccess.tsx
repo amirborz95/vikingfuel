@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import Icon from '@/components/ui/AppIcon';
 import { useLanguage } from '@/context/LanguageContext';
+import { fbqTrack } from '@/lib/fbpixel';
 
 interface Props {
   sessionId?: string | null;
@@ -41,6 +42,17 @@ export default function ClientCheckoutSuccess({ sessionId, paymentIntentId }: Pr
         }
 
         setConfirmationStatus(result.message || t('checkoutResult.confOk'));
+
+        // Fire the Meta Pixel Purchase event once per order.
+        const orderKey = paymentIntentId || sessionId || '';
+        const firedKey = `fb_purchase_${orderKey}`;
+        if (orderKey && !sessionStorage.getItem(firedKey)) {
+          fbqTrack('Purchase', {
+            value: typeof result.value === 'number' ? result.value : undefined,
+            currency: result.currency || 'SEK',
+          });
+          sessionStorage.setItem(firedKey, '1');
+        }
       } catch (error: any) {
         setConfirmationError(error?.message || t('checkoutResult.confErrGeneric'));
       }

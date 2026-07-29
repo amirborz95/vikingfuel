@@ -21,7 +21,11 @@ export async function POST(req: NextRequest) {
           console.error('PI confirmation email failed:', e);
         }
       }
-      return NextResponse.json({ success: true });
+      return NextResponse.json({
+        success: true,
+        value: result.order?.totalAmount ?? null,
+        currency: result.order?.currency || 'SEK',
+      });
     }
 
     if (!sessionId) {

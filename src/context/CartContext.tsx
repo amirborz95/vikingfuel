@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { MAX_STOCK, totalUnits as calculateUnits, itemUnits } from '@/lib/inventory';
+import { fbqTrack } from '@/lib/fbpixel';
 
 export interface CartItem {
   id: string;
@@ -78,6 +79,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return [...prev, { ...item, quantity: quantityToAdd }];
     });
     setIsOpen(true);
+    fbqTrack('AddToCart', {
+      content_name: item.name,
+      content_ids: [item.id],
+      content_type: 'product',
+      value: (item.price || 0) * quantityToAdd,
+      currency: 'SEK',
+    });
   }, []);
 
   const removeItem = useCallback((id: string) => {

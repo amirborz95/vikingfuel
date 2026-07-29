@@ -9,6 +9,7 @@ import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { availableCarriers, carrierCost, getCarrier, type CarrierDef } from '@/lib/carriers';
 import { COUNTRIES } from '@/lib/countries';
+import { fbqTrack } from '@/lib/fbpixel';
 import AppImage from '@/components/ui/AppImage';
 import PostNordLogo from '@/components/ui/PostNordLogo';
 import PaymentMethods from '@/components/ui/PaymentMethods';
@@ -159,6 +160,14 @@ export default function CheckoutPage() {
       setError((en ? 'Please ' : 'Vänligen ') + joined + '.');
       return;
     }
+
+    fbqTrack('InitiateCheckout', {
+      value: total,
+      currency: 'SEK',
+      num_items: items.reduce((s, it) => s + it.quantity, 0),
+      content_ids: items.map((it) => it.id),
+      content_type: 'product',
+    });
 
     setLoading(true);
     try {

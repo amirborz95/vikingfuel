@@ -8,6 +8,7 @@ import { CartProvider } from '@/context/CartContext';
 import { LanguageProvider } from '@/context/LanguageContext';
 import AnalyticsTracker from '@/components/AnalyticsTracker';
 import NewsletterPopup from '@/app/components/NewsletterPopup';
+import MetaPixel from '@/components/MetaPixel';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -47,6 +48,7 @@ export default function RootLayout({
         <LanguageProvider>
           <AuthProvider>
             <CartProvider>
+              <MetaPixel />
               <AnalyticsTracker />
               {children}
               <NewsletterPopup />
