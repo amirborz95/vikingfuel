@@ -11,6 +11,70 @@ const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: '2026-04-22
 
 const VALID_STATUSES = ['not_shipped', 'progress', 'shipped'];
 
+/**
+ * Book the shipping label for an order if one hasn't been created yet.
+ * Handles both PostNord (direct) and Shipmondo carriers. Mutates `order` with
+ * the shipment id / tracking. Returns a warning string on failure, else null.
+ */
+async function bookLabelIfMissing(order: any, user: any): Promise<string | null> {
+  if (!order.shippingAddress?.address) return null;
+
+  const carrier = getCarrier(order.carrier);
+  const optLower = String(order.shippingOption || '').toLowerCase();
+  const provider =
+    order.carrierProvider ||
+    carrier?.provider ||
+    (optLower.includes('postnord') ? 'postnord' : 'pickup');
+
+  if (provider === 'postnord' && !order.postnordShipmentId) {
+    try {
+      const shipment = await createPostNordShipment({
+        orderId: order.id,
+        packageDescription: `Order ${order.id}`,
+        items: order.items || [],
+        totalAmount: order.totalAmount || 0,
+        customerEmail: user.email,
+        shippingDetails: {
+          name: order.shippingAddress?.name || user.name || 'Kund',
+          phone: order.shippingAddress?.phone || order.billingAddress?.phone || '',
+          address: order.shippingAddress?.address || null,
+        },
+      });
+      if (shipment) {
+        order.postnordShipmentId = shipment.shipmentId;
+        order.postnordTracking = shipment.trackingNumber || order.postnordTracking || null;
+        order.postnordLabelUrl = shipment.labelUrl || null;
+        order.postnordLabelPdfUrl = shipment.labelPdfUrl || null;
+      }
+    } catch (e: any) {
+      console.error('PostNord booking failed:', e);
+      return `PostNord-etikett kunde inte skapas: ${e?.message || e}`;
+    }
+  } else if (provider === 'shipmondo' && !order.shipmondoShipmentId) {
+    try {
+      const productCode = carrier?.productEnv ? process.env[carrier.productEnv] || '' : '';
+      const shipment = await createShipmondoShipment({
+        orderId: order.id,
+        productCode,
+        customerEmail: user.email,
+        recipient: {
+          name: order.shippingAddress?.name || user.name || 'Kund',
+          phone: order.shippingAddress?.phone || order.billingAddress?.phone || '',
+          address: order.shippingAddress?.address,
+        },
+      });
+      if (shipment) {
+        order.shipmondoShipmentId = shipment.shipmentId;
+        order.shipmondoTracking = shipment.trackingNumber || order.shipmondoTracking || null;
+      }
+    } catch (e: any) {
+      console.error('Shipmondo booking failed:', e);
+      return `${carrier?.brand || 'Frakt'}-etikett kunde inte skapas: ${e?.message || e}`;
+    }
+  }
+  return null;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const users = await readUsers();
@@ -52,10 +116,11 @@ export async function POST(req: NextRequest) {
     if (!userEmail || !orderId) {
       return NextResponse.json({ error: 'userEmail and orderId are required' }, { status: 400 });
     }
-    if (action && action !== 'setStatus') {
+    const act = action || 'setStatus';
+    if (act !== 'setStatus' && act !== 'printLabel') {
       return NextResponse.json({ error: 'Unsupported action' }, { status: 400 });
     }
-    if (!VALID_STATUSES.includes(requestedStatus)) {
+    if (act === 'setStatus' && !VALID_STATUSES.includes(requestedStatus)) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
     }
 
@@ -65,74 +130,31 @@ export async function POST(req: NextRequest) {
     const order = (user.orders || []).find((o: any) => o.id === orderId || o.sessionId === orderId);
     if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
 
-    const wasShipped = order.status === 'shipped';
-    order.status = requestedStatus;
-
     let warning: string | null = null;
     let emailed = false;
+
+    // ── Print label: book the label if needed and move the order to "Pågår" ──
+    if (act === 'printLabel') {
+      warning = await bookLabelIfMissing(order, user);
+      const hasLabel = !!(order.postnordLabelUrl || order.shipmondoShipmentId || order.postnordShipmentId);
+      // Advance to "progress" only from the not-shipped state (never downgrade).
+      if (order.status !== 'shipped' && order.status !== 'progress') {
+        order.status = 'progress';
+      }
+      await writeUsers(users);
+      const labelUrl = hasLabel
+        ? `/api/admin/label?email=${encodeURIComponent(userEmail)}&order=${encodeURIComponent(order.id)}`
+        : null;
+      return NextResponse.json({ success: true, order, labelUrl, warning });
+    }
+
+    const wasShipped = order.status === 'shipped';
+    order.status = requestedStatus;
 
     // Only act (label fallback + customer email) on the transition INTO shipped.
     if (requestedStatus === 'shipped' && !wasShipped) {
       if (!order.shippedAt) order.shippedAt = new Date().toISOString();
-
-      // Determine the carrier/provider (fall back to the shippingOption label
-      // for older orders created before the carrier field existed).
-      const carrier = getCarrier(order.carrier);
-      const optLower = String(order.shippingOption || '').toLowerCase();
-      const provider =
-        order.carrierProvider ||
-        carrier?.provider ||
-        (optLower.includes('postnord') ? 'postnord' : 'pickup');
-
-      // Fallback: if the label wasn't created at order time, create it now.
-      if (order.shippingAddress?.address) {
-        if (provider === 'postnord' && !order.postnordShipmentId) {
-          try {
-            const shipment = await createPostNordShipment({
-              orderId: order.id,
-              packageDescription: `Order ${order.id}`,
-              items: order.items || [],
-              totalAmount: order.totalAmount || 0,
-              customerEmail: user.email,
-              shippingDetails: {
-                name: order.shippingAddress?.name || user.name || 'Kund',
-                phone: order.shippingAddress?.phone || order.billingAddress?.phone || '',
-                address: order.shippingAddress?.address || null,
-              },
-            });
-            if (shipment) {
-              order.postnordShipmentId = shipment.shipmentId;
-              order.postnordTracking = shipment.trackingNumber || order.postnordTracking || null;
-              order.postnordLabelUrl = shipment.labelUrl || null;
-              order.postnordLabelPdfUrl = shipment.labelPdfUrl || null;
-            }
-          } catch (e: any) {
-            console.error('PostNord fallback booking failed:', e);
-            warning = `PostNord-etikett kunde inte skapas: ${e?.message || e}`;
-          }
-        } else if (provider === 'shipmondo' && !order.shipmondoShipmentId) {
-          try {
-            const productCode = carrier?.productEnv ? process.env[carrier.productEnv] || '' : '';
-            const shipment = await createShipmondoShipment({
-              orderId: order.id,
-              productCode,
-              customerEmail: user.email,
-              recipient: {
-                name: order.shippingAddress?.name || user.name || 'Kund',
-                phone: order.shippingAddress?.phone || order.billingAddress?.phone || '',
-                address: order.shippingAddress?.address,
-              },
-            });
-            if (shipment) {
-              order.shipmondoShipmentId = shipment.shipmentId;
-              order.shipmondoTracking = shipment.trackingNumber || order.shipmondoTracking || null;
-            }
-          } catch (e: any) {
-            console.error('Shipmondo fallback booking failed:', e);
-            warning = `${carrier?.brand || 'Frakt'}-etikett kunde inte skapas: ${e?.message || e}`;
-          }
-        }
-      }
+      warning = await bookLabelIfMissing(order, user);
 
       // Email the customer their shipping confirmation (once).
       if (!order.shippingEmailSent) {

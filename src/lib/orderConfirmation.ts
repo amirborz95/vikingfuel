@@ -1,10 +1,26 @@
 import Stripe from 'stripe';
 import nodemailer from 'nodemailer';
+import { getCarrier } from './carriers';
 import {
   buildOrderConfirmationHtml,
   buildShippingHtml,
   type EmailItem,
 } from './emailTemplates';
+
+/**
+ * Carrier-aware view of a stored order: is it a pickup, what's the brand label
+ * and the tracking number (works for PostNord and every Shipmondo carrier).
+ */
+function orderShipping(order: any): { isPickup: boolean; brand: string; tracking: string | null } {
+  const carrier = getCarrier(order?.carrier);
+  const provider =
+    order?.carrierProvider ||
+    carrier?.provider ||
+    (String(order?.shippingOption || '').toLowerCase() === 'postnord' ? 'postnord' : 'pickup');
+  const brand = order?.shippingOption || carrier?.brand || (provider === 'postnord' ? 'PostNord' : 'Uthämtning');
+  const tracking = order?.postnordTracking || order?.shipmondoTracking || null;
+  return { isPickup: provider === 'pickup', brand, tracking };
+}
 
 function normalizeItems(items: any[]): EmailItem[] {
   return (items || []).map((it) => ({
@@ -192,13 +208,13 @@ export async function sendNewOrderAdminNotification(order: any, customerEmail: s
     .map((it: any) => `• ${it.name} x${it.quantity} — ${formatAmount((it.price || 0) * (it.quantity || 1) * 100)} kr`)
     .join('\n');
 
-  const shippingMethod = normalizeShippingOption(order.shippingOption);
-  const shippingLabel = shippingMethod === 'postnord' ? 'PostNord' : 'Uthämtning';
+  const { isPickup, brand } = orderShipping(order);
+  const shippingLabel = brand;
   const address = order.shippingAddress?.address
     ? Object.values(order.shippingAddress.address).filter(Boolean).join(', ')
-    : shippingMethod === 'postnord'
-      ? 'Ingen adress angiven'
-      : 'Uthämtning (ingen adress)';
+    : isPickup
+      ? 'Uthämtning (ingen adress)'
+      : 'Ingen adress angiven';
 
   const totalText = formatAmount((order.totalAmount || 0) * 100);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vikingfuel.se';
@@ -262,14 +278,13 @@ export async function sendOrderConfirmationEmailForStoredOrder(order: any, recip
 }
 
 export function buildShippingNotificationTextFromStoredOrder(order: any, recipientEmail: string, tracking?: string) {
-  const shippingMethod = normalizeShippingOption(order.shippingOption);
-  if (shippingMethod !== 'postnord') {
+  const { isPickup, brand } = orderShipping(order);
+  if (isPickup) {
     return `Hej!\n\nDin beställning ${order.id} är redo för uthämtning.\n\nOrdernummer: ${order.id}\nE-post: ${recipientEmail}\n\nHämtningsadress:\n${getPickupAddressText()}\n\nVänligen hämta din order enligt överenskommelse.\n\nMed vänlig hälsning,\nVikingfuel\n`;
   }
 
-  const postNordShipmentId = order.postnordShipmentId || '';
-  const trackingText = tracking || order.postnordTracking || 'Ej tillgängligt';
-  return `Hej!\n\nDin beställning ${order.id} har skickats.\n\nOrdernummer: ${order.id}\nE-post: ${recipientEmail}\n${postNordShipmentId ? `PostNord-nummer: ${postNordShipmentId}\n` : ''}Spårningsnummer: ${trackingText}\n\nDu kan följa din försändelse på PostNords spårningssida med numret ovan.\n\nMed vänlig hälsning,\nVikingfuel\n`;
+  const trackingText = tracking || orderShipping(order).tracking || 'Ej tillgängligt';
+  return `Hej!\n\nDin beställning ${order.id} har skickats med ${brand}.\n\nOrdernummer: ${order.id}\nE-post: ${recipientEmail}\nSpårningsnummer: ${trackingText}\n\nDu kan följa din försändelse hos ${brand} med numret ovan.\n\nMed vänlig hälsning,\nVikingfuel\n`;
 }
 
 export async function sendShippingNotificationForStoredOrder(order: any, recipientEmail: string, tracking?: string) {
@@ -277,26 +292,26 @@ export async function sendShippingNotificationForStoredOrder(order: any, recipie
     throw new Error('Recipient email is required for shipping notification');
   }
 
-  const method = normalizeShippingOption(order.shippingOption);
+  const { isPickup, brand, tracking: orderTracking } = orderShipping(order);
+  const detailMethod: 'postnord' | 'pickup' = isPickup ? 'pickup' : 'postnord';
   const transporter = getTransporter();
   await transporter.sendMail({
     from: senderEmail,
     to: recipientEmail,
     replyTo: replyToEmail,
-    subject:
-      method === 'postnord'
-        ? 'Din beställning har skickats — spårningsnummer'
-        : 'Din beställning är redo för uthämtning',
+    subject: isPickup
+      ? 'Din beställning är redo för uthämtning'
+      : 'Din beställning har skickats — spårningsnummer',
     text: buildShippingNotificationTextFromStoredOrder(order, recipientEmail, tracking),
     html: buildShippingHtml({
       orderId: order.id,
       customerName: order.shippingAddress?.name || undefined,
       items: normalizeItems(order.items),
       totalInCents: (order.totalAmount || 0) * 100,
-      shippingLabel: method === 'postnord' ? 'PostNord' : 'Uthämtning',
-      shippingDetail: storedOrderShippingDetail(order, method),
-      tracking: tracking || order.postnordTracking || null,
-      isPostNord: method === 'postnord',
+      shippingLabel: brand,
+      shippingDetail: storedOrderShippingDetail(order, detailMethod),
+      tracking: tracking || orderTracking,
+      isPostNord: !isPickup,
     }),
   });
   return { sent: true };
