@@ -369,19 +369,24 @@ export default function AdminPage() {
                 </div>
 
                 <div id="orders" className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
-                  <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Management</p>
-                      <h2 className="mt-2 text-2xl font-bold text-slate-900">Orders</h2>
+                      <h2 className="mt-2 text-2xl font-bold text-slate-900">Orderhantering</h2>
                       <p className="mt-2 text-sm text-slate-600 max-w-3xl">
-                        Manage all customer orders with status tracking and fulfillment actions.
+                        Se alla beställningar, skriv ut fraktsedlar och markera som skickade på den dedikerade orders-sidan.
                       </p>
                     </div>
-                    <span className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-700 whitespace-nowrap">
-                      {orders.length} Total
-                    </span>
+                    <a
+                      href="/admin/orders"
+                      className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800 whitespace-nowrap"
+                    >
+                      Gå till orders
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+                    </a>
                   </div>
 
+                  {false && (
                   <div className="mt-6 space-y-4">
                     {ordersLoading ? (
                       <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-12 text-center text-sm text-slate-500">Loading orders...</div>
@@ -515,6 +520,7 @@ export default function AdminPage() {
                       </div>
                     )}
                   </div>
+                  )}
                 </div>
 
                 <div id="users" className="grid gap-6 lg:grid-cols-[2fr_1fr]">
