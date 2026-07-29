@@ -12,7 +12,7 @@ function kr(n: number) {
 }
 
 export default function AffiliatePage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, login } = useAuth();
   const { lang } = useLanguage();
   const en = lang === 'en';
 
@@ -20,6 +20,26 @@ export default function AffiliatePage() {
   const [generating, setGenerating] = useState(false);
   const [data, setData] = useState<any>(null);
   const [copied, setCopied] = useState(false);
+
+  // Inline login (so affiliates can sign in right here, like the admin panel).
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [loggingIn, setLoggingIn] = useState(false);
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoginError('');
+    setLoggingIn(true);
+    try {
+      const res = await login(loginEmail.trim(), loginPassword);
+      if (!res.success) setLoginError(res.message || (en ? 'Login failed.' : 'Inloggning misslyckades.'));
+    } catch {
+      setLoginError(en ? 'Login failed.' : 'Inloggning misslyckades.');
+    } finally {
+      setLoggingIn(false);
+    }
+  }
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://vikingfuel.se';
 
@@ -67,7 +87,7 @@ export default function AffiliatePage() {
           <div className="mb-8 text-center">
             <p className="section-label">{en ? 'Affiliate program' : 'Affiliateprogram'}</p>
             <h1 className="mt-3 text-4xl font-bold text-foreground">
-              {en ? 'Earn with Viking Fuel' : 'Tjäna med Viking Fuel'}
+              {en ? 'Become an affiliate' : 'Bli affiliate'}
             </h1>
             <p className="mt-3 text-muted-foreground">
               {en
@@ -77,17 +97,60 @@ export default function AffiliatePage() {
           </div>
 
           {!isAuthenticated ? (
-            <div className="rounded-2xl border border-border bg-white p-10 text-center shadow-card">
-              <p className="mb-6 text-muted-foreground">
-                {en ? 'Log in to your account to become an affiliate.' : 'Logga in på ditt konto för att bli affiliate.'}
-              </p>
-              <div className="flex justify-center gap-3">
-                <Link href="/login" className="rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 hover:brightness-95">
-                  {en ? 'Log in' : 'Logga in'}
-                </Link>
-                <Link href="/register" className="rounded-xl border border-foreground px-6 py-3 text-sm font-bold text-foreground hover:bg-slate-100">
-                  {en ? 'Create account' : 'Skapa konto'}
-                </Link>
+            <div className="space-y-6">
+              {/* How it works */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                {[
+                  { n: '1', t: en ? 'Log in first' : 'Logga in först', d: en ? 'Sign in to your account below.' : 'Logga in på ditt konto nedan.' },
+                  { n: '2', t: en ? 'Get your link' : 'Få din länk', d: en ? 'Generate your personal link.' : 'Generera din personliga länk.' },
+                  { n: '3', t: en ? 'Earn per bottle' : 'Tjäna per flaska', d: en ? `${perBottle} kr for every bottle sold.` : `${perBottle} kr för varje såld flaska.` },
+                ].map((s) => (
+                  <div key={s.n} className="rounded-2xl border border-border bg-white p-5 text-center shadow-card">
+                    <span className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">{s.n}</span>
+                    <p className="font-bold text-foreground">{s.t}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">{s.d}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Inline login */}
+              <div className="rounded-2xl border border-border bg-white p-6 shadow-card sm:p-8">
+                <h2 className="text-xl font-bold text-foreground">{en ? 'Log in to start' : 'Logga in för att börja'}</h2>
+                <p className="mt-1 mb-5 text-sm text-muted-foreground">
+                  {en ? 'Use your Viking Fuel account to become an affiliate.' : 'Använd ditt Viking Fuel-konto för att bli affiliate.'}
+                </p>
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <input
+                    type="email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    placeholder={en ? 'Email' : 'E-post'}
+                    required
+                    className="w-full rounded-xl border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                  <input
+                    type="password"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    placeholder={en ? 'Password' : 'Lösenord'}
+                    required
+                    className="w-full rounded-xl border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                  {loginError && <p className="text-sm text-rose-600">{loginError}</p>}
+                  <button
+                    type="submit"
+                    disabled={loggingIn || !loginEmail || !loginPassword}
+                    className="w-full rounded-xl bg-primary px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-primary/20 transition hover:brightness-95 disabled:opacity-50"
+                  >
+                    {loggingIn ? (en ? 'Logging in…' : 'Loggar in…') : (en ? 'Log in' : 'Logga in')}
+                  </button>
+                </form>
+                <p className="mt-4 text-center text-sm text-muted-foreground">
+                  {en ? 'No account yet?' : 'Inget konto än?'}{' '}
+                  <Link href="/register" className="font-semibold text-primary hover:underline">
+                    {en ? 'Create one' : 'Skapa konto'}
+                  </Link>
+                </p>
               </div>
             </div>
           ) : loading ? (
