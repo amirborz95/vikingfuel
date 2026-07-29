@@ -10,6 +10,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { availableCarriers, carrierCost, getCarrier, type CarrierDef } from '@/lib/carriers';
 import { COUNTRIES } from '@/lib/countries';
 import { fbqTrack } from '@/lib/fbpixel';
+import { computeDiscount } from '@/lib/discount';
 import AppImage from '@/components/ui/AppImage';
 import PostNordLogo from '@/components/ui/PostNordLogo';
 import PaymentMethods from '@/components/ui/PaymentMethods';
@@ -99,12 +100,16 @@ export default function CheckoutPage() {
     if (carrierId && !carriers.some((c) => c.id === carrierId)) setCarrierId('');
   }, [carriers, carrierId]);
 
+  const [discountInput, setDiscountInput] = useState('');
+  const discount = useMemo(() => computeDiscount(discountInput, items), [discountInput, items]);
+  const discountAmount = discount.valid ? discount.amount : 0;
+
   const subtotal = totalPrice;
   const shippingCost = useMemo(
     () => (carrierId ? carrierCost(carrierId, country, subtotal) : 0),
     [carrierId, country, subtotal]
   );
-  const total = subtotal + shippingCost;
+  const total = Math.max(0, subtotal + shippingCost - discountAmount);
   const vat = Math.round((total - total / 1.06) * 100) / 100;
 
   if (!hasMounted) return null;
@@ -175,9 +180,10 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: items.map((it) => ({ name: it.name, price: it.price, quantity: it.quantity, image: it.image })),
+          items: items.map((it) => ({ name: it.name, price: it.price, quantity: it.quantity, units: it.units ?? 1, image: it.image })),
           customer: { email: form.email, name: form.name, phone: form.phone },
           shipping: { carrier: carrierId, country, line1: form.line1, line2: form.line2, postcode: form.postcode, city: form.city },
+          discountCode: discount.valid ? discount.code : '',
         }),
       });
       const data = await res.json();
@@ -390,12 +396,44 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
+              {/* Discount code */}
+              <div className="border-t border-border px-6 py-5">
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {en ? 'Discount code' : 'Rabattkod'}
+                </label>
+                <input
+                  value={discountInput}
+                  onChange={(e) => setDiscountInput(e.target.value)}
+                  placeholder={en ? 'e.g. VIKING10' : 't.ex. VIKING10'}
+                  className={`${inputCls} uppercase`}
+                />
+                {discountInput.trim() && (
+                  discount.valid ? (
+                    <p className="mt-2 text-sm font-medium text-primary">
+                      ✓ {discount.code} {en ? 'applied' : 'tillagd'} — −{kr(discountAmount)}
+                    </p>
+                  ) : (
+                    <p className="mt-2 text-sm text-amber-600">
+                      {discount.reason === 'not_applicable'
+                        ? (en ? 'Only valid on the single bottle.' : 'Gäller bara enstaka flaska.')
+                        : (en ? 'Invalid code.' : 'Ogiltig kod.')}
+                    </p>
+                  )
+                )}
+              </div>
+
               {/* Totals */}
               <div className="space-y-3 border-t border-border px-6 py-5 text-sm">
                 <div className="flex justify-between text-muted-foreground">
                   <span>{en ? 'Subtotal' : 'Delbelopp'}</span>
                   <span className="font-medium text-foreground">{kr(subtotal)}</span>
                 </div>
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-primary">
+                    <span>{en ? 'Discount' : 'Rabatt'} ({discount.code})</span>
+                    <span className="font-medium">−{kr(discountAmount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-muted-foreground">
                   <span>{en ? 'Shipping' : 'Frakt'}</span>
                   <span className={`font-medium ${shippingCost === 0 ? 'text-primary' : 'text-foreground'}`}>

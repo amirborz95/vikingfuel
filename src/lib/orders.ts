@@ -3,6 +3,7 @@ import { readUsers, writeUsers } from './auth';
 import { createPostNordShipment } from './postnord.server';
 import { createShipmondoShipment } from './shipmondo.server';
 import { getCarrier, type CarrierId } from './carriers';
+import { commissionForItems } from './affiliates';
 import { sendNewOrderAdminNotification } from './orderConfirmation';
 import { readData, writeData } from './dataStore';
 
@@ -12,7 +13,7 @@ const stripe = new Stripe(stripeSecret, { apiVersion: '2026-04-22.dahlia' });
 // ── Embedded (on-site) checkout: draft stored at PaymentIntent creation,
 //    finalized into a real order when payment_intent.succeeded fires. ──
 export interface OrderDraft {
-  items: { name: string; price: number; quantity: number; image?: string }[];
+  items: { name: string; price: number; quantity: number; units?: number; image?: string }[];
   customer: { email: string; name: string; phone?: string };
   shipping: {
     method: 'pickup' | 'postnord';
@@ -23,6 +24,9 @@ export interface OrderDraft {
     postcode?: string;
     city?: string;
   };
+  discountCode?: string;
+  discountAmount?: number;
+  affiliateCode?: string;
   subtotal: number;
   shippingCost: number;
   total: number;
@@ -64,13 +68,24 @@ export async function finalizeOrderFromPaymentIntent(
   const provider = carrier?.provider || (draft.shipping.method === 'postnord' ? 'postnord' : 'pickup');
   const needsAddress = carrier ? carrier.needsAddress : draft.shipping.method === 'postnord';
 
+  // Affiliate commission: 50 kr per bottle sold through the link.
+  const affiliateBottles = draft.affiliateCode
+    ? draft.items.reduce((s, it) => s + (it.units ?? 1) * it.quantity, 0)
+    : 0;
+  const affiliateCommission = draft.affiliateCode ? commissionForItems(draft.items) : 0;
+
   const order: any = {
     id: piId,
     sessionId: piId,
     paymentIntentId: piId,
-    items: draft.items.map((it) => ({ name: it.name, quantity: it.quantity, price: it.price })),
+    items: draft.items.map((it) => ({ name: it.name, quantity: it.quantity, price: it.price, units: it.units ?? 1 })),
     totalAmount: draft.total,
     currency: 'SEK',
+    discountCode: draft.discountCode || null,
+    discountAmount: draft.discountAmount || 0,
+    affiliateCode: draft.affiliateCode || null,
+    affiliateBottles,
+    affiliateCommission,
     status: 'not_shipped',
     paymentStatus: 'paid',
     paymentMethod: 'card',

@@ -34,6 +34,7 @@ export default function Footer() {
         { label: t('footer.about'), href: '/about' },
         { label: t('footer.faq'), href: '/faq' },
         { label: t('footer.reviews'), href: '/reviews' },
+        { label: t('footer.affiliate'), href: '/affiliate' },
       ],
     },
     service: {
