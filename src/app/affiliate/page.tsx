@@ -20,6 +20,7 @@ export default function AffiliatePage() {
   const [generating, setGenerating] = useState(false);
   const [data, setData] = useState<any>(null);
   const [copied, setCopied] = useState(false);
+  const [showWithdraw, setShowWithdraw] = useState(false);
 
   // Inline login (so affiliates can sign in right here, like the admin panel).
   const [loginEmail, setLoginEmail] = useState('');
@@ -213,6 +214,59 @@ export default function AffiliatePage() {
                   <p className="text-2xl font-bold text-primary">{kr(stats?.commission ?? 0)}</p>
                   <p className="text-xs text-muted-foreground">{en ? 'Earned' : 'Intjänat'}</p>
                 </div>
+              </div>
+
+              {/* Withdrawal */}
+              <div className="rounded-2xl border border-border bg-white p-6 shadow-card sm:p-8">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="font-bold text-foreground">{en ? 'Withdraw your earnings' : 'Ta ut dina pengar'}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {en ? `Available to withdraw: ${kr(stats?.commission ?? 0)}` : `Tillgängligt att ta ut: ${kr(stats?.commission ?? 0)}`}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowWithdraw((v) => !v)}
+                    disabled={(stats?.commission ?? 0) <= 0}
+                    className="rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {en ? 'Request withdrawal' : 'Begär utbetalning'}
+                  </button>
+                </div>
+
+                {showWithdraw && (
+                  <div className="mt-6 rounded-xl border border-border bg-muted/50 p-5 text-sm animate-in fade-in slide-in-from-top-2 duration-300">
+                    <p className="font-semibold text-foreground">
+                      {en ? 'To get paid, email us the details below:' : 'För att få betalt, mejla oss uppgifterna nedan:'}
+                    </p>
+                    <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-muted-foreground">
+                      <li>{en ? 'Your login (email): ' : 'Ditt inloggningsnamn (e-post): '}<span className="font-semibold text-foreground">{user?.email}</span></li>
+                      <li>{en ? 'Affiliate code: ' : 'Affiliate-kod: '}<span className="font-semibold text-foreground">{affiliate.code}</span></li>
+                      <li>{en ? 'Amount sold / earned: ' : 'Sålt / intjänat belopp: '}<span className="font-semibold text-foreground">{kr(stats?.commission ?? 0)} ({stats?.bottles ?? 0} {en ? 'bottles' : 'flaskor'})</span></li>
+                      <li>{en ? 'Your IBAN' : 'Din IBAN'}</li>
+                      <li>{en ? 'Your SWIFT/BIC' : 'Din SWIFT/BIC'}</li>
+                      <li>{en ? 'Account holder name' : 'Kontoinnehavarens namn'}</li>
+                    </ol>
+                    <a
+                      href={`mailto:info@vikingfuel.se?subject=${encodeURIComponent(
+                        (en ? 'Withdrawal request — affiliate ' : 'Utbetalning — affiliate ') + affiliate.code
+                      )}&body=${encodeURIComponent(
+                        (en
+                          ? `Hi! I'd like to request a withdrawal for my affiliate account.\n\nLogin (email): ${user?.email}\nAffiliate code: ${affiliate.code}\nBottles sold: ${stats?.bottles ?? 0}\nAmount earned: ${kr(stats?.commission ?? 0)}\n\nIBAN: \nSWIFT/BIC: \nAccount holder name: \n`
+                          : `Hej! Jag vill begära utbetalning för mitt affiliate-konto.\n\nInloggningsnamn (e-post): ${user?.email}\nAffiliate-kod: ${affiliate.code}\nAntal sålda flaskor: ${stats?.bottles ?? 0}\nIntjänat belopp: ${kr(stats?.commission ?? 0)}\n\nIBAN: \nSWIFT/BIC: \nKontoinnehavarens namn: \n`)
+                      )}`}
+                      className="mt-4 inline-flex items-center gap-2 rounded-xl bg-foreground px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-900"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                      {en ? 'Email info@vikingfuel.se' : 'Mejla info@vikingfuel.se'}
+                    </a>
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      {en
+                        ? 'We process payouts to your bank account after verifying your sales.'
+                        : 'Vi betalar ut till ditt bankkonto efter att vi verifierat din försäljning.'}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Recent orders */}
