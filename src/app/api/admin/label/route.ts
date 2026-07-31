@@ -29,8 +29,9 @@ export async function GET(req: NextRequest) {
     }
 
     // PostNord: public label URL → redirect.
-    if (order.postnordLabelUrl) {
-      return NextResponse.redirect(order.postnordLabelUrl);
+    const postnordUrl = order.postnordLabelUrl || order.postnordLabelPdfUrl;
+    if (postnordUrl) {
+      return NextResponse.redirect(postnordUrl);
     }
 
     // Shipmondo: fetch the PDF with server-side auth and stream it.

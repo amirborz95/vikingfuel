@@ -212,15 +212,23 @@ export async function createPostNordShipment(
       }
     }
 
+    // Find a printable label URL. PostNord tags it differently depending on
+    // account/mode — LABEL / PDF / ZPL type, or a url that contains "label".
+    const findLabel = (pred: (u: any) => boolean) =>
+      idInfo && Array.isArray(idInfo.urls) ? idInfo.urls.find(pred)?.url : undefined;
+
     const labelUrl =
       data?.labelUrl ||
       data?.printLabelUrl ||
-      (idInfo &&
-        Array.isArray(idInfo.urls) &&
-        idInfo.urls.find((u: any) => (u.type || '').toUpperCase().includes('LABEL'))?.url) ||
+      findLabel((u: any) => /LABEL/i.test(u?.type || '')) ||
+      findLabel((u: any) => /\b(PDF|ZPL)\b/i.test(u?.type || '')) ||
+      findLabel((u: any) => /label/i.test(u?.url || '')) ||
       undefined;
 
-    const labelPdfUrl = data?.labelPdfUrl || undefined;
+    const labelPdfUrl =
+      data?.labelPdfUrl ||
+      findLabel((u: any) => /PDF/i.test(u?.type || '') && /label/i.test(u?.url || '')) ||
+      undefined;
 
     return { bookingId, trackingNumber, labelUrl, labelPdfUrl, rawJson: data };
   };
