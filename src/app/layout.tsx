@@ -43,6 +43,9 @@ export const metadata: Metadata = {
   icons: {
     icon: [{ url: '/viking_logo_nav.png', type: 'image/png' }],
   },
+  verification: {
+    google: 'DDAyKo3-3mG30fkdenXj22Md4pecav43TqSZINU9SEU',
+  },
   openGraph: {
     title: 'Viking Fuel — Premium Kosttillskott',
     description: 'Nordiska premiumtillskott för daglig prestation.',
