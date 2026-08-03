@@ -9,6 +9,8 @@ import { LanguageProvider } from '@/context/LanguageContext';
 import AnalyticsTracker from '@/components/AnalyticsTracker';
 import NewsletterPopup from '@/app/components/NewsletterPopup';
 import MetaPixel from '@/components/MetaPixel';
+import JsonLd from '@/components/JsonLd';
+import { organizationSchema, websiteSchema } from '@/lib/seo';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -24,9 +26,20 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
-  title: 'Viking Fuel — Premium Kosttillskott för Daglig Prestation',
+  title: 'Viking Fuel — Kosttillskott för Energi & Testo-support',
   description:
-    'Viking Fuel erbjuder premium kosttillskott med naturliga ingredienser för energi, uthållighet och prestationsstöd. Tillverkat i EU. Fri frakt över 700 kr.',
+    'Viking Fuel — naturligt energitillskott och testo-support för energi, uthållighet och fokus. Slut på att vara trött på eftermiddagen. Tillverkat i EU. Fri frakt över 700 kr.',
+  keywords: [
+    'energitillskott',
+    'kosttillskott energi',
+    'testo support',
+    'energy boost',
+    'naturligt kosttillskott',
+    'trött på eftermiddagen',
+    'kosttillskott utan koffein',
+    'Viking Fuel',
+    'maca ashwagandha ginseng',
+  ],
   icons: {
     icon: [{ url: '/viking_logo_nav.png', type: 'image/png' }],
   },
@@ -45,6 +58,7 @@ export default function RootLayout({
   return (
     <html lang="sv" className={plusJakartaSans.variable}>
       <body className={plusJakartaSans.className}>
+        <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <LanguageProvider>
           <AuthProvider>
             <CartProvider>
