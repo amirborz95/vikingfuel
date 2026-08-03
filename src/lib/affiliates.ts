@@ -15,6 +15,7 @@ export interface Affiliate {
   email: string;
   name?: string;
   createdAt: string;
+  paidOut?: number; // total SEK already paid out to this affiliate
 }
 
 const FILE = 'affiliates.json';
@@ -58,4 +59,14 @@ export async function getOrCreateAffiliate(email: string, name?: string): Promis
 /** Commission (SEK) for a set of order items, based on total bottles. */
 export function commissionForItems(items: Array<{ quantity: number; units?: number }>): number {
   return totalUnits(items) * COMMISSION_PER_BOTTLE;
+}
+
+/** Record that `amount` SEK has been paid out to an affiliate (sets the total). */
+export async function setAffiliatePaidOut(code: string, amount: number): Promise<Affiliate | null> {
+  const list = await readAffiliates();
+  const a = list.find((x) => x.code === String(code));
+  if (!a) return null;
+  a.paidOut = Math.max(0, Math.round(amount));
+  await writeAffiliates(list);
+  return a;
 }

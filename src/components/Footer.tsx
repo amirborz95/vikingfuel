@@ -42,6 +42,7 @@ export default function Footer() {
       title: t('footer.serviceTitle'),
       links: [
         { label: t('footer.contact'), href: '/contact' },
+        { label: t('footer.subscription'), href: '/prenumeration' },
         { label: t('footer.shipping'), href: '/frakt-leverans' },
         { label: t('footer.returns'), href: '/returpolicy' },
       ],

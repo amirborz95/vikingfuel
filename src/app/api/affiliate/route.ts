@@ -44,7 +44,9 @@ export async function GET(req: NextRequest) {
   const meta = { perBottle: COMMISSION_PER_BOTTLE, currency: COMMISSION_CURRENCY };
   if (!affiliate) return NextResponse.json({ affiliate: null, meta });
 
-  const stats = await statsForCode(affiliate.code);
+  const base = await statsForCode(affiliate.code);
+  const paidOut = affiliate.paidOut || 0;
+  const stats = { ...base, paidOut, available: Math.max(0, base.commission - paidOut) };
   return NextResponse.json({ affiliate, stats, meta });
 }
 
@@ -54,7 +56,9 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
   const affiliate = await getOrCreateAffiliate(user.email, user.name || undefined);
-  const stats = await statsForCode(affiliate.code);
+  const base = await statsForCode(affiliate.code);
+  const paidOut = affiliate.paidOut || 0;
+  const stats = { ...base, paidOut, available: Math.max(0, base.commission - paidOut) };
   return NextResponse.json({
     affiliate,
     stats,

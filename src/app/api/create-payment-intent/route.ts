@@ -66,12 +66,24 @@ export async function POST(req: NextRequest) {
     const total = Math.round((subtotal + shippingCost - discountAmount) * 100) / 100;
     const amountInCents = Math.round(Math.max(0, total) * 100);
 
+    // Find or create a Stripe customer so the card can be reused for the
+    // one-click post-purchase upsell (setup_future_usage saves the card).
+    let customerId: string | undefined;
+    try {
+      const existing = await stripe.customers.list({ email: customer.email, limit: 1 });
+      const cust = existing.data[0] || (await stripe.customers.create({ email: customer.email, name: customer.name || undefined }));
+      customerId = cust.id;
+    } catch (e) {
+      console.error('Customer lookup/create failed (non-fatal):', e);
+    }
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency: 'sek',
       automatic_payment_methods: { enabled: true },
       receipt_email: customer.email,
       description: `Vikingfuel order — ${customer.email}`,
+      ...(customerId ? { customer: customerId, setup_future_usage: 'off_session' as const } : {}),
       metadata: {
         email: customer.email,
         name: (customer.name || '').slice(0, 200),

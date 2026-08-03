@@ -222,12 +222,12 @@ export default function AffiliatePage() {
                   <div>
                     <p className="font-bold text-foreground">{en ? 'Withdraw your earnings' : 'Ta ut dina pengar'}</p>
                     <p className="text-sm text-muted-foreground">
-                      {en ? `Available to withdraw: ${kr(stats?.commission ?? 0)}` : `Tillgängligt att ta ut: ${kr(stats?.commission ?? 0)}`}
+                      {en ? `Available to withdraw: ${kr(stats?.available ?? 0)}` : `Tillgängligt att ta ut: ${kr(stats?.available ?? 0)}`}
                     </p>
                   </div>
                   <button
                     onClick={() => setShowWithdraw((v) => !v)}
-                    disabled={(stats?.commission ?? 0) <= 0}
+                    disabled={(stats?.available ?? 0) <= 0}
                     className="rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {en ? 'Request withdrawal' : 'Begär utbetalning'}
@@ -242,7 +242,7 @@ export default function AffiliatePage() {
                     <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-muted-foreground">
                       <li>{en ? 'Your login (email): ' : 'Ditt inloggningsnamn (e-post): '}<span className="font-semibold text-foreground">{user?.email}</span></li>
                       <li>{en ? 'Affiliate code: ' : 'Affiliate-kod: '}<span className="font-semibold text-foreground">{affiliate.code}</span></li>
-                      <li>{en ? 'Amount sold / earned: ' : 'Sålt / intjänat belopp: '}<span className="font-semibold text-foreground">{kr(stats?.commission ?? 0)} ({stats?.bottles ?? 0} {en ? 'bottles' : 'flaskor'})</span></li>
+                      <li>{en ? 'Amount to pay out: ' : 'Belopp att betala ut: '}<span className="font-semibold text-foreground">{kr(stats?.available ?? 0)} ({stats?.bottles ?? 0} {en ? 'bottles' : 'flaskor'})</span></li>
                       <li>{en ? 'Your IBAN' : 'Din IBAN'}</li>
                       <li>{en ? 'Your SWIFT/BIC' : 'Din SWIFT/BIC'}</li>
                       <li>{en ? 'Account holder name' : 'Kontoinnehavarens namn'}</li>
@@ -252,8 +252,8 @@ export default function AffiliatePage() {
                         (en ? 'Withdrawal request — affiliate ' : 'Utbetalning — affiliate ') + affiliate.code
                       )}&body=${encodeURIComponent(
                         (en
-                          ? `Hi! I'd like to request a withdrawal for my affiliate account.\n\nLogin (email): ${user?.email}\nAffiliate code: ${affiliate.code}\nBottles sold: ${stats?.bottles ?? 0}\nAmount earned: ${kr(stats?.commission ?? 0)}\n\nIBAN: \nSWIFT/BIC: \nAccount holder name: \n`
-                          : `Hej! Jag vill begära utbetalning för mitt affiliate-konto.\n\nInloggningsnamn (e-post): ${user?.email}\nAffiliate-kod: ${affiliate.code}\nAntal sålda flaskor: ${stats?.bottles ?? 0}\nIntjänat belopp: ${kr(stats?.commission ?? 0)}\n\nIBAN: \nSWIFT/BIC: \nKontoinnehavarens namn: \n`)
+                          ? `Hi! I'd like to request a withdrawal for my affiliate account.\n\nLogin (email): ${user?.email}\nAffiliate code: ${affiliate.code}\nBottles sold: ${stats?.bottles ?? 0}\nAmount to pay out: ${kr(stats?.available ?? 0)}\n\nIBAN: \nSWIFT/BIC: \nAccount holder name: \n`
+                          : `Hej! Jag vill begära utbetalning för mitt affiliate-konto.\n\nInloggningsnamn (e-post): ${user?.email}\nAffiliate-kod: ${affiliate.code}\nAntal sålda flaskor: ${stats?.bottles ?? 0}\nBelopp att betala ut: ${kr(stats?.available ?? 0)}\n\nIBAN: \nSWIFT/BIC: \nKontoinnehavarens namn: \n`)
                       )}`}
                       className="mt-4 inline-flex items-center gap-2 rounded-xl bg-foreground px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-900"
                     >

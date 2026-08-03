@@ -25,6 +25,25 @@ export default function AdminAffiliatePage() {
     }
   }, []);
 
+  const [payingCode, setPayingCode] = useState<string | null>(null);
+  async function markPaid(code: string, unpaid: number) {
+    if (!confirm(`Markera ${unpaid.toLocaleString('sv-SE')} kr som utbetalt till affiliate ${code}?`)) return;
+    setPayingCode(code);
+    try {
+      const res = await fetch('/api/admin/affiliates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'markPaid', code }),
+      });
+      if (!res.ok) throw new Error((await res.json())?.error || 'Misslyckades');
+      await load();
+    } catch (e: any) {
+      alert('Kunde inte markera utbetald: ' + (e?.message || e));
+    } finally {
+      setPayingCode(null);
+    }
+  }
+
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -83,7 +102,7 @@ export default function AdminAffiliatePage() {
   }
 
   const rows = data?.affiliates || [];
-  const totals = data?.totals || { affiliates: 0, orders: 0, bottles: 0, commission: 0, sales: 0 };
+  const totals = data?.totals || { affiliates: 0, orders: 0, bottles: 0, commission: 0, paidOut: 0, unpaid: 0, sales: 0 };
   const perBottle = data?.meta?.perBottle ?? 50;
 
   return (
@@ -104,9 +123,9 @@ export default function AdminAffiliatePage() {
         {/* Totals */}
         <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <Stat label="Affiliates" value={String(totals.affiliates)} />
-          <Stat label="Ordrar" value={String(totals.orders)} />
           <Stat label="Sålda flaskor" value={String(totals.bottles)} />
-          <Stat label="Total provision" value={kr(totals.commission)} highlight />
+          <Stat label="Total provision" value={kr(totals.commission)} />
+          <Stat label="Kvar att betala" value={kr(totals.unpaid)} highlight />
         </div>
 
         {rows.length === 0 ? (
@@ -122,9 +141,10 @@ export default function AdminAffiliatePage() {
                   <th className="px-4 py-3">Affiliate</th>
                   <th className="px-4 py-3 text-right">Ordrar</th>
                   <th className="px-4 py-3 text-right">Flaskor</th>
-                  <th className="px-4 py-3 text-right">Försäljning</th>
                   <th className="px-4 py-3 text-right">Provision</th>
-                  <th className="px-4 py-3">Senaste</th>
+                  <th className="px-4 py-3 text-right">Utbetalt</th>
+                  <th className="px-4 py-3 text-right">Kvar</th>
+                  <th className="px-4 py-3 text-right">Åtgärd</th>
                 </tr>
               </thead>
               <tbody>
@@ -141,10 +161,21 @@ export default function AdminAffiliatePage() {
                     </td>
                     <td className="px-4 py-3 text-right text-foreground">{r.orders}</td>
                     <td className="px-4 py-3 text-right text-foreground">{r.bottles}</td>
-                    <td className="px-4 py-3 text-right text-foreground">{kr(r.sales)}</td>
-                    <td className="px-4 py-3 text-right font-bold text-primary">{kr(r.commission)}</td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">
-                      {r.lastOrder ? new Date(r.lastOrder).toLocaleDateString('sv-SE') : '—'}
+                    <td className="px-4 py-3 text-right font-bold text-foreground">{kr(r.commission)}</td>
+                    <td className="px-4 py-3 text-right text-muted-foreground">{kr(r.paidOut)}</td>
+                    <td className="px-4 py-3 text-right font-bold text-primary">{kr(r.unpaid)}</td>
+                    <td className="px-4 py-3 text-right">
+                      {r.unpaid > 0 ? (
+                        <button
+                          onClick={() => markPaid(r.code, r.unpaid)}
+                          disabled={payingCode === r.code}
+                          className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
+                        >
+                          {payingCode === r.code ? '...' : 'Markera utbetald'}
+                        </button>
+                      ) : (
+                        <span className="text-xs font-semibold text-emerald-600">✓ Betald</span>
+                      )}
                     </td>
                   </tr>
                 ))}
