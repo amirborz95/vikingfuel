@@ -11,6 +11,7 @@ import { useInventory } from '@/hooks/useInventory';
 import ProductCard from '@/app/components/ProductCard';
 import { allProducts } from '@/app/components/ProductsSection';
 import { useLanguage } from '@/context/LanguageContext';
+import { subPlanForUnits } from '@/lib/subscriptions';
 
 export default function ProductDetailView() {
   const { lang } = useLanguage();
@@ -19,6 +20,8 @@ export default function ProductDetailView() {
   const [activeTab, setActiveTab] = useState('desc');
   const [quantity, setQuantity] = useState(1);
   const [addedMsg, setAddedMsg] = useState(false);
+  const [purchaseMode, setPurchaseMode] = useState<'subscribe' | 'once'>('subscribe');
+  const [subLoading, setSubLoading] = useState(false);
   const { addItem, totalUnits } = useCart();
   const inventory = useInventory();
 
@@ -152,6 +155,8 @@ export default function ProductDetailView() {
   const stockPercentage = Math.max(0, Math.min(100, Math.round((remainingUnits / MAX_STOCK) * 100)));
   const canAddToCart = enoughStockForSelection && enoughCartCapacity;
 
+  const subPlan = subPlanForUnits(bundle.units ?? 1);
+
   const handleAddToCart = () => {
     if (!canAddToCart) return;
     addItem({
@@ -166,6 +171,25 @@ export default function ProductDetailView() {
     });
     setAddedMsg(true);
     setTimeout(() => setAddedMsg(false), 2000);
+  };
+
+  const handleSubscribe = async () => {
+    if (!subPlan) return;
+    setSubLoading(true);
+    try {
+      const res = await fetch('/api/create-subscription-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId: subPlan.priceId, quantity }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else alert(data.error || (en ? 'Could not start subscription.' : 'Kunde inte starta prenumerationen.'));
+    } catch {
+      alert(en ? 'Something went wrong.' : 'Något gick fel.');
+    } finally {
+      setSubLoading(false);
+    }
   };
 
   const trustBadges = en
@@ -295,6 +319,47 @@ export default function ProductDetailView() {
                 </div>
               </div>
 
+              {/* Purchase mode: subscribe (default) vs one-time */}
+              {subPlan && (
+                <div className="mb-4 space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => setPurchaseMode('subscribe')}
+                    className={`relative w-full text-left rounded-2xl border-2 p-4 transition-all ${purchaseMode === 'subscribe' ? 'border-primary bg-accent' : 'border-border bg-white hover:border-primary/40'}`}
+                  >
+                    <span className="absolute -top-2.5 right-4 rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold text-white">{en ? 'Save 20%' : 'Spara 20%'}</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${purchaseMode === 'subscribe' ? 'border-primary bg-primary' : 'border-border'}`}>
+                          {purchaseMode === 'subscribe' && <Icon name="CheckIcon" size={11} className="text-white" />}
+                        </span>
+                        <div>
+                          <p className="text-sm font-bold text-foreground">{en ? 'Subscribe & save' : 'Prenumerera & spara'}</p>
+                          <p className="text-xs text-muted-foreground">{en ? 'Delivered monthly · cancel anytime' : 'Levereras varje månad · avsluta när du vill'}</p>
+                        </div>
+                      </div>
+                      <p className="text-sm font-bold text-primary">{subPlan.monthly} SEK<span className="text-xs font-medium text-muted-foreground">/{en ? 'mo' : 'mån'}</span></p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPurchaseMode('once')}
+                    className={`w-full text-left rounded-2xl border-2 p-4 transition-all ${purchaseMode === 'once' ? 'border-primary bg-accent' : 'border-border bg-white hover:border-primary/40'}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${purchaseMode === 'once' ? 'border-primary bg-primary' : 'border-border'}`}>
+                          {purchaseMode === 'once' && <Icon name="CheckIcon" size={11} className="text-white" />}
+                        </span>
+                        <p className="text-sm font-bold text-foreground">{en ? 'One-time purchase' : 'Köp en gång'}</p>
+                      </div>
+                      <p className="text-sm font-bold text-foreground">{bundle.price} SEK</p>
+                    </div>
+                  </button>
+                </div>
+              )}
+
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex items-center gap-2 border border-border rounded-xl p-1">
                   <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-9 h-9 rounded-lg hover:bg-muted transition-colors flex items-center justify-center" aria-label={en ? 'Decrease quantity' : 'Minska antal'}>
@@ -305,10 +370,17 @@ export default function ProductDetailView() {
                     <Icon name="PlusIcon" size={14} />
                   </button>
                 </div>
-                <button onClick={handleAddToCart} disabled={!canAddToCart} className={`flex-1 py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 ${canAddToCart ? 'bg-primary text-white hover:bg-green-700' : 'bg-muted text-muted-foreground cursor-not-allowed'}`}>
-                  <Icon name="ShoppingCartIcon" size={16} />
-                  {addedMsg ? (en ? 'Added to cart' : 'Tillagd i varukorg') : canAddToCart ? (en ? 'Add to cart' : 'Lägg till i varukorg') : (en ? 'Out of stock' : 'Slut i lager')}
-                </button>
+                {subPlan && purchaseMode === 'subscribe' ? (
+                  <button onClick={handleSubscribe} disabled={!canAddToCart || subLoading} className={`flex-1 py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 ${canAddToCart && !subLoading ? 'bg-primary text-white hover:bg-green-700' : 'bg-muted text-muted-foreground cursor-not-allowed'}`}>
+                    <Icon name="ArrowPathIcon" size={16} />
+                    {subLoading ? (en ? 'Loading…' : 'Laddar…') : canAddToCart ? (en ? `Subscribe – ${subPlan.monthly} SEK/mo` : `Prenumerera – ${subPlan.monthly} SEK/mån`) : (en ? 'Out of stock' : 'Slut i lager')}
+                  </button>
+                ) : (
+                  <button onClick={handleAddToCart} disabled={!canAddToCart} className={`flex-1 py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 ${canAddToCart ? 'bg-primary text-white hover:bg-green-700' : 'bg-muted text-muted-foreground cursor-not-allowed'}`}>
+                    <Icon name="ShoppingCartIcon" size={16} />
+                    {addedMsg ? (en ? 'Added to cart' : 'Tillagd i varukorg') : canAddToCart ? (en ? 'Add to cart' : 'Lägg till i varukorg') : (en ? 'Out of stock' : 'Slut i lager')}
+                  </button>
+                )}
               </div>
 
               <p className="text-xs text-muted-foreground mb-4">{en ? '6% VAT included in the price.' : '6% moms ingår i priset.'}</p>
