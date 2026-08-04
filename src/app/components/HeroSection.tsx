@@ -61,7 +61,7 @@ export default function HeroSection() {
           >
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 rounded-sm bg-[#9c8e6f] px-8 py-4 text-sm font-bold uppercase tracking-wider text-[#17150f] transition-all hover:bg-[#b0a284] hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 rounded-sm bg-[#2f6b4a] px-8 py-4 text-sm font-bold uppercase tracking-wider text-white transition-all hover:bg-[#3a8259] hover:-translate-y-0.5"
             >
               Shoppa nu
             </Link>
@@ -80,7 +80,7 @@ export default function HeroSection() {
         <div className="mx-auto grid max-w-screen-2xl grid-cols-2 gap-y-3 px-6 py-5 sm:grid-cols-4 sm:px-10 lg:px-16 xl:px-24">
           {trust.map((item) => (
             <div key={item} className="flex items-center gap-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#cfc7b6]">
-              <svg className="h-4 w-4 flex-shrink-0 text-[#9c8e6f]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+              <svg className="h-4 w-4 flex-shrink-0 text-[#4f9d72]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
               {item}
             </div>
           ))}
