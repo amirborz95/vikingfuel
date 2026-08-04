@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 export default function ForgedInNorth() {
   return (
-    <section className="relative overflow-hidden bg-[#17150f]">
+    <section className="relative overflow-hidden border-t border-white/5 bg-[#17150f]">
       <div className="absolute inset-0 z-0">
         <img
           src="/assets/images/forged-viking.png"

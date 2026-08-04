@@ -13,7 +13,7 @@ const items = [
     ),
   },
   {
-    title: 'Carefully selected ingredients',
+    title: 'Noga utvalda ingredienser',
     desc: 'Ingredienser valda med fokus på kvalitet och transparens.',
     icon: (
       <g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -22,7 +22,7 @@ const items = [
     ),
   },
   {
-    title: 'Scandinavian brand',
+    title: 'Skandinaviskt varumärke',
     desc: 'Designad med nordisk enkelhet och styrka.',
     icon: (
       <g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -31,8 +31,8 @@ const items = [
     ),
   },
   {
-    title: 'Premium quality',
-    desc: 'Producerad enligt strikta kvalitetskrav.',
+    title: 'Premiumkvalitet',
+    desc: 'Producerad enligt strikta kvalitetskrav i EU.',
     icon: (
       <g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="9" r="6" /><path d="M9 14l-2 7 5-3 5 3-2-7" /><path d="M9.5 9l1.8 1.8L15 7" />
@@ -43,15 +43,15 @@ const items = [
 
 export default function HomeFeatures4() {
   return (
-    <section className="bg-[#e8e1d4] py-16 lg:py-20">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-10 px-6 lg:grid-cols-4 lg:gap-8">
+    <section className="border-t border-white/5 bg-[#100f0b] py-16 lg:py-20">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-x-6 gap-y-10 px-6 lg:grid-cols-4">
         {items.map((it) => (
           <div key={it.title} className="text-center">
-            <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center text-[#2a271f]">
-              <svg viewBox="0 0 24 24" className="h-8 w-8">{it.icon}</svg>
+            <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-full border border-[#4f9d72]/30 bg-[#4f9d72]/10 text-[#4f9d72]">
+              <svg viewBox="0 0 24 24" className="h-6 w-6">{it.icon}</svg>
             </div>
-            <h3 className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-[#2a271f]">{it.title}</h3>
-            <p className="mx-auto max-w-[220px] text-xs leading-relaxed text-[#6b6456]">{it.desc}</p>
+            <h3 className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-[#f3efe6]">{it.title}</h3>
+            <p className="mx-auto max-w-[220px] text-xs leading-relaxed text-[#9c9483]">{it.desc}</p>
           </div>
         ))}
       </div>
