@@ -3,151 +3,82 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import Icon from '@/components/ui/AppIcon';
-import { useLanguage } from '@/context/LanguageContext';
 
-const trustItemIcons = ['TruckIcon', 'ShieldCheckIcon', 'ArrowPathIcon', 'SparklesIcon', 'BoltIcon'];
+const HERO_IMG = 'https://i.postimg.cc/SQZ7ycXV/Chat-GPT-Image-Jun-4-2026-01-35-12-PM.png';
+
+const trust = [
+  'Tillverkad i EU',
+  'Premium ingredienser',
+  '60 kapslar',
+  'Fri frakt över 700 kr',
+];
 
 export default function HeroSection() {
-  const { t } = useLanguage();
-  const trustItems = [
-    { title: t('home.trust.fastTitle'), subtitle: t('home.trust.fastSub') },
-    { title: t('home.trust.freeTitle'), subtitle: t('home.trust.freeSub') },
-    { title: t('home.trust.returnsTitle'), subtitle: t('home.trust.returnsSub') },
-    { title: t('home.trust.payTitle'), subtitle: t('home.trust.paySub') },
-    { title: t('home.trust.naturalTitle'), subtitle: t('home.trust.naturalSub') },
-  ].map((item, index) => ({
-    ...item,
-    icon: trustItemIcons[index] as any,
-  }));
-
   return (
-    <>
-      {/* ── HERO ── */}
-      <section className="relative overflow-hidden min-h-[88vh] flex flex-col justify-between">
-        {/* Full-width background image */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src="https://i.postimg.cc/SQZ7ycXV/Chat-GPT-Image-Jun-4-2026-01-35-12-PM.png"
-            alt="Viking Fuel hero background"
-            className="w-full h-full object-cover object-center"
-            loading="eager"
-          />
-          {/* Dark overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/20" />
-        </div>
+    <section className="relative min-h-[92vh] overflow-hidden bg-[#17150f] flex flex-col justify-between">
+      {/* Background warrior image */}
+      <div className="absolute inset-0 z-0">
+        <img src={HERO_IMG} alt="Viking warrior" className="h-full w-full object-cover object-[70%_center]" loading="eager" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#100f0b] via-[#100f0b]/85 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#100f0b] via-transparent to-[#100f0b]/40" />
+      </div>
 
-        {/* Subtle noise texture */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.03] z-[1]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-            backgroundSize: '200px 200px',
-          }}
-        />
-
-        {/* ── MASSIVE HEADLINE — top of section ── */}
-        <div className="relative z-10 pt-10 lg:pt-14 px-4 sm:px-8 lg:px-16 xl:px-24 overflow-hidden">
+      {/* Content */}
+      <div className="relative z-10 flex flex-1 items-center px-6 sm:px-10 lg:px-16 xl:px-24 pt-28 pb-10">
+        <div className="max-w-2xl">
           <motion.h1
-            initial={{ opacity: 0, y: 60 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="font-extrabold uppercase leading-[0.88] tracking-[-0.03em] text-white select-none"
-            style={{
-              fontSize: 'clamp(4.5rem, 14vw, 13rem)',
-              WebkitTextStroke: '1px rgba(255,255,255,0.08)',
-            }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="font-extrabold uppercase leading-[0.92] tracking-[-0.02em] text-[#f3efe6]"
+            style={{ fontSize: 'clamp(2.75rem, 7vw, 5.5rem)' }}
           >
-            VIKING
+            Fuel your<br />inner viking
           </motion.h1>
-          <motion.h1
-            initial={{ opacity: 0, y: 60 }}
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-            className="font-extrabold uppercase leading-[0.88] tracking-[-0.03em] select-none"
-            style={{
-              fontSize: 'clamp(4.5rem, 14vw, 13rem)',
-              color: 'transparent',
-              WebkitTextStroke: '2px rgba(255,255,255,0.55)',
-            }}
+            transition={{ duration: 0.7, delay: 0.15 }}
+            className="mt-6 max-w-lg text-base sm:text-lg leading-relaxed text-[#cfc7b6]"
           >
-            FUEL
-          </motion.h1>
-        </div>
+            Premium nordiskt kosttillskott utvecklat för män som kräver mer av sig själva.
+            Naturliga ingredienser. Transparent formula. Inga kompromisser.
+          </motion.p>
 
-        {/* ── BOTTOM ROW: text left ── */}
-        <div className="relative z-10 flex items-end justify-between px-4 sm:px-8 lg:px-16 xl:px-24 pb-0">
-          {/* Left: subtitle + CTA */}
-          <div className="max-w-[480px] pb-14 lg:pb-20 flex-shrink-0">
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.35 }}
-              className="text-[11px] font-bold tracking-[0.18em] uppercase text-[#16a34a] mb-3"
-            >{t('home.hero.premium')}</motion.p>
-
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.42, ease: [0.16, 1, 0.3, 1] }}
-              className="text-white font-bold text-xl sm:text-2xl lg:text-3xl leading-[1.2] tracking-[-0.01em] mb-3"
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.28 }}
+            className="mt-8 flex flex-wrap gap-4"
+          >
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 rounded-sm bg-[#9c8e6f] px-8 py-4 text-sm font-bold uppercase tracking-wider text-[#17150f] transition-all hover:bg-[#b0a284] hover:-translate-y-0.5"
             >
-              {t('home.hero.heading')}
-            </motion.h2>
-
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="text-[#e2e8f0] text-sm sm:text-base leading-relaxed mb-7"
+              Shoppa nu
+            </Link>
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 rounded-sm border border-[#cfc7b6]/40 px-8 py-4 text-sm font-bold uppercase tracking-wider text-[#f3efe6] transition-all hover:border-[#cfc7b6] hover:-translate-y-0.5"
             >
-              {t('home.hero.desc')}
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.58, ease: [0.16, 1, 0.3, 1] }}
-              className="flex flex-wrap gap-3"
-            >
-              <Link
-                href="/products"
-                className="inline-flex items-center gap-2 bg-white hover:bg-[#f1f5f9] text-[#0a0a0a] font-bold text-sm px-6 py-3 rounded-none transition-all duration-200 hover:-translate-y-0.5"
-              >
-                {t('home.hero.shopNow')}
-                <Icon name="ArrowRightIcon" size={15} />
-              </Link>
-              <Link
-                href="/about"
-                className="inline-flex items-center gap-2 border border-white/40 hover:border-white/80 text-white font-semibold text-sm px-6 py-3 rounded-none transition-all duration-200 hover:-translate-y-0.5"
-              >{t('home.hero.readMore')}</Link>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── TRUST BAR ── */}
-      <div className="bg-[#111111] border-t border-white/5">
-        <div className="container-wide">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 divide-x divide-white/5">
-            {trustItems.map((item, i) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.7 + i * 0.07 }}
-                className="flex items-center gap-3 px-5 py-5"
-              >
-                <Icon name={item.icon as any} size={20} className="text-[#16a34a] flex-shrink-0" />
-                <div>
-                  <p className="text-white text-[13px] font-semibold leading-tight">{item.title}</p>
-                  <p className="text-[#64748b] text-[11px] mt-0.5">{item.subtitle}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+              Läs om formulan
+            </Link>
+          </motion.div>
         </div>
       </div>
-    </>
+
+      {/* Trust bar */}
+      <div className="relative z-10 border-t border-white/10 bg-[#100f0b]/70 backdrop-blur-sm">
+        <div className="mx-auto grid max-w-screen-2xl grid-cols-2 gap-y-3 px-6 py-5 sm:grid-cols-4 sm:px-10 lg:px-16 xl:px-24">
+          {trust.map((item) => (
+            <div key={item} className="flex items-center gap-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#cfc7b6]">
+              <svg className="h-4 w-4 flex-shrink-0 text-[#9c8e6f]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+              {item}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
