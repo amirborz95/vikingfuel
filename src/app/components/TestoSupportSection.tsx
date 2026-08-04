@@ -15,14 +15,15 @@ export default function TestoSupportSection() {
       <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-6 lg:grid-cols-2 lg:gap-16">
         {/* Bottle */}
         <div className="flex justify-center">
-          <div className="relative w-full max-w-sm">
+          <div className="relative w-full max-w-md">
             <div className="absolute inset-0 -z-0 rounded-full bg-[#9c8e6f]/10 blur-3xl" />
             <AppImage
-              src="/assets/images/viking-energy-1e.png"
+              src="/assets/images/testo-bottle.png"
+              fallbackSrc="/assets/images/viking-energy-1e.png"
               alt="Viking Fuel +Testo Support"
-              width={520}
+              width={640}
               height={520}
-              className="relative z-10 mx-auto h-auto w-full object-contain drop-shadow-2xl"
+              className="relative z-10 mx-auto h-auto w-full rounded-2xl object-cover drop-shadow-2xl"
             />
           </div>
         </div>
@@ -45,7 +46,7 @@ export default function TestoSupportSection() {
 
           <Link
             href="/product-detail"
-            className="mt-8 inline-flex items-center gap-2 rounded-sm bg-[#9c8e6f] px-7 py-3.5 text-sm font-bold uppercase tracking-wider text-[#17150f] transition-all hover:bg-[#b0a284]"
+            className="mt-8 inline-flex items-center gap-2 rounded-sm border border-[#9c8e6f] px-7 py-3.5 text-sm font-bold uppercase tracking-wider text-[#9c8e6f] transition-all hover:bg-[#9c8e6f] hover:text-[#17150f]"
           >
             Se alla ingredienser
           </Link>

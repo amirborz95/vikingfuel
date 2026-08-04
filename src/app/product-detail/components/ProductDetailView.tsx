@@ -371,12 +371,12 @@ export default function ProductDetailView() {
                   </button>
                 </div>
                 {subPlan && purchaseMode === 'subscribe' ? (
-                  <button onClick={handleSubscribe} disabled={!canAddToCart || subLoading} className={`flex-1 py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 ${canAddToCart && !subLoading ? 'bg-primary text-white hover:bg-green-700' : 'bg-muted text-muted-foreground cursor-not-allowed'}`}>
+                  <button onClick={handleSubscribe} disabled={!canAddToCart || subLoading} className={`flex-1 py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 ${canAddToCart && !subLoading ? 'bg-primary text-white hover:brightness-95' : 'bg-muted text-muted-foreground cursor-not-allowed'}`}>
                     <Icon name="ArrowPathIcon" size={16} />
                     {subLoading ? (en ? 'Loading…' : 'Laddar…') : canAddToCart ? (en ? `Subscribe – ${subPlan.monthly} SEK/mo` : `Prenumerera – ${subPlan.monthly} SEK/mån`) : (en ? 'Out of stock' : 'Slut i lager')}
                   </button>
                 ) : (
-                  <button onClick={handleAddToCart} disabled={!canAddToCart} className={`flex-1 py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 ${canAddToCart ? 'bg-primary text-white hover:bg-green-700' : 'bg-muted text-muted-foreground cursor-not-allowed'}`}>
+                  <button onClick={handleAddToCart} disabled={!canAddToCart} className={`flex-1 py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 ${canAddToCart ? 'bg-primary text-white hover:brightness-95' : 'bg-muted text-muted-foreground cursor-not-allowed'}`}>
                     <Icon name="ShoppingCartIcon" size={16} />
                     {addedMsg ? (en ? 'Added to cart' : 'Tillagd i varukorg') : canAddToCart ? (en ? 'Add to cart' : 'Lägg till i varukorg') : (en ? 'Out of stock' : 'Slut i lager')}
                   </button>

@@ -355,7 +355,7 @@ export default function PersonalInfoSection({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="px-6 py-3 rounded-xl bg-green-600 text-white font-bold text-sm hover:bg-green-700 transition-colors disabled:opacity-50"
+                className="px-6 py-3 rounded-xl bg-primary text-white font-bold text-sm hover:brightness-95 transition-colors disabled:opacity-50"
               >
                 {isLoading ? (en ? 'Saving...' : 'Sparar...') : 'Spara'}
               </button>
@@ -420,7 +420,7 @@ export default function PersonalInfoSection({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="px-6 py-3 rounded-xl bg-green-600 text-white font-bold text-sm hover:bg-green-700 transition-colors disabled:opacity-50"
+                className="px-6 py-3 rounded-xl bg-primary text-white font-bold text-sm hover:brightness-95 transition-colors disabled:opacity-50"
               >
                 {isLoading ? (en ? 'Saving...' : 'Sparar...') : (en ? 'Save password' : 'Spara lösenord')}
               </button>

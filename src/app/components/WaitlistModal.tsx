@@ -119,7 +119,7 @@ export default function WaitlistModal({ isOpen, onClose, productName = 'Produkte
                 <button
                   type="submit"
                   disabled={loading || !email}
-                  className="w-full py-3 bg-primary text-white font-bold rounded-xl hover:bg-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-primary text-white font-bold rounded-xl hover:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>

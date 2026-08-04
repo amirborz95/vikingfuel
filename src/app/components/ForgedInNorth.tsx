@@ -7,7 +7,13 @@ export default function ForgedInNorth() {
   return (
     <section className="relative overflow-hidden bg-[#17150f]">
       <div className="absolute inset-0 z-0">
-        <img src="/assets/images/cta-viking.png" alt="Viking warrior in the north" className="h-full w-full object-cover object-center" loading="lazy" />
+        <img
+          src="/assets/images/forged-viking.png"
+          alt="Viking warrior in the north"
+          className="h-full w-full object-cover object-center"
+          loading="lazy"
+          onError={(e) => { if (!e.currentTarget.src.endsWith('cta-viking.png')) e.currentTarget.src = '/assets/images/cta-viking.png'; }}
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-[#100f0b]/40 via-[#100f0b]/70 to-[#100f0b]/90" />
       </div>
 

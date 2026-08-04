@@ -4,7 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
-const HERO_IMG = 'https://i.postimg.cc/SQZ7ycXV/Chat-GPT-Image-Jun-4-2026-01-35-12-PM.png';
+const HERO_IMG = '/assets/images/hero-viking.png';
+const HERO_FALLBACK = 'https://i.postimg.cc/SQZ7ycXV/Chat-GPT-Image-Jun-4-2026-01-35-12-PM.png';
 
 const trust = [
   'Tillverkad i EU',
@@ -18,7 +19,13 @@ export default function HeroSection() {
     <section className="relative min-h-[92vh] overflow-hidden bg-[#17150f] flex flex-col justify-between">
       {/* Background warrior image */}
       <div className="absolute inset-0 z-0">
-        <img src={HERO_IMG} alt="Viking warrior" className="h-full w-full object-cover object-[70%_center]" loading="eager" />
+        <img
+          src={HERO_IMG}
+          alt="Viking warrior"
+          className="h-full w-full object-cover object-[70%_center]"
+          loading="eager"
+          onError={(e) => { if (e.currentTarget.src !== HERO_FALLBACK) e.currentTarget.src = HERO_FALLBACK; }}
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-[#100f0b] via-[#100f0b]/85 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#100f0b] via-transparent to-[#100f0b]/40" />
       </div>

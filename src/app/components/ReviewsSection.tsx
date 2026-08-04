@@ -224,7 +224,7 @@ export default function ReviewsSection() {
           <div className="text-center mt-12">
             <button
               onClick={showMoreReviews}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-full text-base hover:bg-green-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-full text-base hover:brightness-110 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               {t('reviewsSection.showMore')}
               <Icon name="ChevronDownIcon" size={18} />

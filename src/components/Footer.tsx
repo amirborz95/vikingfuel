@@ -6,10 +6,14 @@ import AppLogo from './ui/AppLogo';
 import Icon from './ui/AppIcon';
 import PaymentMethods from './ui/PaymentMethods';
 import { useLanguage } from '@/context/LanguageContext';
+import { usePathname } from 'next/navigation';
 // payment methods: Visa, Mastercard, Card, PayPal, Apple Pay, Google Pay
 
 export default function Footer() {
   const { t } = useLanguage();
+  const pathname = usePathname();
+  // Dark viking footer on the homepage so it blends with the dark sections.
+  const dark = pathname === '/';
   type FooterLink = {
     label: string;
     href: string;
@@ -57,7 +61,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-white border-t border-border pt-16 pb-8">
+    <footer className={`${dark ? 'vf-section-dark' : 'bg-white'} border-t border-border pt-16 pb-8`}>
       <div className="container-wide">
         {/* Main grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 mb-12">

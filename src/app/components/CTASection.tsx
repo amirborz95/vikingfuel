@@ -39,7 +39,7 @@ export default function CTASection() {
             <div className="flex flex-wrap justify-center gap-4">
               <Link
                 href="/products"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-full text-base shadow-lg shadow-primary/30 hover:bg-green-500 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white font-bold rounded-full text-base shadow-lg shadow-primary/30 hover:brightness-110 transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 {t('home.cta.shopNow')}
                 <Icon name="ArrowRightIcon" size={18} />

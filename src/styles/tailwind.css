@@ -3,9 +3,10 @@
 @tailwind utilities;
 
 :root {
+  /* Original palette restored — only the primary is the deeper viking green. */
   --background: #ffffff;
   --foreground: #0f172a;
-  --primary: #16a34a;
+  --primary: #2f6b4a;
   --primary-foreground: #ffffff;
   --secondary: #f1f5f9;
   --secondary-foreground: #0f172a;
@@ -17,7 +18,7 @@
   --card-foreground: #0f172a;
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #16a34a;
+  --ring: #2f6b4a;
   --radius: 0.75rem;
   --font-sans: var(--font-plus-jakarta-sans), sans-serif;
 }
@@ -54,6 +55,19 @@
 }
 
 @layer components {
+  /* Scopes the dark viking palette to a section (e.g. the homepage footer):
+     overriding the CSS vars flips every text-foreground / muted / border child. */
+  .vf-section-dark {
+    --background: #17150f;
+    --foreground: #f3efe6;
+    --muted: #201d15;
+    --muted-foreground: #b7ad99;
+    --border: rgba(255, 255, 255, 0.10);
+    --card: #17150f;
+    --secondary: #201d15;
+    background-color: #17150f;
+  }
+
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-md transition-all duration-200 hover:brightness-95 active:scale-[0.98] text-sm;
   }
@@ -112,7 +126,7 @@
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #16a34a;
+  background: #2f6b4a;
 }
 
 /* Mega menu transition */

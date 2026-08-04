@@ -8,7 +8,7 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageToggle from '@/components/LanguageToggle';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import CartDrawer from '@/components/CartDrawer';
 
 export default function Header() {
@@ -16,6 +16,12 @@ export default function Header() {
   const { user, logout } = useAuth();
   const { t } = useLanguage();
   const router = useRouter();
+  const pathname = usePathname();
+  // Dark viking header on the homepage so it blends with the dark hero.
+  const dark = pathname === '/';
+  const txt = dark ? 'text-[#f3efe6]' : 'text-foreground';
+  const txtMuted = dark ? 'text-[#cfc7b6] hover:text-white' : 'text-foreground/70 hover:text-foreground';
+  const hoverBg = dark ? 'hover:bg-white/10' : 'hover:bg-muted';
 
   const megaCategories = [
     { label: t('nav.testoSupport'), href: '/products', disabled: false },
@@ -53,8 +59,10 @@ export default function Header() {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 w-full bg-white transition-shadow duration-200 ${
-          scrolled ? 'shadow-md' : 'border-b border-border'
+        className={`sticky top-0 z-50 w-full transition-shadow duration-200 ${
+          dark
+            ? `bg-[#17150f] ${scrolled ? 'shadow-lg shadow-black/30' : 'border-b border-white/10'}`
+            : `bg-white ${scrolled ? 'shadow-md' : 'border-b border-border'}`
         }`}
       >
         <div className="container-wide">
@@ -62,7 +70,7 @@ export default function Header() {
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 flex-shrink-0">
               <AppLogo size={56} />
-              <span className="font-extrabold text-xl tracking-tight text-foreground hidden sm:block">
+              <span className={`font-extrabold text-xl tracking-tight hidden sm:block ${txt}`}>
                 Viking Fuel
               </span>
             </Link>
@@ -78,7 +86,7 @@ export default function Header() {
                 >
                   <Link
                     href={item?.href}
-                    className="px-3 py-2 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors rounded-lg hover:bg-muted whitespace-nowrap"
+                    className={`px-3 py-2 text-sm font-medium transition-colors rounded-lg whitespace-nowrap ${txtMuted} ${hoverBg}`}
                   >
                     {item?.label}
                     {item?.hasMega && (
@@ -140,7 +148,7 @@ export default function Header() {
               <LanguageToggle className="mr-1 hidden sm:inline-flex" />
               <button
                 onClick={openCart}
-                className="relative p-2 rounded-lg hover:bg-muted transition-colors text-foreground/70 hover:text-foreground"
+                className={`relative p-2 rounded-lg transition-colors ${txtMuted} ${hoverBg}`}
               >
                 <Icon name="ShoppingCartIcon" size={20} />
                 {totalItems > 0 && (
@@ -153,15 +161,15 @@ export default function Header() {
               {/* User area */}
               {!user ? (
                 <div className="hidden lg:flex items-center gap-2">
-                  <Link href="/" className="px-3 py-2 text-sm rounded-lg hover:bg-muted">{t('nav.guest')}</Link>
-                  <Link href="/login" className="px-3 py-2 text-sm rounded-lg hover:bg-muted">{t('nav.login')}</Link>
-                  <Link href="/register" className="px-3 py-2 text-sm rounded-lg bg-primary text-primary-foreground">{t('nav.register')}</Link>
+                  <Link href="/" className={`px-3 py-2 text-sm rounded-lg ${txtMuted} ${hoverBg}`}>{t('nav.guest')}</Link>
+                  <Link href="/login" className={`px-3 py-2 text-sm rounded-lg ${txtMuted} ${hoverBg}`}>{t('nav.login')}</Link>
+                  <Link href="/register" className="px-3 py-2 text-sm rounded-lg bg-primary text-primary-foreground font-semibold">{t('nav.register')}</Link>
                 </div>
               ) : (
                 <div className="relative hidden lg:flex">
                   <button
                     onClick={() => setUserMenuOpen((s) => !s)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted"
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg ${txtMuted} ${hoverBg}`}
                     aria-haspopup="true"
                     aria-expanded={userMenuOpen}
                   >
@@ -190,7 +198,7 @@ export default function Header() {
               )}
               {/* Mobile hamburger */}
               <button
-                className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors ml-1"
+                className={`lg:hidden p-2 rounded-lg transition-colors ml-1 ${txtMuted} ${hoverBg}`}
                 onClick={() => setMobileOpen(true)}
               >
                 <Icon name="Bars3Icon" size={22} />

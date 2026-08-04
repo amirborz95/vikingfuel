@@ -102,7 +102,7 @@ export default function ContactContent() {
               <div className="text-right">
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-green-700"
+                  className="inline-flex items-center justify-center rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-white transition hover:brightness-95"
                   disabled={isLoading}
                 >
                   {isLoading ? t('contact.sending') : t('contact.send')}
