@@ -28,10 +28,11 @@ export default function HeroSection() {
         {/* Full-width background image */}
         <div className="absolute inset-0 z-0">
           <img
-            src="https://i.postimg.cc/SQZ7ycXV/Chat-GPT-Image-Jun-4-2026-01-35-12-PM.png"
+            src="/assets/images/hero-bottle.png"
             alt="Viking Fuel hero background"
             className="w-full h-full object-cover object-center"
             loading="eager"
+            onError={(e) => { const fb = 'https://i.postimg.cc/SQZ7ycXV/Chat-GPT-Image-Jun-4-2026-01-35-12-PM.png'; if (e.currentTarget.src !== fb) e.currentTarget.src = fb; }}
           />
           {/* Dark overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/20" />

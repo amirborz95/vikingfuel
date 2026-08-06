@@ -1,27 +1,34 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useAuth } from '@/context/AuthContext';
-import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { availableCarriers, carrierCost, getCarrier, carrierBrand, type CarrierDef } from '@/lib/carriers';
 import { COUNTRIES } from '@/lib/countries';
+import { SUB_PLANS, ALLOWED_SUB_PRICE_IDS } from '@/lib/subscriptions';
 import { fbqTrack } from '@/lib/fbpixel';
-import { computeDiscount } from '@/lib/discount';
 import AppImage from '@/components/ui/AppImage';
 import PostNordLogo from '@/components/ui/PostNordLogo';
 import PaymentMethods from '@/components/ui/PaymentMethods';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
+// Pack artwork by number of bottles — matches the product page bundles.
+const PACK_IMG: Record<number, string> = {
+  1: 'https://i.postimg.cc/5t5mBGsQ/neuralpony.png',
+  3: 'https://i.postimg.cc/pdQBf7sR/neuralpony3.png',
+  6: 'https://i.postimg.cc/zfwkCMxg/neuralpony6.png',
+};
+
 function kr(n: number) {
   return `${n.toLocaleString('sv-SE')} kr`;
 }
 
-function PaymentSection({ total, en, onBack }: { total: number; en: boolean; onBack: () => void }) {
+function PaymentSection({ monthly, en, subscriptionId, onBack }: { monthly: number; en: boolean; subscriptionId: string; onBack: () => void }) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -32,9 +39,10 @@ function PaymentSection({ total, en, onBack }: { total: number; en: boolean; onB
     if (!stripe || !elements) return;
     setLoading(true);
     setError('');
+    const returnUrl = `${window.location.origin}/checkout/success?subscription=1${subscriptionId ? `&sub=${encodeURIComponent(subscriptionId)}` : ''}`;
     const { error } = await stripe.confirmPayment({
       elements,
-      confirmParams: { return_url: `${window.location.origin}/checkout/success` },
+      confirmParams: { return_url: returnUrl },
     });
     if (error) {
       setError(error.message || (en ? 'Payment failed.' : 'Betalningen misslyckades.'));
@@ -55,7 +63,9 @@ function PaymentSection({ total, en, onBack }: { total: number; en: boolean; onB
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
-        {loading ? (en ? 'Processing...' : 'Bearbetar...') : `${en ? 'Pay' : 'Betala'} ${kr(total)}`}
+        {loading
+          ? (en ? 'Processing...' : 'Bearbetar...')
+          : `${en ? 'Start subscription' : 'Starta prenumeration'} · ${kr(monthly)}/${en ? 'mo' : 'mån'}`}
       </button>
       <button type="button" onClick={onBack} className="w-full text-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
         {en ? '← Back to details' : '← Tillbaka till uppgifter'}
@@ -65,17 +75,29 @@ function PaymentSection({ total, en, onBack }: { total: number; en: boolean; onB
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
-        {en ? 'Secure payment powered by Stripe.' : 'Säker betalning via Stripe.'}
+        {en ? 'Secure recurring payment via Stripe. Cancel anytime.' : 'Säker återkommande betalning via Stripe. Avsluta när du vill.'}
       </p>
     </form>
   );
 }
 
-export default function CheckoutPage() {
+function SubscribeInner() {
   const { user } = useAuth();
-  const { items, totalPrice } = useCart();
   const { lang } = useLanguage();
   const en = lang === 'en';
+  const params = useSearchParams();
+
+  const priceId = params.get('plan') || '';
+  const qty = Math.max(1, Math.min(10, Number(params.get('qty')) || 1));
+  const planEntry = useMemo(
+    () => Object.entries(SUB_PLANS).find(([, p]) => p.priceId === priceId),
+    [priceId]
+  );
+  const valid = ALLOWED_SUB_PRICE_IDS.includes(priceId) && !!planEntry;
+  const bottlesPerPack = planEntry ? Number(planEntry[0]) : 1;
+  const monthly = planEntry ? planEntry[1].monthly : 0;
+  const packLabel = bottlesPerPack === 1 ? 'Testo-support' : `Testo-support ${bottlesPerPack}-pack`;
+  const packSub = `${bottlesPerPack * 60} ${en ? 'capsules' : 'kapslar'}`;
 
   const [hasMounted, setHasMounted] = useState(false);
   const [country, setCountry] = useState('SE');
@@ -83,6 +105,7 @@ export default function CheckoutPage() {
   const [deliveryOpen, setDeliveryOpen] = useState(false);
   const [form, setForm] = useState({ email: '', name: '', phone: '', line1: '', line2: '', postcode: '', city: '' });
   const [clientSecret, setClientSecret] = useState('');
+  const [subscriptionId, setSubscriptionId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -95,40 +118,31 @@ export default function CheckoutPage() {
     if (user?.email) setForm((p) => ({ ...p, email: user.email, name: p.name || user.name || '' }));
   }, [user]);
 
-  // If the chosen carrier isn't available for the selected country, clear it.
   useEffect(() => {
     if (carrierId && !carriers.some((c) => c.id === carrierId)) setCarrierId('');
   }, [carriers, carrierId]);
 
-  const [discountInput, setDiscountInput] = useState('');
-  const discount = useMemo(() => computeDiscount(discountInput, items), [discountInput, items]);
-  const discountAmount = discount.valid ? discount.amount : 0;
-
-  const subtotal = totalPrice;
+  // Monthly product subtotal, plus shipping computed exactly like the one-time
+  // checkout (PostNord: free over 700 kr, otherwise 49 kr). Shipping recurs with
+  // the subscription and is charged every month alongside the plan.
+  const monthlySubtotal = monthly * qty;
   const shippingCost = useMemo(
-    () => (carrierId ? carrierCost(carrierId, country, subtotal) : 0),
-    [carrierId, country, subtotal]
+    () => (carrierId ? carrierCost(carrierId, country, monthlySubtotal) : 0),
+    [carrierId, country, monthlySubtotal]
   );
-  const total = Math.max(0, subtotal + shippingCost - discountAmount);
-  const vat = Math.round((total - total / 1.06) * 100) / 100;
+  const monthlyTotal = monthlySubtotal + shippingCost;
 
   if (!hasMounted) return null;
 
-  if (items.length === 0) {
+  if (!valid) {
     return (
       <div className="min-h-screen bg-muted pt-24">
         <div className="container-wide">
           <div className="mx-auto max-w-md rounded-2xl border border-border bg-white p-10 text-center shadow-card">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-              <svg className="h-8 w-8 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-              </svg>
-            </div>
-            <h1 className="mb-3 text-2xl font-bold text-foreground">{en ? 'Your cart is empty' : 'Din varukorg är tom'}</h1>
-            <p className="mb-8 text-muted-foreground">{en ? 'Add some products to continue to checkout.' : 'Lägg till några produkter för att fortsätta till kassan.'}</p>
+            <h1 className="mb-3 text-2xl font-bold text-foreground">{en ? 'Invalid subscription' : 'Ogiltig prenumeration'}</h1>
+            <p className="mb-8 text-muted-foreground">{en ? 'This subscription plan could not be found.' : 'Den här prenumerationen kunde inte hittas.'}</p>
             <Link href="/products" className="inline-flex rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all hover:brightness-95">
-              {en ? 'Shop now' : 'Handla nu'}
+              {en ? 'Back to shop' : 'Tillbaka till butiken'}
             </Link>
           </div>
         </div>
@@ -142,8 +156,6 @@ export default function CheckoutPage() {
   const startPayment = async () => {
     setError('');
 
-    // Validate required fields (everything except optional line2) and that a
-    // delivery method has actually been chosen. Show a clear message on click.
     const missing: string[] = [];
     if (!form.name.trim()) missing.push(en ? 'name' : 'namn');
     if (!form.email.trim()) missing.push(en ? 'email' : 'e-post');
@@ -167,27 +179,27 @@ export default function CheckoutPage() {
     }
 
     fbqTrack('InitiateCheckout', {
-      value: total,
+      value: monthlyTotal,
       currency: 'SEK',
-      num_items: items.reduce((s, it) => s + it.quantity, 0),
-      content_ids: items.map((it) => it.id),
-      content_type: 'product',
+      num_items: qty,
+      content_type: 'product_group',
     });
 
     setLoading(true);
     try {
-      const res = await fetch('/api/create-payment-intent', {
+      const res = await fetch('/api/create-subscription-intent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: items.map((it) => ({ name: it.name, price: it.price, quantity: it.quantity, units: it.units ?? 1, image: it.image })),
+          priceId,
+          quantity: qty,
           customer: { email: form.email, name: form.name, phone: form.phone },
           shipping: { carrier: carrierId, country, line1: form.line1, line2: form.line2, postcode: form.postcode, city: form.city },
-          discountCode: discount.valid ? discount.code : '',
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || 'Failed to start payment');
+      if (!res.ok) throw new Error(data?.error || 'Failed to start subscription');
+      setSubscriptionId(data.subscriptionId || '');
       setClientSecret(data.clientSecret);
     } catch (e: any) {
       setError(e?.message || (en ? 'Something went wrong.' : 'Något gick fel.'));
@@ -208,11 +220,13 @@ export default function CheckoutPage() {
           <nav className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
             <Link href="/products" className="transition-colors hover:text-foreground">{en ? 'Shop' : 'Butik'}</Link>
             <span>/</span>
-            <span className="font-medium text-foreground">{en ? 'Checkout' : 'Kassa'}</span>
+            <span className="font-medium text-foreground">{en ? 'Subscription' : 'Prenumeration'}</span>
           </nav>
-          <h1 className="text-4xl font-bold tracking-tight text-foreground">{en ? 'Complete your purchase' : 'Slutför ditt köp'}</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">{en ? 'Start your subscription' : 'Starta din prenumeration'}</h1>
           <p className="mt-2 text-muted-foreground">
-            {en ? 'Enter your details, choose delivery and pay securely.' : 'Fyll i dina uppgifter, välj leverans och betala säkert.'}
+            {en
+              ? 'Enter your details, choose delivery and start your monthly subscription securely.'
+              : 'Fyll i dina uppgifter, välj leverans och starta din månadsprenumeration säkert.'}
           </p>
         </div>
 
@@ -277,9 +291,8 @@ export default function CheckoutPage() {
                   </div>
                 </section>
 
-                {/* Delivery method — under postcode/address */}
+                {/* Delivery method */}
                 <section className={`rounded-2xl border bg-white p-6 shadow-card transition-colors sm:p-8 ${!carrier && !deliveryOpen ? 'border-primary/40 ring-1 ring-primary/20' : 'border-border'}`}>
-                  {/* Clickable header — toggles the alternatives open/closed */}
                   <button
                     type="button"
                     onClick={() => setDeliveryOpen((o) => !o)}
@@ -288,7 +301,7 @@ export default function CheckoutPage() {
                   >
                     <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">2</span>
                     <span className="min-w-0 flex-1">
-                      <span className="block text-xl font-bold text-foreground">{en ? 'Delivery method' : 'Leveranssätt'}</span>
+                      <span className="block text-xl font-bold text-foreground">{en ? 'Monthly delivery' : 'Månadsleverans'}</span>
                       {!deliveryOpen && (
                         carrier ? (
                           <span className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
@@ -299,7 +312,7 @@ export default function CheckoutPage() {
                               <span className="font-semibold text-foreground">Alvesta</span>
                             ) : (
                               <span className={shippingCost === 0 ? 'font-semibold text-primary' : 'font-semibold text-foreground'}>
-                                {shippingCost === 0 ? (en ? 'Free' : 'Gratis') : kr(shippingCost)}
+                                {shippingCost === 0 ? (en ? 'Free' : 'Fri frakt') : kr(shippingCost)}
                               </span>
                             )}
                           </span>
@@ -328,11 +341,22 @@ export default function CheckoutPage() {
                     )}
                   </button>
 
-                  {/* Alternatives — revealed when the header is clicked */}
+                  {/* Professional note: this is the recurring monthly delivery. */}
+                  <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-primary/5 px-4 py-3 text-sm text-foreground ring-1 ring-primary/15">
+                    <svg className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                    </svg>
+                    <span>
+                      {en
+                        ? 'This will be your recurring monthly delivery — we automatically ship a new package to this address every month for as long as your subscription is active. Cancel anytime.'
+                        : 'Detta blir din återkommande månadsleverans – vi skickar automatiskt en ny försändelse till denna adress varje månad så länge din prenumeration är aktiv. Avsluta när du vill.'}
+                    </span>
+                  </div>
+
                   {deliveryOpen && (
                     <div className="mt-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                       {carriers.map((c) => {
-                        const cost = carrierCost(c.id, country, subtotal);
+                        const cost = carrierCost(c.id, country, monthlySubtotal);
                         return (
                           <DeliveryOption
                             key={c.id}
@@ -342,7 +366,7 @@ export default function CheckoutPage() {
                             icon={<CarrierMark carrier={c} />}
                             title={carrierBrand(c, en)}
                             desc={en ? c.descEn : c.descSv}
-                            priceLabel={cost === 0 ? (en ? 'Free' : 'Gratis') : kr(cost)}
+                            priceLabel={cost === 0 ? (en ? 'Free' : 'Fri frakt') : `${kr(cost)}/${en ? 'mo' : 'mån'}`}
                             free={cost === 0}
                           />
                         );
@@ -379,99 +403,93 @@ export default function CheckoutPage() {
                   <h2 className="text-xl font-bold text-foreground">{en ? 'Payment' : 'Betalning'}</h2>
                 </div>
                 <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
-                  <PaymentSection total={total} en={en} onBack={() => setClientSecret('')} />
+                  <PaymentSection monthly={monthlyTotal} en={en} subscriptionId={subscriptionId} onBack={() => setClientSecret('')} />
                 </Elements>
               </section>
             )}
           </div>
 
-          {/* RIGHT: order summary */}
+          {/* RIGHT: subscription summary */}
           <aside className="lg:sticky lg:top-24">
             <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-card">
-              <div className="border-b border-border px-6 py-5">
+              <div className="flex items-center justify-between border-b border-border px-6 py-5">
                 <h2 className="text-lg font-bold text-foreground">{en ? 'Order summary' : 'Ordersammanfattning'}</h2>
+                <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">
+                  {en ? 'Subscription' : 'Prenumeration'}
+                </span>
               </div>
 
-              {/* Items */}
+              {/* Item */}
               <div className="space-y-4 px-6 py-5">
-                {items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-4">
-                    <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
-                      <AppImage src={item.image} alt={item.name} width={64} height={64} className="h-full w-full object-contain p-1" />
-                      <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-foreground px-1 text-xs font-bold text-white">
-                        {item.quantity}
-                      </span>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-foreground">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">{item.size}</p>
-                    </div>
-                    <p className="whitespace-nowrap text-sm font-semibold text-foreground">{kr(item.price * item.quantity)}</p>
+                <div className="flex items-center gap-4">
+                  <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
+                    <AppImage src={PACK_IMG[bottlesPerPack] || PACK_IMG[1]} alt={packLabel} width={64} height={64} className="h-full w-full object-contain p-1" />
+                    <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-foreground px-1 text-xs font-bold text-white">
+                      {qty}
+                    </span>
                   </div>
-                ))}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-foreground">Viking Energy — {packLabel}</p>
+                    <p className="text-xs text-muted-foreground">{packSub} · {en ? 'billed monthly' : 'debiteras varje månad'}</p>
+                  </div>
+                  <p className="whitespace-nowrap text-sm font-semibold text-foreground">
+                    {kr(monthlySubtotal)}<span className="text-xs font-medium text-muted-foreground">/{en ? 'mo' : 'mån'}</span>
+                  </p>
+                </div>
               </div>
 
-              {/* Discount code */}
-              <div className="border-t border-border px-6 py-5">
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {en ? 'Discount code' : 'Rabattkod'}
-                </label>
-                <input
-                  value={discountInput}
-                  onChange={(e) => setDiscountInput(e.target.value)}
-                  placeholder={en ? 'Enter discount code' : 'Ange rabattkod'}
-                  className={`${inputCls} uppercase`}
-                />
-                {discountInput.trim() && (
-                  discount.valid ? (
-                    <p className="mt-2 text-sm font-medium text-primary">
-                      ✓ {discount.code} {en ? 'applied' : 'tillagd'} — −{kr(discountAmount)}
-                    </p>
-                  ) : (
-                    <p className="mt-2 text-sm text-amber-600">
-                      {discount.reason === 'not_applicable'
-                        ? (en ? 'Only valid on the single bottle.' : 'Gäller bara enstaka flaska.')
-                        : (en ? 'Invalid code.' : 'Ogiltig kod.')}
-                    </p>
-                  )
-                )}
+              {/* Subscription details */}
+              <div className="border-t border-border bg-primary/5 px-6 py-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                  </svg>
+                  {en ? 'Save 20% every month' : 'Spara 20% varje månad'}
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {en
+                    ? 'Renews automatically each month. Skip or cancel anytime — no lock-in.'
+                    : 'Förnyas automatiskt varje månad. Hoppa över eller avsluta när du vill — ingen bindningstid.'}
+                </p>
               </div>
 
               {/* Totals */}
               <div className="space-y-3 border-t border-border px-6 py-5 text-sm">
                 <div className="flex justify-between text-muted-foreground">
-                  <span>{en ? 'Subtotal' : 'Delbelopp'}</span>
-                  <span className="font-medium text-foreground">{kr(subtotal)}</span>
+                  <span>{en ? 'Monthly price' : 'Månadspris'}</span>
+                  <span className="font-medium text-foreground">{kr(monthlySubtotal)}/{en ? 'mo' : 'mån'}</span>
                 </div>
-                {discountAmount > 0 && (
-                  <div className="flex justify-between text-primary">
-                    <span>{en ? 'Discount' : 'Rabatt'} ({discount.code})</span>
-                    <span className="font-medium">−{kr(discountAmount)}</span>
-                  </div>
-                )}
                 <div className="flex justify-between text-muted-foreground">
-                  <span>{en ? 'Shipping' : 'Frakt'}</span>
+                  <span>{en ? 'Shipping' : 'Frakt'}{carrier ? ` · ${carrierBrand(carrier, en)}` : ''}</span>
                   <span className={`font-medium ${shippingCost === 0 ? 'text-primary' : 'text-foreground'}`}>
-                    {shippingCost === 0 ? (en ? 'Free' : 'Gratis') : kr(shippingCost)}
+                    {!carrier
+                      ? (en ? 'Choose method' : 'Välj sätt')
+                      : shippingCost === 0
+                        ? (en ? 'Free' : 'Fri frakt')
+                        : `${kr(shippingCost)}/${en ? 'mo' : 'mån'}`}
                   </span>
                 </div>
-                <div className="flex justify-between text-muted-foreground">
-                  <span>{en ? 'incl. VAT (6%)' : 'varav moms (6%)'}</span>
-                  <span className="font-medium text-foreground">
-                    {vat.toLocaleString('sv-SE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kr
-                  </span>
-                </div>
+                {carrier && shippingCost > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {en ? 'Free shipping on orders over 700 kr.' : 'Fri frakt vid order över 700 kr.'}
+                  </p>
+                )}
                 <div className="mt-2 flex items-baseline justify-between border-t border-border pt-4">
-                  <span className="text-base font-bold text-foreground">{en ? 'Total' : 'Total'}</span>
-                  <span className="text-2xl font-bold text-foreground">{kr(total)}</span>
+                  <span className="text-base font-bold text-foreground">{en ? 'Due today' : 'Att betala nu'}</span>
+                  <span className="text-2xl font-bold text-foreground">
+                    {kr(monthlyTotal)}
+                  </span>
                 </div>
+                <p className="text-right text-xs text-muted-foreground">
+                  {en ? `then ${kr(monthlyTotal)}/mo` : `därefter ${kr(monthlyTotal)}/mån`}
+                </p>
               </div>
 
               {/* Trust row */}
               <div className="grid grid-cols-3 gap-2 border-t border-border bg-muted/50 px-6 py-4 text-center">
                 <Trust en={en} label={en ? 'Secure' : 'Säkert'} sub={en ? 'checkout' : 'köp'} icon="lock" />
-                <Trust en={en} label={en ? 'Fast' : 'Snabb'} sub={en ? 'delivery' : 'leverans'} icon="truck" />
-                <Trust en={en} label={en ? 'Easy' : 'Enkla'} sub={en ? 'returns' : 'returer'} icon="return" />
+                <Trust en={en} label="PostNord" sub={en ? 'delivery' : 'leverans'} icon="truck" />
+                <Trust en={en} label={en ? 'Cancel' : 'Avsluta'} sub={en ? 'anytime' : 'när du vill'} icon="return" />
               </div>
 
               {/* Accepted payment methods */}
@@ -489,6 +507,14 @@ export default function CheckoutPage() {
   );
 }
 
+export default function SubscribeCheckoutPage() {
+  return (
+    <Suspense fallback={<div className="container-wide pt-28 text-muted-foreground">…</div>}>
+      <SubscribeInner />
+    </Suspense>
+  );
+}
+
 /* ── Carrier icon/badge ──────────────────────────────────────────────── */
 function CarrierMark({ carrier }: { carrier: CarrierDef }) {
   if (carrier.id === 'postnord') return <PostNordLogo />;
@@ -499,7 +525,6 @@ function CarrierMark({ carrier }: { carrier: CarrierDef }) {
       </svg>
     );
   }
-  // Brand-coloured text badge for the Shipmondo carriers.
   const styles: Record<string, string> = {
     dhl: 'bg-[#FFCC00] text-[#D40511]',
     earlybird: 'bg-slate-900 text-white',
@@ -513,7 +538,7 @@ function CarrierMark({ carrier }: { carrier: CarrierDef }) {
   );
 }
 
-/* ── Delivery option card with "Välj" button ─────────────────────────── */
+/* ── Delivery option card ─────────────────────────────────────────────── */
 function DeliveryOption({
   selected,
   onSelect,

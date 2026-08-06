@@ -30,6 +30,11 @@ export interface OrderDraft {
   subtotal: number;
   shippingCost: number;
   total: number;
+  // Set for "Prenumerera & spara 20%" orders. Each monthly invoice reuses the
+  // saved draft to create a fresh order + shipment.
+  isSubscription?: boolean;
+  subscriptionId?: string;
+  billingInterval?: 'month';
 }
 
 export async function savePendingOrder(piId: string, draft: OrderDraft): Promise<void> {
@@ -40,33 +45,32 @@ async function readPendingOrder(piId: string): Promise<OrderDraft | null> {
   return readData<OrderDraft | null>(`pending_${piId}.json`, null);
 }
 
-/**
- * Finalize a paid on-site order from its PaymentIntent. Idempotent — safe to
- * call multiple times. Creates the order, books the PostNord label (if
- * applicable) and notifies the business owner. Returns the created order.
- */
-export async function finalizeOrderFromPaymentIntent(
-  piId: string
-): Promise<{ order: any | null; created: boolean; email: string | null }> {
-  const draft = await readPendingOrder(piId);
-  if (!draft) return { order: null, created: false, email: null };
+// Subscriptions store their draft keyed by the Stripe subscription id, so every
+// recurring invoice (first + monthly renewals) can build a fresh order.
+export async function savePendingSubscriptionOrder(subId: string, draft: OrderDraft): Promise<void> {
+  await writeData(`pending_sub_${subId}.json`, draft);
+}
 
-  const email = draft.customer.email;
-  const users = await readUsers();
-  let user: any = users.find((u: any) => u.email === email);
-  if (!user) {
-    user = { email, name: draft.customer.name || null, orders: [] };
-    users.push(user);
-  }
-  if (!user.orders) user.orders = [];
+async function readPendingSubscriptionOrder(subId: string): Promise<OrderDraft | null> {
+  return readData<OrderDraft | null>(`pending_sub_${subId}.json`, null);
+}
 
-  const existing = user.orders.find((o: any) => o.id === piId || o.sessionId === piId);
-  if (existing) return { order: existing, created: false, email };
-
+function carrierInfoForDraft(draft: OrderDraft) {
   const carrierId = (draft.shipping.carrier || draft.shipping.method) as CarrierId;
   const carrier = getCarrier(carrierId);
   const provider = carrier?.provider || (draft.shipping.method === 'postnord' ? 'postnord' : 'pickup');
   const needsAddress = carrier ? carrier.needsAddress : draft.shipping.method === 'postnord';
+  return { carrierId, carrier, provider, needsAddress };
+}
+
+/** Build the order record from a stored draft. Pure — performs no I/O. */
+function makeOrderRecord(
+  orderId: string,
+  draft: OrderDraft,
+  opts?: { isSubscription?: boolean; subscriptionId?: string }
+) {
+  const email = draft.customer.email;
+  const { carrierId, carrier, provider, needsAddress } = carrierInfoForDraft(draft);
 
   // Affiliate commission: 50 kr per bottle sold through the link.
   const affiliateBottles = draft.affiliateCode
@@ -75,9 +79,11 @@ export async function finalizeOrderFromPaymentIntent(
   const affiliateCommission = draft.affiliateCode ? commissionForItems(draft.items) : 0;
 
   const order: any = {
-    id: piId,
-    sessionId: piId,
-    paymentIntentId: piId,
+    id: orderId,
+    sessionId: orderId,
+    paymentIntentId: orderId,
+    isSubscription: !!opts?.isSubscription,
+    subscriptionId: opts?.subscriptionId || null,
     items: draft.items.map((it) => ({ name: it.name, quantity: it.quantity, price: it.price, units: it.units ?? 1 })),
     totalAmount: draft.total,
     currency: 'SEK',
@@ -118,50 +124,89 @@ export async function finalizeOrderFromPaymentIntent(
     createdAt: new Date().toISOString(),
   };
 
-  // Auto-book the shipment/label at order time so it's ready to print.
-  // Non-fatal: the order is still created and the admin can retry from the panel.
-  if (needsAddress && order.shippingAddress?.address) {
-    try {
-      if (provider === 'postnord') {
-        const shipment = await createPostNordShipment({
-          orderId: order.id,
-          packageDescription: `Order ${order.id}`,
-          items: order.items,
-          totalAmount: order.totalAmount,
-          customerEmail: email,
-          shippingDetails: {
-            name: order.shippingAddress.name,
-            phone: order.shippingAddress.phone || '',
-            address: order.shippingAddress.address,
-          },
-        });
-        if (shipment) {
-          order.postnordShipmentId = shipment.shipmentId;
-          order.postnordTracking = shipment.trackingNumber || null;
-          order.postnordLabelUrl = shipment.labelUrl || null;
-          order.postnordLabelPdfUrl = shipment.labelPdfUrl || null;
-        }
-      } else if (provider === 'shipmondo') {
-        const productCode = carrier?.productEnv ? process.env[carrier.productEnv] || '' : '';
-        const shipment = await createShipmondoShipment({
-          orderId: order.id,
-          productCode,
-          customerEmail: email,
-          recipient: {
-            name: order.shippingAddress.name,
-            phone: order.shippingAddress.phone || '',
-            address: order.shippingAddress.address,
-          },
-        });
-        if (shipment) {
-          order.shipmondoShipmentId = shipment.shipmentId;
-          order.shipmondoTracking = shipment.trackingNumber || null;
-        }
+  return { order, carrier, provider, needsAddress, email };
+}
+
+/**
+ * Auto-book the shipment/label for an order at order time so it's ready to
+ * print. Mutates `order`. Non-fatal: the order is still valid if this fails and
+ * the admin can retry from the panel.
+ */
+async function autoBookShipment(
+  order: any,
+  carrier: ReturnType<typeof getCarrier>,
+  provider: string,
+  needsAddress: boolean,
+  email: string
+) {
+  if (!(needsAddress && order.shippingAddress?.address)) return;
+  try {
+    if (provider === 'postnord') {
+      const shipment = await createPostNordShipment({
+        orderId: order.id,
+        packageDescription: `Order ${order.id}`,
+        items: order.items,
+        totalAmount: order.totalAmount,
+        customerEmail: email,
+        shippingDetails: {
+          name: order.shippingAddress.name,
+          phone: order.shippingAddress.phone || '',
+          address: order.shippingAddress.address,
+        },
+      });
+      if (shipment) {
+        order.postnordShipmentId = shipment.shipmentId;
+        order.postnordTracking = shipment.trackingNumber || null;
+        order.postnordLabelUrl = shipment.labelUrl || null;
+        order.postnordLabelPdfUrl = shipment.labelPdfUrl || null;
       }
-    } catch (e) {
-      console.error(`Shipment auto-booking (${provider}) failed for PI order ${order.id} (non-fatal):`, e);
+    } else if (provider === 'shipmondo') {
+      const productCode = carrier?.productEnv ? process.env[carrier.productEnv] || '' : '';
+      const shipment = await createShipmondoShipment({
+        orderId: order.id,
+        productCode,
+        customerEmail: email,
+        recipient: {
+          name: order.shippingAddress.name,
+          phone: order.shippingAddress.phone || '',
+          address: order.shippingAddress.address,
+        },
+      });
+      if (shipment) {
+        order.shipmondoShipmentId = shipment.shipmentId;
+        order.shipmondoTracking = shipment.trackingNumber || null;
+      }
     }
+  } catch (e) {
+    console.error(`Shipment auto-booking (${provider}) failed for order ${order.id} (non-fatal):`, e);
   }
+}
+
+/**
+ * Finalize a paid on-site order from its PaymentIntent. Idempotent — safe to
+ * call multiple times. Creates the order, books the PostNord label (if
+ * applicable) and notifies the business owner. Returns the created order.
+ */
+export async function finalizeOrderFromPaymentIntent(
+  piId: string
+): Promise<{ order: any | null; created: boolean; email: string | null }> {
+  const draft = await readPendingOrder(piId);
+  if (!draft) return { order: null, created: false, email: null };
+
+  const email = draft.customer.email;
+  const users = await readUsers();
+  let user: any = users.find((u: any) => u.email === email);
+  if (!user) {
+    user = { email, name: draft.customer.name || null, orders: [] };
+    users.push(user);
+  }
+  if (!user.orders) user.orders = [];
+
+  const existing = user.orders.find((o: any) => o.id === piId || o.sessionId === piId);
+  if (existing) return { order: existing, created: false, email };
+
+  const { order, carrier, provider, needsAddress } = makeOrderRecord(piId, draft);
+  await autoBookShipment(order, carrier, provider, needsAddress, email);
 
   user.orders.push(order);
   await writeUsers(users);
@@ -170,6 +215,60 @@ export async function finalizeOrderFromPaymentIntent(
     await sendNewOrderAdminNotification(order, email);
   } catch (e) {
     console.error(`Failed to send new-order notification for ${order.id}:`, e);
+  }
+
+  return { order, created: true, email };
+}
+
+/**
+ * Finalize a paid subscription invoice into an order. Fires for both the first
+ * payment (billing_reason `subscription_create`) and every monthly renewal
+ * (`subscription_cycle`) — each invoice creates its own order + shipment so the
+ * customer gets a fresh delivery and confirmation every month. Idempotent per
+ * invoice id.
+ */
+export async function finalizeSubscriptionOrderFromInvoice(
+  invoice: Stripe.Invoice
+): Promise<{ order: any | null; created: boolean; email: string | null }> {
+  const subRef = invoice.parent?.subscription_details?.subscription;
+  const subId = typeof subRef === 'string' ? subRef : subRef?.id;
+  if (!subId) return { order: null, created: false, email: null };
+
+  const draft = await readPendingSubscriptionOrder(subId);
+  if (!draft) return { order: null, created: false, email: null };
+
+  const orderId = invoice.id as string;
+  const email = draft.customer.email;
+  const users = await readUsers();
+  let user: any = users.find((u: any) => u.email === email);
+  if (!user) {
+    user = { email, name: draft.customer.name || null, orders: [] };
+    users.push(user);
+  }
+  if (!user.orders) user.orders = [];
+
+  const existing = user.orders.find((o: any) => o.id === orderId || o.sessionId === orderId);
+  if (existing) return { order: existing, created: false, email };
+
+  const { order, carrier, provider, needsAddress } = makeOrderRecord(orderId, draft, {
+    isSubscription: true,
+    subscriptionId: subId,
+  });
+  // Reflect the amount Stripe actually charged for this cycle.
+  if (typeof invoice.amount_paid === 'number' && invoice.amount_paid > 0) {
+    order.totalAmount = invoice.amount_paid / 100;
+  }
+  order.billingReason = invoice.billing_reason || null;
+
+  await autoBookShipment(order, carrier, provider, needsAddress, email);
+
+  user.orders.push(order);
+  await writeUsers(users);
+
+  try {
+    await sendNewOrderAdminNotification(order, email);
+  } catch (e) {
+    console.error(`Failed to send new-order notification for subscription order ${order.id}:`, e);
   }
 
   return { order, created: true, email };

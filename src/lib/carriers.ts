@@ -16,7 +16,8 @@ export type CarrierProvider = 'pickup' | 'postnord' | 'shipmondo';
 
 export interface CarrierDef {
   id: CarrierId;
-  brand: string; // brand label shown to the customer
+  brand: string; // brand label shown to the customer (Swedish/default)
+  brandEn?: string; // English label; only needed for non-proper-name brands
   provider: CarrierProvider;
   descSv: string;
   descEn: string;
@@ -31,9 +32,10 @@ export const CARRIERS: CarrierDef[] = [
   {
     id: 'pickup',
     brand: 'Uthämtning',
+    brandEn: 'Store pickup',
     provider: 'pickup',
-    descSv: 'Hämta din order på vårt lager.',
-    descEn: 'Collect your order at our warehouse.',
+    descSv: 'Hämta din order hos oss i Alvesta (Mältarevägen 31).',
+    descEn: 'Collect your order from us in Alvesta (Mältarevägen 31).',
     needsAddress: false,
     seOnly: true,
     price: 0,
@@ -102,6 +104,12 @@ export const CARRIERS: CarrierDef[] = [
 
 export function getCarrier(id: string): CarrierDef | undefined {
   return CARRIERS.find((c) => c.id === id);
+}
+
+/** Localised brand label — English falls back to the default brand. */
+export function carrierBrand(c: CarrierDef | undefined | null, en: boolean): string {
+  if (!c) return '';
+  return en && c.brandEn ? c.brandEn : c.brand;
 }
 
 /**

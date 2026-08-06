@@ -173,23 +173,11 @@ export default function ProductDetailView() {
     setTimeout(() => setAddedMsg(false), 2000);
   };
 
-  const handleSubscribe = async () => {
+  // Go to the subscription checkout page (email step), then on to Stripe.
+  const handleSubscribe = () => {
     if (!subPlan) return;
     setSubLoading(true);
-    try {
-      const res = await fetch('/api/create-subscription-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId: subPlan.priceId, quantity }),
-      });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else alert(data.error || (en ? 'Could not start subscription.' : 'Kunde inte starta prenumerationen.'));
-    } catch {
-      alert(en ? 'Something went wrong.' : 'Något gick fel.');
-    } finally {
-      setSubLoading(false);
-    }
+    window.location.href = `/checkout/subscribe?plan=${encodeURIComponent(subPlan.priceId)}&qty=${quantity}`;
   };
 
   const trustBadges = en

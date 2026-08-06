@@ -1,15 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
 import {
   sendOrderConfirmationEmailForSessionId,
   sendOrderConfirmationEmailForStoredOrder,
 } from '@/lib/orderConfirmation';
-import { saveOrderForSession, finalizeOrderFromPaymentIntent } from '@/lib/orders';
+import {
+  saveOrderForSession,
+  finalizeOrderFromPaymentIntent,
+  finalizeSubscriptionOrderFromInvoice,
+} from '@/lib/orders';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const paymentIntentId = String(body.paymentIntentId || '').trim();
     const sessionId = String(body.sessionId || '').trim();
+    const subscriptionId = String(body.subscriptionId || '').trim();
+
+    // On-site subscription: finalize from the subscription's latest invoice.
+    // Idempotent with the invoice.paid webhook (dedupes on invoice id).
+    if (subscriptionId) {
+      const sub = await stripe.subscriptions.retrieve(subscriptionId, { expand: ['latest_invoice'] });
+      const invoice = sub.latest_invoice as Stripe.Invoice | null;
+      if (invoice) {
+        const result = await finalizeSubscriptionOrderFromInvoice(invoice);
+        if (result.created && result.order && result.email) {
+          try {
+            await sendOrderConfirmationEmailForStoredOrder(result.order, result.email);
+          } catch (e) {
+            console.error('Subscription confirmation email failed:', e);
+          }
+        }
+        return NextResponse.json({
+          success: true,
+          value: result.order?.totalAmount ?? null,
+          currency: result.order?.currency || 'SEK',
+        });
+      }
+      return NextResponse.json({ success: true, value: null, currency: 'SEK' });
+    }
 
     // On-site (embedded) checkout: finalize from the PaymentIntent.
     if (paymentIntentId) {

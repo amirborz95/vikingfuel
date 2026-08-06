@@ -12,16 +12,19 @@ import { UPSELL, UPSELL_TOTAL } from '@/lib/upsell';
 interface Props {
   sessionId?: string | null;
   paymentIntentId?: string | null;
+  isSubscription?: boolean;
+  subscriptionId?: string | null;
 }
 
-export default function ClientCheckoutSuccess({ sessionId, paymentIntentId }: Props) {
+export default function ClientCheckoutSuccess({ sessionId, paymentIntentId, isSubscription, subscriptionId }: Props) {
   const { clearCart } = useCart();
   const { t, lang } = useLanguage();
   const en = lang === 'en';
   const [confirmationStatus, setConfirmationStatus] = useState<string>('');
   const [confirmationError, setConfirmationError] = useState<string>('');
 
-  // Upsell: only for the embedded (PaymentIntent) flow, shown once per order.
+  // Upsell: only for one-time embedded (PaymentIntent) orders — never for
+  // subscriptions (a one-off extra charge doesn't belong on a subscription).
   const upsellKey = paymentIntentId ? `upsell_${paymentIntentId}` : '';
   const [upsellPhase, setUpsellPhase] = useState<'na' | 'offer' | 'processing' | 'accepted' | 'declined'>('na');
   const [upsellError, setUpsellError] = useState('');
@@ -29,19 +32,24 @@ export default function ClientCheckoutSuccess({ sessionId, paymentIntentId }: Pr
   useEffect(() => {
     clearCart();
     sessionStorage.setItem('checkoutCompleted', 'true');
-    if (paymentIntentId && !sessionStorage.getItem(upsellKey)) {
+    if (paymentIntentId && !isSubscription && !sessionStorage.getItem(upsellKey)) {
       setUpsellPhase('offer');
     }
-  }, [clearCart, paymentIntentId, upsellKey]);
+  }, [clearCart, paymentIntentId, isSubscription, upsellKey]);
 
   useEffect(() => {
-    if (!sessionId && !paymentIntentId) return;
+    if (!sessionId && !paymentIntentId && !subscriptionId) return;
     async function sendConfirmation() {
       try {
+        const payload = isSubscription && subscriptionId
+          ? { subscriptionId }
+          : paymentIntentId
+            ? { paymentIntentId }
+            : { sessionId };
         const response = await fetch('/api/order-confirmation', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(paymentIntentId ? { paymentIntentId } : { sessionId }),
+          body: JSON.stringify(payload),
         });
         const result = await response.json();
         if (!response.ok) {
@@ -63,7 +71,7 @@ export default function ClientCheckoutSuccess({ sessionId, paymentIntentId }: Pr
       }
     }
     sendConfirmation();
-  }, [sessionId, paymentIntentId]);
+  }, [sessionId, paymentIntentId, isSubscription, subscriptionId]);
 
   async function acceptUpsell() {
     setUpsellError('');
@@ -162,6 +170,14 @@ export default function ClientCheckoutSuccess({ sessionId, paymentIntentId }: Pr
 
           <h1 className="text-3xl font-bold text-foreground mb-2">{t('checkoutResult.orderDone')}</h1>
           <p className="text-muted-foreground mb-6">{t('checkoutResult.thankYou')}</p>
+
+          {isSubscription && (
+            <div className="mb-4 rounded-lg bg-accent p-3 text-sm font-semibold text-primary">
+              {en
+                ? 'Your subscription is active — we ship a new package every month. Cancel anytime from your account.'
+                : 'Din prenumeration är aktiv — vi skickar en ny försändelse varje månad. Avsluta när du vill från ditt konto.'}
+            </div>
+          )}
 
           {upsellPhase === 'accepted' && (
             <div className="mb-4 rounded-lg bg-accent p-3 text-sm font-semibold text-primary">

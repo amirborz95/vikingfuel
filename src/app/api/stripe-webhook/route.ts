@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { saveOrderForSession, finalizeOrderFromPaymentIntent } from '@/lib/orders';
+import {
+  saveOrderForSession,
+  finalizeOrderFromPaymentIntent,
+  finalizeSubscriptionOrderFromInvoice,
+} from '@/lib/orders';
 import {
   sendOrderConfirmationEmailForSessionId,
   sendOrderConfirmationEmailForStoredOrder,
@@ -55,6 +59,31 @@ export async function POST(req: NextRequest) {
       await sendOrderConfirmationEmailForSessionId(sessionEvent.id);
     } catch (e) {
       console.error('Failed to send order confirmation email:', e);
+    }
+  }
+
+  // On-site subscriptions ("Prenumerera & spara 20%"): every paid invoice —
+  // the first on-site confirmation and each monthly renewal — creates a fresh
+  // order + shipment and sends the order confirmation email.
+  if (event.type === 'invoice.paid') {
+    const invoice = event.data.object as Stripe.Invoice;
+    // Only act on subscription invoices.
+    if (invoice.parent?.subscription_details?.subscription) {
+      try {
+        const result = await finalizeSubscriptionOrderFromInvoice(invoice);
+        console.log(
+          `Subscription order ${result.created ? 'created' : 'already existed'} for invoice ${invoice.id} (${result.email})`
+        );
+        if (result.created && result.order && result.email) {
+          try {
+            await sendOrderConfirmationEmailForStoredOrder(result.order, result.email);
+          } catch (e) {
+            console.error('Failed to send subscription order confirmation email:', e);
+          }
+        }
+      } catch (e) {
+        console.error('Failed to finalize subscription order from invoice:', e);
+      }
     }
   }
 
