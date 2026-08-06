@@ -9,7 +9,9 @@ const senderCountry = process.env.POSTNORD_SENDER_COUNTRY || 'SE';
 const consignorCustomerNumber = process.env.POSTNORD_CUSTOMER_NUMBER || '';
 const consignorIssuerCode = process.env.POSTNORD_CONSIGNOR_ISSUER_CODE || 'Z12';
 const consignorPartyIdType = process.env.POSTNORD_CONSIGNOR_PARTY_ID_TYPE || '160';
-const postNordApplicationId = Number(process.env.POSTNORD_APPLICATION_ID || '1438');
+// applicationId 2624 was provisioned for Vikingfuel by PostNord API support
+// (replaces 1438, which returned a LogMode fault and never produced real labels).
+const postNordApplicationId = Number(process.env.POSTNORD_APPLICATION_ID || '2624');
 const postNordApplicationName = process.env.POSTNORD_APPLICATION_NAME || 'PostNord';
 const postNordApplicationVersion = process.env.POSTNORD_APPLICATION_VERSION || '1.0';
 const forceNoApplication = process.env.POSTNORD_FORCE_NO_APPLICATION === 'true';
