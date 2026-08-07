@@ -38,15 +38,26 @@ function storedOrderShippingDetail(order: any, method: 'postnord' | 'pickup'): s
   return addr || 'Adress enligt beställning';
 }
 
+// Some hosts (e.g. Netlify) keep the surrounding quotes when you paste an env
+// value like "Vikingfuel <info@vikingfuel.se>", which produces a malformed
+// From header that Gmail silently drops. Strip a single pair of wrapping quotes.
+function unquote(v: string): string {
+  const t = (v || '').trim();
+  if (t.length >= 2 && ((t[0] === '"' && t.endsWith('"')) || (t[0] === "'" && t.endsWith("'")))) {
+    return t.slice(1, -1).trim();
+  }
+  return t;
+}
+
 const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
-const smtpHost = process.env.SMTP_HOST || '';
-const smtpPort = Number(process.env.SMTP_PORT || '587');
-const smtpUser = process.env.SMTP_USER || '';
+const smtpHost = unquote(process.env.SMTP_HOST || '');
+const smtpPort = Number(unquote(process.env.SMTP_PORT || '587'));
+const smtpUser = unquote(process.env.SMTP_USER || '');
 const smtpPass = process.env.SMTP_PASS || '';
-const senderEmail = process.env.ORDER_CONFIRMATION_SENDER || `Vikingfuel <${smtpUser || 'info@vikingfuel.se'}>`;
-const replyToEmail = process.env.ORDER_CONFIRMATION_REPLY_TO || smtpUser || 'info@vikingfuel.se';
+const senderEmail = unquote(process.env.ORDER_CONFIRMATION_SENDER || '') || `Vikingfuel <${smtpUser || 'info@vikingfuel.se'}>`;
+const replyToEmail = unquote(process.env.ORDER_CONFIRMATION_REPLY_TO || '') || smtpUser || 'info@vikingfuel.se';
 // Business owner gets a notification on every new order.
-const orderNotificationRecipient = process.env.ORDER_NOTIFICATION_RECIPIENT || 'smartval.se@gmail.com';
+const orderNotificationRecipient = unquote(process.env.ORDER_NOTIFICATION_RECIPIENT || '') || 'smartval.se@gmail.com';
 
 if (!stripeSecret) {
   console.error('Missing STRIPE_SECRET_KEY environment variable');
