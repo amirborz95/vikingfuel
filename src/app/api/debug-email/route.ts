@@ -12,6 +12,14 @@ export const dynamic = 'force-dynamic';
 
 const ADMIN_PASSWORD = process.env.ADMIN_PANEL_PASSWORD || 'Viking2026Fuel!';
 
+function unquote(v: string): string {
+  const t = (v || '').trim();
+  if (t.length >= 2 && ((t[0] === '"' && t.endsWith('"')) || (t[0] === "'" && t.endsWith("'")))) {
+    return t.slice(1, -1).trim();
+  }
+  return t;
+}
+
 export async function GET(req: NextRequest) {
   const key = req.nextUrl.searchParams.get('key') || '';
   if (key !== ADMIN_PASSWORD) {
@@ -32,6 +40,7 @@ export async function GET(req: NextRequest) {
     SMTP_PASS_present: !!pass,
     SMTP_PASS_length: pass.length,
     ORDER_CONFIRMATION_SENDER: sender || '(using SMTP_USER)',
+    effectiveSender: unquote(sender) || user,
     ORDER_NOTIFICATION_RECIPIENT: process.env.ORDER_NOTIFICATION_RECIPIENT || '(default: smartval.se@gmail.com)',
     runtime: process.env.NETLIFY ? 'netlify' : 'other',
   };
@@ -76,7 +85,7 @@ export async function GET(req: NextRequest) {
   if (to) {
     try {
       const info = await transporter.sendMail({
-        from: sender || user,
+        from: unquote(sender) || user,
         to,
         subject: 'Vikingfuel SMTP-test',
         text: 'Testmeddelande från Vikingfuel för att verifiera e-postutskick i produktion.',
