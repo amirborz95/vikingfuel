@@ -64,6 +64,7 @@
     "lucide-react": "^1.7.0",
     "next": "15.1.11",
     "nodemailer": "^8.0.8",
+    "pdf-lib": "^1.17.1",
     "react": "19.0.3",
     "react-dom": "19.0.3",
     "react-fast-marquee": "^1.6.0",

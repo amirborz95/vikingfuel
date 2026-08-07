@@ -134,8 +134,15 @@ export function buildOrderConfirmationHtml(opts: {
   taxInCents?: number;
   shippingLabel: string;
   shippingDetail: string;
+  receiptNote?: string;
 }): string {
   const hi = opts.customerName ? `Hej ${esc(opts.customerName)},` : 'Hej,';
+  const receiptBlock = opts.receiptNote
+    ? `<div style="margin-top:18px;padding:16px 18px;border:1px solid ${BRAND.border};border-radius:12px;background:#f8faf9;">
+         <div style="font-size:15px;font-weight:700;color:${BRAND.text};">📄 Här är din kvitto</div>
+         <div style="font-size:14px;color:${BRAND.muted};margin-top:4px;">${esc(opts.receiptNote)}</div>
+       </div>`
+    : '';
   return shell({
     preheader: 'Tack för din beställning – vi förbereder din order.',
     heading: 'Tack för din beställning! 🛡️',
@@ -147,7 +154,7 @@ export function buildOrderConfirmationHtml(opts: {
       taxInCents: opts.taxInCents,
       shippingLabel: opts.shippingLabel,
       shippingDetail: opts.shippingDetail,
-    }),
+    }) + receiptBlock,
   });
 }
 

@@ -6,6 +6,7 @@ import {
   buildShippingHtml,
   type EmailItem,
 } from './emailTemplates';
+import { buildReceiptPdf } from './receipt';
 
 /**
  * Carrier-aware view of a stored order: is it a pickup, what's the brand label
@@ -269,13 +270,26 @@ export async function sendOrderConfirmationEmailForStoredOrder(order: any, recip
   }
 
   const method = normalizeShippingOption(order.shippingOption);
+
+  // Generate the kvitto PDF and attach it. Non-fatal — the confirmation still
+  // sends if PDF generation fails for any reason.
+  let attachments: { filename: string; content: Buffer; contentType: string }[] | undefined;
+  let receiptNote: string | undefined;
+  try {
+    const { bytes, receiptNo } = await buildReceiptPdf(order);
+    attachments = [{ filename: `Kvitto-${receiptNo}-Vikingfuel.pdf`, content: Buffer.from(bytes), contentType: 'application/pdf' }];
+    receiptNote = `Din kvitto (Kvitto #${receiptNo}) finns bifogad som PDF – med företagsuppgifter, org.nr, belopp och moms.`;
+  } catch (e) {
+    console.error('Kvitto PDF generation failed (non-fatal):', e);
+  }
+
   const transporter = getTransporter();
   await transporter.sendMail({
     from: senderEmail,
     to: recipientEmail,
     replyTo: replyToEmail,
     subject: 'Tack för din beställning hos Vikingfuel',
-    text: buildOrderConfirmationTextFromStoredOrder(order, recipientEmail),
+    text: buildOrderConfirmationTextFromStoredOrder(order, recipientEmail) + (receiptNote ? `\n\n📄 Här är din kvitto: ${receiptNote}` : ''),
     html: buildOrderConfirmationHtml({
       orderId: order.id,
       customerName: order.shippingAddress?.name || undefined,
@@ -283,7 +297,9 @@ export async function sendOrderConfirmationEmailForStoredOrder(order: any, recip
       totalInCents: (order.totalAmount || 0) * 100,
       shippingLabel: method === 'postnord' ? 'PostNord' : 'Uthämtning',
       shippingDetail: storedOrderShippingDetail(order, method),
+      receiptNote,
     }),
+    ...(attachments ? { attachments } : {}),
   });
   return { sent: true };
 }
