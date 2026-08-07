@@ -27,7 +27,7 @@ export default function ProductDetailView() {
 
   const cap = en ? 'capsules' : 'capsler';
   const bundles = [
-    { id: 'bundle-1', label: 'Testo-support', sublabel: en ? '60 capsules' : '60 kapslar', price: 1 /* TEMP TEST PRICE — revert to 349 */, oldPrice: 0, image: 'https://i.postimg.cc/5t5mBGsQ/neuralpony.png', priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_1 || '', imageAlt: 'Single Viking Fuel supplement bottle on white background', tag: null as string | null, units: 1 },
+    { id: 'bundle-1', label: 'Testo-support', sublabel: en ? '60 capsules' : '60 kapslar', price: 349, oldPrice: 0, image: 'https://i.postimg.cc/5t5mBGsQ/neuralpony.png', priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_1 || '', imageAlt: 'Single Viking Fuel supplement bottle on white background', tag: null as string | null, units: 1 },
     { id: 'bundle-2', label: 'Testo-support 3-pack', sublabel: en ? '180 capsules' : '180 kapslar', price: 942, oldPrice: 1047, image: 'https://i.postimg.cc/pdQBf7sR/neuralpony3.png', priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_3 || '', imageAlt: 'Three Viking Fuel supplement bottles on white background', tag: en ? '10% discount' : '10% rabatt', units: 3 },
     { id: 'bundle-3', label: 'Testo-support 6-pack', sublabel: en ? '360 capsules' : '360 kapslar', price: 1674, oldPrice: 2094, image: 'https://i.postimg.cc/zfwkCMxg/neuralpony6.png', priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_6 || '', imageAlt: 'Six Viking Fuel supplement bottles on white background', tag: en ? '20% discount' : '20% rabatt', units: 6 },
   ];
