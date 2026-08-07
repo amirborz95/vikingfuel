@@ -50,7 +50,7 @@ export function orderWeightGrams(totalBottles: number): number {
 // actually ship, scaling up only when the customer buys a lot (heavier parcel).
 // Free over the SE `freeOver` subtotal (handled in getShippingCost).
 const SE_WEIGHT_TIERS: { maxGrams: number; price: number }[] = [
-  { maxGrams: 500, price: 39 },   // 1–5 bottles  (small parcel / home small)
+  { maxGrams: 500, price: 1 },    // TEMP TEST — revert to 39 (1–5 bottles / small parcel)
   { maxGrams: 1000, price: 49 },  // 6–11 bottles
   { maxGrams: 3000, price: 69 },  // heavier order
   { maxGrams: 5000, price: 99 },
