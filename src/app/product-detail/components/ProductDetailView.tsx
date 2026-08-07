@@ -257,14 +257,44 @@ export default function ProductDetailView() {
                 <span className="text-sm text-muted-foreground">(45 {en ? 'reviews' : 'recensioner'})</span>
               </div>
               <div className="mb-6">
-                <p className="text-4xl font-extrabold text-foreground mb-2">{bundle.price} SEK</p>
-                {bundle.oldPrice > 0 && (
+                {purchaseMode === 'subscribe' && subPlan ? (
+                  <p className="text-4xl font-extrabold text-foreground mb-2">
+                    {subPlan.monthly} SEK<span className="text-lg font-bold text-muted-foreground">/{en ? 'mo' : 'mån'}</span>
+                  </p>
+                ) : (
+                  <p className="text-4xl font-extrabold text-foreground mb-2">{bundle.price} SEK</p>
+                )}
+                {purchaseMode === 'once' && bundle.oldPrice > 0 && (
                   <>
                     <span className="text-xl text-muted-foreground line-through">{bundle.oldPrice} SEK</span>
                     <span className="text-sm font-bold text-primary bg-accent px-2.5 py-1 rounded-full ml-2">{en ? 'Save' : 'Spara'} {bundle.oldPrice - bundle.price} SEK</span>
                   </>
                 )}
               </div>
+
+              {/* Purchase type — one clear 2-way toggle (replaces the confusing second radio group) */}
+              {subPlan && (
+                <div className="mb-6">
+                  <p className="text-sm font-bold text-foreground mb-3">{en ? 'How would you like it?' : 'Hur vill du köpa?'}</p>
+                  <div className="grid grid-cols-2 gap-2 rounded-2xl bg-muted p-1">
+                    <button
+                      type="button"
+                      onClick={() => setPurchaseMode('once')}
+                      className={`rounded-xl px-3 py-3 text-sm font-bold transition-all ${purchaseMode === 'once' ? 'bg-white text-foreground shadow-sm ring-1 ring-primary/30' : 'text-muted-foreground hover:text-foreground'}`}
+                    >
+                      {en ? 'One-time' : 'Köp en gång'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPurchaseMode('subscribe')}
+                      className={`flex items-center justify-center gap-1.5 rounded-xl px-3 py-3 text-sm font-bold transition-all ${purchaseMode === 'subscribe' ? 'bg-white text-foreground shadow-sm ring-1 ring-primary/30' : 'text-muted-foreground hover:text-foreground'}`}
+                    >
+                      {en ? 'Subscribe' : 'Prenumerera'}
+                      <span className="rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">−20%</span>
+                    </button>
+                  </div>
+                </div>
+              )}
               <div className="mb-8">
                 <p className="text-sm font-bold text-foreground mb-3">{en ? 'Choose pack' : 'Välj paket'}</p>
                 <div className="space-y-3">
@@ -280,10 +310,22 @@ export default function ProductDetailView() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {b.tag && (<span className="text-[10px] font-bold bg-primary text-white px-2 py-0.5 rounded-full">{b.tag}</span>)}
+                        {(purchaseMode === 'subscribe' || b.tag) && (
+                          <span className="text-[10px] font-bold bg-primary text-white px-2 py-0.5 rounded-full">
+                            {purchaseMode === 'subscribe' ? (en ? 'Save 20%' : 'Spara 20%') : b.tag}
+                          </span>
+                        )}
                         <div className="text-right">
-                          <p className="text-sm font-bold text-foreground">{b.price} SEK</p>
-                          {b.oldPrice > 0 && (<p className="text-[10px] text-muted-foreground line-through">{b.oldPrice} SEK</p>)}
+                          {purchaseMode === 'subscribe' ? (
+                            <p className="text-sm font-bold text-foreground">
+                              {subPlanForUnits(b.units)?.monthly ?? b.price} SEK<span className="text-[10px] font-medium text-muted-foreground">/{en ? 'mo' : 'mån'}</span>
+                            </p>
+                          ) : (
+                            <>
+                              <p className="text-sm font-bold text-foreground">{b.price} SEK</p>
+                              {b.oldPrice > 0 && (<p className="text-[10px] text-muted-foreground line-through">{b.oldPrice} SEK</p>)}
+                            </>
+                          )}
                         </div>
                       </div>
                     </button>
@@ -306,47 +348,6 @@ export default function ProductDetailView() {
                   <div className={`h-full rounded-full ${remainingUnits > 0 ? 'bg-primary' : 'bg-red-400'}`} style={{ width: `${stockPercentage}%` }} />
                 </div>
               </div>
-
-              {/* Purchase mode: subscribe (default) vs one-time */}
-              {subPlan && (
-                <div className="mb-4 space-y-3">
-                  <button
-                    type="button"
-                    onClick={() => setPurchaseMode('subscribe')}
-                    className={`relative w-full text-left rounded-2xl border-2 p-4 transition-all ${purchaseMode === 'subscribe' ? 'border-primary bg-accent' : 'border-border bg-white hover:border-primary/40'}`}
-                  >
-                    <span className="absolute -top-2.5 right-4 rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold text-white">{en ? 'Save 20%' : 'Spara 20%'}</span>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${purchaseMode === 'subscribe' ? 'border-primary bg-primary' : 'border-border'}`}>
-                          {purchaseMode === 'subscribe' && <Icon name="CheckIcon" size={11} className="text-white" />}
-                        </span>
-                        <div>
-                          <p className="text-sm font-bold text-foreground">{en ? 'Subscribe & save' : 'Prenumerera & spara'}</p>
-                          <p className="text-xs text-muted-foreground">{en ? 'Delivered monthly · cancel anytime' : 'Levereras varje månad · avsluta när du vill'}</p>
-                        </div>
-                      </div>
-                      <p className="text-sm font-bold text-primary">{subPlan.monthly} SEK<span className="text-xs font-medium text-muted-foreground">/{en ? 'mo' : 'mån'}</span></p>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setPurchaseMode('once')}
-                    className={`w-full text-left rounded-2xl border-2 p-4 transition-all ${purchaseMode === 'once' ? 'border-primary bg-accent' : 'border-border bg-white hover:border-primary/40'}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${purchaseMode === 'once' ? 'border-primary bg-primary' : 'border-border'}`}>
-                          {purchaseMode === 'once' && <Icon name="CheckIcon" size={11} className="text-white" />}
-                        </span>
-                        <p className="text-sm font-bold text-foreground">{en ? 'One-time purchase' : 'Köp en gång'}</p>
-                      </div>
-                      <p className="text-sm font-bold text-foreground">{bundle.price} SEK</p>
-                    </div>
-                  </button>
-                </div>
-              )}
 
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex items-center gap-2 border border-border rounded-xl p-1">
