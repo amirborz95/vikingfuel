@@ -105,9 +105,13 @@ export default function CheckoutPage() {
   const discountAmount = discount.valid ? discount.amount : 0;
 
   const subtotal = totalPrice;
+  const totalBottles = useMemo(
+    () => items.reduce((s, it) => s + (it.units ?? 1) * it.quantity, 0),
+    [items]
+  );
   const shippingCost = useMemo(
-    () => (carrierId ? carrierCost(carrierId, country, subtotal) : 0),
-    [carrierId, country, subtotal]
+    () => (carrierId ? carrierCost(carrierId, country, subtotal, totalBottles) : 0),
+    [carrierId, country, subtotal, totalBottles]
   );
   const total = Math.max(0, subtotal + shippingCost - discountAmount);
   const vat = Math.round((total - total / 1.06) * 100) / 100;
@@ -332,7 +336,7 @@ export default function CheckoutPage() {
                   {deliveryOpen && (
                     <div className="mt-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                       {carriers.map((c) => {
-                        const cost = carrierCost(c.id, country, subtotal);
+                        const cost = carrierCost(c.id, country, subtotal, totalBottles);
                         return (
                           <DeliveryOption
                             key={c.id}

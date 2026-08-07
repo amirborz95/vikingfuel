@@ -1,3 +1,5 @@
+import { orderWeightGrams } from './shipping';
+
 const apiKey = process.env.POSTNORD_API_KEY || '';
 const rawApiBaseUrl = process.env.POSTNORD_API_BASE_URL || 'https://api2.postnord.com';
 const apiBaseUrl = rawApiBaseUrl.replace(/\/rest\/?$/, '');
@@ -41,7 +43,7 @@ export type PostNordShippingDetails =
 export interface CreatePostNordShipmentArgs {
   orderId: string;
   packageDescription: string;
-  items: Array<{ name: string; quantity: number; price: number }>;
+  items: Array<{ name: string; quantity: number; price: number; units?: number }>;
   totalAmount: number;
   customerEmail: string;
   shippingDetails: PostNordShippingDetails;
@@ -85,6 +87,14 @@ export async function createPostNordShipment(
     throw new Error('Missing PostNord consignor customer number. Set POSTNORD_CUSTOMER_NUMBER in your environment.');
   }
 
+  // Declare the real parcel weight so PostNord bills the correct (small) tier —
+  // a hardcoded 1 kg pushed every parcel into a far pricier bracket.
+  const totalBottles = (args.items || []).reduce(
+    (sum, it) => sum + (it.units ?? 1) * (it.quantity || 1),
+    0
+  );
+  const weightKg = Math.max(0.1, Math.round(orderWeightGrams(totalBottles)) / 1000);
+
   const buildPayload = (includeApplication = true) => {
     const data: any = {
       messageDate: new Date().toISOString(),
@@ -112,7 +122,7 @@ export async function createPostNordShipment(
             value: 1,
           },
           totalGrossWeight: {
-            value: 1.0,
+            value: weightKg,
             unit: 'KGM',
           },
           parties: {
@@ -163,7 +173,7 @@ export async function createPostNordShipment(
                     itemIdType: 'SSCC',
                   },
                   grossWeight: {
-                    value: 1.0,
+                    value: weightKg,
                     unit: 'KGM',
                   },
                 },

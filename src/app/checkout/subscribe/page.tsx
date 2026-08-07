@@ -123,12 +123,13 @@ function SubscribeInner() {
   }, [carriers, carrierId]);
 
   // Monthly product subtotal, plus shipping computed exactly like the one-time
-  // checkout (PostNord: free over 700 kr, otherwise 49 kr). Shipping recurs with
-  // the subscription and is charged every month alongside the plan.
+  // checkout (weight-based PostNord; free over 700 kr). Shipping recurs with the
+  // subscription and is charged every month alongside the plan.
   const monthlySubtotal = monthly * qty;
+  const totalBottles = bottlesPerPack * qty;
   const shippingCost = useMemo(
-    () => (carrierId ? carrierCost(carrierId, country, monthlySubtotal) : 0),
-    [carrierId, country, monthlySubtotal]
+    () => (carrierId ? carrierCost(carrierId, country, monthlySubtotal, totalBottles) : 0),
+    [carrierId, country, monthlySubtotal, totalBottles]
   );
   const monthlyTotal = monthlySubtotal + shippingCost;
 
@@ -356,7 +357,7 @@ function SubscribeInner() {
                   {deliveryOpen && (
                     <div className="mt-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                       {carriers.map((c) => {
-                        const cost = carrierCost(c.id, country, monthlySubtotal);
+                        const cost = carrierCost(c.id, country, monthlySubtotal, totalBottles);
                         return (
                           <DeliveryOption
                             key={c.id}

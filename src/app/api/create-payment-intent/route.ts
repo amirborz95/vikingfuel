@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       (sum: number, it: any) => sum + Number(it.price) * Number(it.quantity),
       0
     );
-    const shippingCost = carrierCost(carrierId, country, subtotal);
+    const shippingCost = carrierCost(carrierId, country, subtotal, orderedUnits);
 
     // Discount code (e.g. VIKING10 → 10% off single bottle only).
     const discount = computeDiscount(String(body.discountCode || ''), items);

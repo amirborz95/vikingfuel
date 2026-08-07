@@ -129,13 +129,17 @@ export function availableCarriers(country: string): CarrierDef[] {
   });
 }
 
-/** Shipping cost in SEK for a carrier, destination and subtotal. */
-export function carrierCost(id: string, country: string, subtotal: number): number {
+/**
+ * Shipping cost in SEK for a carrier, destination, subtotal and bottle count.
+ * PostNord (SE) is priced by parcel weight (derived from `totalBottles`); other
+ * carriers keep their flat price with a free-over threshold.
+ */
+export function carrierCost(id: string, country: string, subtotal: number, totalBottles = 0): number {
   const c = getCarrier(id);
   if (!c) return 0;
   if (c.provider === 'pickup') return 0;
-  // PostNord keeps its existing zone-based pricing.
-  if (c.id === 'postnord') return getShippingCost('postnord', country, subtotal);
+  // PostNord: weight-based domestic pricing, zone-based international.
+  if (c.id === 'postnord') return getShippingCost('postnord', country, subtotal, totalBottles);
   if (c.price === 0) return 0;
   if (c.freeOver > 0 && subtotal >= c.freeOver) return 0;
   return c.price;

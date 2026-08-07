@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
     // Shipping — same rule as the one-time checkout (PostNord: free over 700 kr,
     // otherwise 49 kr). Charged recurring, alongside the plan, every month.
     const subtotal = monthly * quantity;
-    const shippingCost = carrierCost(carrierId as string, country, subtotal);
+    const shippingCost = carrierCost(carrierId as string, country, subtotal, orderedUnits);
 
     const items: Stripe.SubscriptionCreateParams.Item[] = [{ price: priceId, quantity }];
     if (shippingCost > 0) {

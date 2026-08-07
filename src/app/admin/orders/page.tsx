@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { getCarrier } from '@/lib/carriers';
@@ -46,16 +46,66 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Row[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'not_shipped' | 'progress' | 'shipped'>('all');
+  // Real-time "new order" alerting.
+  const [newCount, setNewCount] = useState(0);
+  const seenIdsRef = useRef<Set<string>>(new Set());
+  const seededRef = useRef(false);
+
+  // Short beep + browser notification when an order arrives while the tab is open.
+  const alertNewOrders = useCallback((count: number) => {
+    try {
+      const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtx) {
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.5);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.5);
+      }
+    } catch {}
+    try {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('🔔 Ny beställning på Vikingfuel', {
+          body: count > 1 ? `${count} nya beställningar` : 'En ny beställning har kommit in.',
+        });
+      }
+    } catch {}
+    if (typeof document !== 'undefined') document.title = `(${count}) Orders — Vikingfuel`;
+  }, []);
 
   const fetchOrders = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/orders');
       const json = await res.json();
-      if (res.ok) setOrders(json.orders || []);
+      if (res.ok) {
+        const rows: Row[] = json.orders || [];
+        setOrders(rows);
+
+        const ids = rows.map((r) => r.order?.id).filter(Boolean) as string[];
+        if (!seededRef.current) {
+          // First load: remember existing orders without alerting for them.
+          ids.forEach((id) => seenIdsRef.current.add(id));
+          seededRef.current = true;
+        } else {
+          const fresh = ids.filter((id) => !seenIdsRef.current.has(id));
+          if (fresh.length) {
+            fresh.forEach((id) => seenIdsRef.current.add(id));
+            setNewCount((n) => n + fresh.length);
+            alertNewOrders(fresh.length);
+          }
+        }
+      }
     } catch (e) {
       console.error('Fetch orders failed', e);
     }
-  }, []);
+  }, [alertNewOrders]);
 
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,6 +133,12 @@ export default function OrdersPage() {
 
   useEffect(() => {
     if (!unlocked) return;
+    // Ask once so we can pop a desktop notification when an order arrives.
+    try {
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().catch(() => {});
+      }
+    } catch {}
     fetchOrders();
     const id = setInterval(fetchOrders, 30000);
     return () => clearInterval(id);
@@ -179,10 +235,38 @@ export default function OrdersPage() {
             <h1 className="text-3xl font-bold text-foreground">Orders</h1>
             <p className="mt-1 text-sm text-muted-foreground">Skriv ut fraktsedlar och markera ordrar som skickade.</p>
           </div>
-          <button onClick={fetchOrders} className="rounded-xl border border-border bg-white px-4 py-2 text-sm font-semibold text-foreground hover:bg-slate-50">
-            ↻ Uppdatera
-          </button>
+          <div className="flex items-center gap-3">
+            {counts.not_shipped > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1.5 text-sm font-bold text-amber-800 ring-1 ring-amber-300">
+                🔔 {counts.not_shipped} att hantera
+              </span>
+            )}
+            <button onClick={fetchOrders} className="rounded-xl border border-border bg-white px-4 py-2 text-sm font-semibold text-foreground hover:bg-slate-50">
+              ↻ Uppdatera
+            </button>
+          </div>
         </div>
+
+        {/* New-order alert — appears when an order arrives while this page is open */}
+        {newCount > 0 && (
+          <div className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-emerald-300 bg-emerald-50 px-5 py-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 text-lg text-white">🔔</span>
+              <div>
+                <p className="font-bold text-emerald-900">
+                  {newCount === 1 ? 'Ny beställning mottagen!' : `${newCount} nya beställningar mottagna!`}
+                </p>
+                <p className="text-sm text-emerald-700">Skriv ut fraktsedel och skicka ordern.</p>
+              </div>
+            </div>
+            <button
+              onClick={() => { setNewCount(0); if (typeof document !== 'undefined') document.title = 'Orders — Vikingfuel'; setFilter('not_shipped'); }}
+              className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700"
+            >
+              Visa
+            </button>
+          </div>
+        )}
 
         {/* Filter tabs */}
         <div className="mb-6 flex flex-wrap gap-2">
