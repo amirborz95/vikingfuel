@@ -18,6 +18,19 @@ const postNordApplicationName = process.env.POSTNORD_APPLICATION_NAME || 'PostNo
 const postNordApplicationVersion = process.env.POSTNORD_APPLICATION_VERSION || '1.0';
 const forceNoApplication = process.env.POSTNORD_FORCE_NO_APPLICATION === 'true';
 
+// PostNord basicServiceCodes:
+//   30 = MyPack Home Small (cheap letterbox home delivery, SE domestic, ≤3 kg)
+//   19 = MyPack Collect (service point / ombud — pricier)
+//   17 = MyPack Home (door delivery)
+// Small domestic parcels ship as Home Small (30); heavier (>3 kg) or non-domestic
+// fall back to Collect (19). Override everything with POSTNORD_SERVICE_CODE.
+export function postnordServiceCode(countryCode: string | undefined, weightKg: number): string {
+  const override = (process.env.POSTNORD_SERVICE_CODE || '').trim();
+  if (override) return override;
+  const isDomesticSE = (countryCode || 'SE').toUpperCase() === 'SE';
+  return isDomesticSE && weightKg <= 3 ? '30' : '19';
+}
+
 if (!apiKey) {
   console.warn('POSTNORD_API_KEY is not configured. PostNord shipment creation will be disabled.');
 }
@@ -95,14 +108,7 @@ export async function createPostNordShipment(
   );
   const weightKg = Math.max(0.1, Math.round(orderWeightGrams(totalBottles)) / 1000);
 
-  // Service selection. PostNord basicServiceCodes:
-  //   30 = MyPack Home Small (cheap letterbox home delivery, SE domestic, ≤3 kg)
-  //   19 = MyPack Collect (service point / ombud — pricier)
-  //   17 = MyPack Home (door delivery)
-  // Default: small domestic parcels ship as Home Small (30); heavier (>3 kg) or
-  // non-domestic fall back to Collect (19). Override with POSTNORD_SERVICE_CODE.
-  const isDomesticSE = (recipient.countryCode || 'SE').toUpperCase() === 'SE';
-  const serviceCode = process.env.POSTNORD_SERVICE_CODE || (isDomesticSE && weightKg <= 3 ? '30' : '19');
+  const serviceCode = postnordServiceCode(recipient.countryCode, weightKg);
 
   const buildPayload = (includeApplication = true) => {
     const data: any = {
