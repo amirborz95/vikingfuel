@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import {
+  sendOrderConfirmationEmailForStoredOrder,
+  sendNewOrderAdminNotification,
+} from '@/lib/orderConfirmation';
 
 // TEMPORARY diagnostic endpoint — verifies that the running environment (e.g.
 // Netlify production) actually has the SMTP env vars and can reach the mail
@@ -95,5 +99,40 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ ok: verifyOk, env, verifyOk, verifyError, sendResult });
+  // 3) Test the REAL order-email functions (HTML templates + replyTo), which is
+  //    what actually runs on a real order. add &realtest=1
+  let realConfirm: any = null;
+  let realAdmin: any = null;
+  if (req.nextUrl.searchParams.get('realtest') === '1') {
+    const sampleOrder = {
+      id: 'debug-' + Date.now(),
+      items: [{ name: 'Viking Energy — Testo-support', quantity: 1, price: 1, units: 1 }],
+      totalAmount: 2,
+      currency: 'SEK',
+      shippingOption: 'PostNord',
+      carrier: 'postnord',
+      carrierProvider: 'postnord',
+      shippingCost: 1,
+      shippingAddress: {
+        name: 'Debug Test',
+        phone: '+46700000000',
+        address: { line1: 'Testgatan 1', postal_code: '34235', city: 'Alvesta', country: 'SE' },
+      },
+    };
+    const recipient = to || user;
+    try {
+      await sendOrderConfirmationEmailForStoredOrder(sampleOrder, recipient);
+      realConfirm = { ok: true, to: recipient };
+    } catch (e: any) {
+      realConfirm = { ok: false, message: e?.message || String(e), code: e?.code || null, response: e?.response || null, stack: (e?.stack || '').split('\n').slice(0, 4) };
+    }
+    try {
+      await sendNewOrderAdminNotification(sampleOrder, recipient);
+      realAdmin = { ok: true };
+    } catch (e: any) {
+      realAdmin = { ok: false, message: e?.message || String(e), code: e?.code || null, response: e?.response || null, stack: (e?.stack || '').split('\n').slice(0, 4) };
+    }
+  }
+
+  return NextResponse.json({ ok: verifyOk, env, verifyOk, verifyError, sendResult, realConfirm, realAdmin });
 }
