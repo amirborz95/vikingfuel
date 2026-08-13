@@ -37,6 +37,22 @@ export default function ClientCheckoutSuccess({ sessionId, paymentIntentId, isSu
     }
   }, [clearCart, paymentIntentId, isSubscription, upsellKey]);
 
+  // Load Trustpilot's invitation JS once (queues calls until the script loads).
+  useEffect(() => {
+    const w = window as any;
+    if (w.tp) return;
+    (function (w: any, d: Document, s: string, r: string, n: string) {
+      w.TrustpilotObject = n;
+      w[n] = w[n] || function () { (w[n].q = w[n].q || []).push(arguments); };
+      const a = d.createElement(s) as HTMLScriptElement;
+      a.async = true;
+      a.src = r;
+      const f = d.getElementsByTagName(s)[0];
+      f.parentNode!.insertBefore(a, f);
+    })(w, document, 'script', 'https://invitejs.trustpilot.com/tp.min.js', 'tp');
+    w.tp('register', 'fdYLlB9bZFM0BBTU');
+  }, []);
+
   useEffect(() => {
     if (!sessionId && !paymentIntentId && !subscriptionId) return;
     async function sendConfirmation() {
@@ -65,6 +81,23 @@ export default function ClientCheckoutSuccess({ sessionId, paymentIntentId, isSu
             currency: result.currency || 'SEK',
           });
           sessionStorage.setItem(firedKey, '1');
+        }
+
+        // Trustpilot review invitation — fire once per order.
+        const tp = (window as any).tp;
+        const invite = result.trustpilot;
+        if (tp && invite?.recipientEmail) {
+          const ref = invite.referenceId || orderKey || invite.recipientEmail;
+          const tpKey = `tp_invited_${ref}`;
+          if (!sessionStorage.getItem(tpKey)) {
+            tp('createInvitation', {
+              recipientEmail: invite.recipientEmail,
+              recipientName: invite.recipientName || '',
+              referenceId: ref,
+              source: 'InvitationScript',
+            });
+            sessionStorage.setItem(tpKey, '1');
+          }
         }
       } catch (error: any) {
         setConfirmationError(error?.message || t('checkoutResult.confErrGeneric'));

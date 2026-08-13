@@ -37,6 +37,9 @@ export async function POST(req: NextRequest) {
           success: true,
           value: result.order?.totalAmount ?? null,
           currency: result.order?.currency || 'SEK',
+          trustpilot: result.email
+            ? { recipientEmail: result.email, recipientName: result.order?.shippingAddress?.name || '', referenceId: result.order?.id || subscriptionId }
+            : null,
         });
       }
       return NextResponse.json({ success: true, value: null, currency: 'SEK' });
@@ -56,6 +59,9 @@ export async function POST(req: NextRequest) {
         success: true,
         value: result.order?.totalAmount ?? null,
         currency: result.order?.currency || 'SEK',
+        trustpilot: result.email
+          ? { recipientEmail: result.email, recipientName: result.order?.shippingAddress?.name || '', referenceId: result.order?.id || paymentIntentId }
+          : null,
       });
     }
 
