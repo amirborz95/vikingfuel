@@ -13,10 +13,10 @@ import { allProducts } from '@/app/components/ProductsSection';
 import { useLanguage } from '@/context/LanguageContext';
 import { subPlanForUnits } from '@/lib/subscriptions';
 
-export default function ProductDetailView() {
+export default function ProductDetailView({ initialBundle = 0 }: { initialBundle?: number }) {
   const { lang } = useLanguage();
   const en = lang === 'en';
-  const [selectedBundle, setSelectedBundle] = useState(0);
+  const [selectedBundle, setSelectedBundle] = useState(Math.min(2, Math.max(0, initialBundle)));
   const [activeTab, setActiveTab] = useState('desc');
   const [quantity, setQuantity] = useState(1);
   const [addedMsg, setAddedMsg] = useState(false);
