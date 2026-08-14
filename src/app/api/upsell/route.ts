@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { UPSELL, UPSELL_TOTAL, UPSELL_TOTAL_CENTS } from '@/lib/upsell';
 import { readUsers, writeUsers } from '@/lib/auth';
+import { savePendingUpsell } from '@/lib/orders';
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
 const stripe = new Stripe(stripeSecret);
@@ -66,15 +67,26 @@ export async function POST(req: NextRequest) {
       });
     } catch {}
 
+    const upsellItem = { name: `${UPSELL.productName} (upsell)`, quantity: UPSELL.bottles, price: UPSELL.pricePerBottle, units: 1 };
+
+    // Record the upsell durably first, so it's applied even if the order hasn't
+    // been finalized yet (finalizeOrderFromPaymentIntent merges it on creation).
+    try {
+      await savePendingUpsell(originalPiId, { items: [upsellItem], total: UPSELL_TOTAL });
+    } catch (e) {
+      console.error('Failed to save pending upsell (non-fatal):', e);
+    }
+
+    // If the order already exists, append immediately (guarded so we never double-add).
     try {
       const users = await readUsers();
       let touched = false;
       for (const u of users) {
         const order = (u.orders || []).find((o: any) => o.id === originalPiId || o.sessionId === originalPiId);
-        if (order) {
+        if (order && !order.upsellCharged) {
           order.items = order.items || [];
-          order.items.push({ name: `${UPSELL.productName} (upsell)`, quantity: UPSELL.bottles, price: UPSELL.pricePerBottle, units: 1 });
-          order.totalAmount = (order.totalAmount || 0) + UPSELL_TOTAL;
+          order.items.push(upsellItem);
+          order.totalAmount = Math.round(((order.totalAmount || 0) + UPSELL_TOTAL) * 100) / 100;
           order.upsellCharged = true;
           touched = true;
           break;

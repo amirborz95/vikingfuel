@@ -45,6 +45,23 @@ async function readPendingOrder(piId: string): Promise<OrderDraft | null> {
   return readData<OrderDraft | null>(`pending_${piId}.json`, null);
 }
 
+// Post-purchase upsell — recorded durably so it's still applied even when the
+// upsell charge lands before the order is finalized (a race that previously
+// dropped the extra bottles from the order).
+export async function savePendingUpsell(piId: string, upsell: { items: any[]; total: number }): Promise<void> {
+  await writeData(`upsell_${piId}.json`, { ...upsell, ts: Date.now() });
+}
+
+export async function applyPendingUpsell(order: any, piId: string): Promise<boolean> {
+  if (order.upsellCharged) return false;
+  const up = await readData<{ items?: any[]; total?: number } | null>(`upsell_${piId}.json`, null);
+  if (!up || !Array.isArray(up.items) || up.items.length === 0) return false;
+  order.items = [...(order.items || []), ...up.items];
+  order.totalAmount = Math.round(((order.totalAmount || 0) + (Number(up.total) || 0)) * 100) / 100;
+  order.upsellCharged = true;
+  return true;
+}
+
 // Subscriptions store their draft keyed by the Stripe subscription id, so every
 // recurring invoice (first + monthly renewals) can build a fresh order.
 export async function savePendingSubscriptionOrder(subId: string, draft: OrderDraft): Promise<void> {
@@ -206,6 +223,9 @@ export async function finalizeOrderFromPaymentIntent(
   if (existing) return { order: existing, created: false, email };
 
   const { order, carrier, provider, needsAddress } = makeOrderRecord(piId, draft);
+  // Merge any upsell that was charged before this order got saved (so the label
+  // weight + fulfilment include the extra bottles).
+  await applyPendingUpsell(order, piId);
   await autoBookShipment(order, carrier, provider, needsAddress, email);
 
   user.orders.push(order);
