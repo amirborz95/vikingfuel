@@ -188,6 +188,25 @@ export default function OrdersPage() {
     }
   }
 
+  async function deleteOrder(row: Row) {
+    if (!confirm(`Ta bort order ${row.order.id}?\n\n${row.userEmail} · ${kr(row.order.totalAmount)}\n\nDetta går inte att ångra.`)) return;
+    setBusy(row.order.id);
+    try {
+      const res = await fetch('/api/admin/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', userEmail: row.userEmail, orderId: row.order.id, password }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error === 'unauthorized' ? 'Fel lösenord — logga in igen.' : (json?.error || 'Misslyckades'));
+      await fetchOrders();
+    } catch (e: any) {
+      alert('Kunde inte ta bort order: ' + (e?.message || e));
+    } finally {
+      setBusy(null);
+    }
+  }
+
   const counts = {
     all: orders.length,
     not_shipped: orders.filter((r) => normalizeStatus(r.order.status) === 'not_shipped').length,
@@ -300,7 +319,6 @@ export default function OrdersPage() {
               const meta = STATUS_META[st];
               const s = shippingOf(o);
               const isBusy = busy === o.id;
-              const itemsText = (o.items || []).map((it: any) => `${it.name} ×${it.quantity}`).join(', ');
               return (
                 <div key={`${row.userEmail}-${o.id}`} className="rounded-2xl border border-border bg-white p-6 shadow-card">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -317,15 +335,41 @@ export default function OrdersPage() {
                         )}
                       </div>
                       <p className="mt-3 text-sm font-semibold text-foreground break-words">{o.id}</p>
-                      <p className="text-sm text-muted-foreground">{row.userName || 'Kund'} · {row.userEmail}</p>
-                      <p className="mt-2 text-sm text-foreground">{itemsText || 'Inga produkter'}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">{row.userName || o.shippingAddress?.name || 'Kund'} · {row.userEmail}</p>
+
+                      {/* Itemized breakdown — per-unit price × antal = radbelopp */}
+                      <div className="mt-3 divide-y divide-border rounded-xl border border-border">
+                        {(o.items || []).length ? (o.items).map((it: any, idx: number) => {
+                          const qty = Number(it.quantity) || 1;
+                          const unit = Number(it.price) || 0;
+                          const isUpsell = String(it.name || '').toLowerCase().includes('upsell');
+                          return (
+                            <div key={idx} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
+                              <div className="min-w-0">
+                                <p className="truncate font-medium text-foreground">
+                                  {String(it.name || '').replace(/\s*\(upsell\)/i, '')}
+                                  {isUpsell && <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">Merförsäljning</span>}
+                                </p>
+                                <p className="text-xs text-muted-foreground">{qty} st × {kr(unit)}/st{it.units && it.units > 1 ? ` · ${it.units} burkar/st` : ''}</p>
+                              </div>
+                              <span className="whitespace-nowrap font-semibold text-foreground">{kr(unit * qty)}</span>
+                            </div>
+                          );
+                        }) : (
+                          <div className="px-3 py-2 text-sm text-muted-foreground">Inga produkter</div>
+                        )}
+                      </div>
+
+                      <p className="mt-2 text-sm text-muted-foreground">
                         {s.isPickup ? 'Uthämtning — ingen adress' : (s.address || 'Ingen adress angiven')}
                       </p>
                       {s.tracking && (
                         <p className="mt-1 text-sm text-foreground"><span className="font-semibold">Spårning:</span> {s.tracking}</p>
                       )}
-                      <p className="mt-2 text-lg font-bold text-foreground">{kr(o.totalAmount)}</p>
+                      <div className="mt-2 flex items-baseline gap-2">
+                        <span className="text-lg font-bold text-foreground">{kr(o.totalAmount)}</span>
+                        <span className="text-xs text-muted-foreground">totalt{o.upsellCharged ? ' · inkl. merförsäljning' : ''}</span>
+                      </div>
                     </div>
 
                     {/* Right: actions */}
@@ -363,6 +407,13 @@ export default function OrdersPage() {
                       {st === 'progress' && (
                         <p className="text-center text-xs text-muted-foreground">Fraktsedel utskriven — klistra på och lämna in.</p>
                       )}
+                      <button
+                        onClick={() => deleteOrder(row)}
+                        disabled={isBusy}
+                        className="mt-1 rounded-xl px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                      >
+                        Ta bort order
+                      </button>
                     </div>
                   </div>
                 </div>

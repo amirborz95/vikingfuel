@@ -10,6 +10,7 @@ const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
 const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: '2026-04-22.dahlia' }) : null;
 
 const VALID_STATUSES = ['not_shipped', 'progress', 'shipped'];
+const ADMIN_PASSWORD = process.env.ADMIN_PANEL_PASSWORD || 'Viking2026Fuel!';
 
 /**
  * Book the shipping label for an order if one hasn't been created yet.
@@ -117,7 +118,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'userEmail and orderId are required' }, { status: 400 });
     }
     const act = action || 'setStatus';
-    if (act !== 'setStatus' && act !== 'printLabel') {
+    if (act !== 'setStatus' && act !== 'printLabel' && act !== 'delete') {
       return NextResponse.json({ error: 'Unsupported action' }, { status: 400 });
     }
     if (act === 'setStatus' && !VALID_STATUSES.includes(requestedStatus)) {
@@ -127,6 +128,19 @@ export async function POST(req: NextRequest) {
     const users = await readUsers();
     const user = users.find((u: any) => u.email === userEmail);
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+    // ── Delete an order (destructive — requires the admin password) ──
+    if (act === 'delete') {
+      if (String(body.password || '') !== ADMIN_PASSWORD) {
+        return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+      }
+      const before = (user.orders || []).length;
+      user.orders = (user.orders || []).filter((o: any) => !(o.id === orderId || o.sessionId === orderId));
+      const removed = before - user.orders.length;
+      await writeUsers(users);
+      return NextResponse.json({ success: true, deleted: removed });
+    }
+
     const order = (user.orders || []).find((o: any) => o.id === orderId || o.sessionId === orderId);
     if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
 
