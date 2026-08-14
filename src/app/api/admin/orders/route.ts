@@ -113,13 +113,41 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { action, userEmail, orderId } = body;
     const requestedStatus = String(body.status || '').trim();
+    const act = action || 'setStatus';
+
+    if (act !== 'setStatus' && act !== 'printLabel' && act !== 'delete') {
+      return NextResponse.json({ error: 'Unsupported action' }, { status: 400 });
+    }
+
+    // ── Delete order(s) — destructive, requires the admin password. Accepts a
+    //    single { orderId } or a bulk { orderIds: [...] }. Bulk removes them all
+    //    in ONE read-modify-write so concurrent writes can't resurrect deletions
+    //    on eventually-consistent storage (Netlify Blobs). ──
+    if (act === 'delete') {
+      if (String(body.password || '') !== ADMIN_PASSWORD) {
+        return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+      }
+      const ids: string[] = Array.isArray(body.orderIds) && body.orderIds.length
+        ? body.orderIds.map(String)
+        : (orderId ? [String(orderId)] : []);
+      if (!ids.length) {
+        return NextResponse.json({ error: 'orderId or orderIds required' }, { status: 400 });
+      }
+      const idSet = new Set(ids);
+      const users = await readUsers();
+      let removed = 0;
+      for (const u of users) {
+        if (!Array.isArray(u.orders)) continue;
+        const before = u.orders.length;
+        u.orders = u.orders.filter((o: any) => !(idSet.has(o.id) || idSet.has(o.sessionId)));
+        removed += before - u.orders.length;
+      }
+      await writeUsers(users);
+      return NextResponse.json({ success: true, deleted: removed });
+    }
 
     if (!userEmail || !orderId) {
       return NextResponse.json({ error: 'userEmail and orderId are required' }, { status: 400 });
-    }
-    const act = action || 'setStatus';
-    if (act !== 'setStatus' && act !== 'printLabel' && act !== 'delete') {
-      return NextResponse.json({ error: 'Unsupported action' }, { status: 400 });
     }
     if (act === 'setStatus' && !VALID_STATUSES.includes(requestedStatus)) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
@@ -128,18 +156,6 @@ export async function POST(req: NextRequest) {
     const users = await readUsers();
     const user = users.find((u: any) => u.email === userEmail);
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
-
-    // ── Delete an order (destructive — requires the admin password) ──
-    if (act === 'delete') {
-      if (String(body.password || '') !== ADMIN_PASSWORD) {
-        return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-      }
-      const before = (user.orders || []).length;
-      user.orders = (user.orders || []).filter((o: any) => !(o.id === orderId || o.sessionId === orderId));
-      const removed = before - user.orders.length;
-      await writeUsers(users);
-      return NextResponse.json({ success: true, deleted: removed });
-    }
 
     const order = (user.orders || []).find((o: any) => o.id === orderId || o.sessionId === orderId);
     if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
