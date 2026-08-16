@@ -102,9 +102,9 @@ export async function POST(req: NextRequest) {
     );
     const shippingAmountInCents = shippingOption === 'pickup'
       ? 0
-      : subtotalInCents >= 70000
+      : subtotalInCents >= 64900
         ? 0
-        : 4900;
+        : 3900;
 
     if (shippingAmountInCents > 0) {
       line_items.push({
