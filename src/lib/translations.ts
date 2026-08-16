@@ -63,7 +63,7 @@ export const translations: Record<Lang, any> = {
     },
     home: {
       announce: {
-        a: 'Fri frakt över 700 kr',
+        a: 'Fri frakt över 649 kr',
         b: 'Snabb leverans inom Sverige',
         c: '14 dagar ångerrätt',
         d: 'Naturliga kosttillskott från Norden',
@@ -77,7 +77,7 @@ export const translations: Record<Lang, any> = {
       },
       trust: {
         fastTitle: 'Snabb leverans', fastSub: '2-4 arbetsdagar',
-        freeTitle: 'Fri frakt', freeSub: 'Över 700 kr',
+        freeTitle: 'Fri frakt', freeSub: 'Över 649 kr',
         returnsTitle: '14 dagar ångerrätt', returnsSub: 'Full återbetalning',
         payTitle: 'Säker betalning', paySub: 'SSL-krypterad',
         naturalTitle: 'Naturliga ingredienser', naturalSub: 'Inga tillsatser',
@@ -156,7 +156,7 @@ export const translations: Record<Lang, any> = {
     },
     cart: {
       title: 'Din varukorg', empty: 'Din varukorg är tom', shopNow: 'Handla nu', total: 'Totalt',
-      shippingNote: 'Uthämtning är gratis. PostNord är gratis vid 700 kr eller mer, annars kostar frakten 49 kr.',
+      shippingNote: 'Uthämtning är gratis. PostNord är gratis vid 649 kr eller mer, annars kostar frakten från 39 kr (efter vikt).',
       vatNote: '6% moms ingår i totalsumman.', clear: 'Töm varukorg', checkout: 'Gå till kassa',
     },
     newsletter: {
@@ -267,7 +267,7 @@ export const translations: Record<Lang, any> = {
       contactUs: 'Kontakta oss', contactTelegram: 'Kontakta via Telegram',
       shippingOptions: 'Leveransalternativ',
       pickup: 'Uthämtning', pickupDesc: 'Gratis alltid vid uthämtning.',
-      postnord: 'PostNord', postnordDesc: '49 kr frakt under 700 kr. Gratis vid 700 kr eller mer.',
+      postnord: 'PostNord', postnordDesc: 'Frakt från 39 kr (efter vikt) under 649 kr. Gratis vid 649 kr eller mer.',
       stripeNote: 'När du klickar på "Gå till betalning" skickas du vidare till säker Stripe-betalning.',
       step2: 'Steg 2', yourCart: 'Din varukorg', itemOne: 'vara', itemMany: 'varor',
       colProduct: 'Produkt', colPrice: 'Pris', colQty: 'Antal', colSum: 'Summa', colAction: 'Åtgärd', remove: 'Ta bort',
@@ -355,7 +355,7 @@ export const translations: Record<Lang, any> = {
     },
     home: {
       announce: {
-        a: 'Free shipping over 700 kr',
+        a: 'Free shipping over 649 kr',
         b: 'Fast delivery within Sweden',
         c: '14-day right of withdrawal',
         d: 'Natural supplements from the Nordics',
@@ -369,7 +369,7 @@ export const translations: Record<Lang, any> = {
       },
       trust: {
         fastTitle: 'Fast delivery', fastSub: '2-4 business days',
-        freeTitle: 'Free shipping', freeSub: 'Over 700 kr',
+        freeTitle: 'Free shipping', freeSub: 'Over 649 kr',
         returnsTitle: '14-day returns', returnsSub: 'Full refund',
         payTitle: 'Secure payment', paySub: 'SSL-encrypted',
         naturalTitle: 'Natural ingredients', naturalSub: 'No additives',
@@ -448,7 +448,7 @@ export const translations: Record<Lang, any> = {
     },
     cart: {
       title: 'Your cart', empty: 'Your cart is empty', shopNow: 'Shop now', total: 'Total',
-      shippingNote: 'Pickup is free. PostNord is free at 700 kr or more, otherwise shipping is 49 kr.',
+      shippingNote: 'Pickup is free. PostNord is free at 649 kr or more, otherwise shipping is from 39 kr (by weight).',
       vatNote: '6% VAT included in the total.', clear: 'Clear cart', checkout: 'Go to checkout',
     },
     newsletter: {
@@ -559,7 +559,7 @@ export const translations: Record<Lang, any> = {
       contactUs: 'Contact us', contactTelegram: 'Contact via Telegram',
       shippingOptions: 'Delivery options',
       pickup: 'Pickup', pickupDesc: 'Always free for pickup.',
-      postnord: 'PostNord', postnordDesc: '49 kr shipping under 700 kr. Free at 700 kr or more.',
+      postnord: 'PostNord', postnordDesc: 'Shipping from 39 kr (by weight) under 649 kr. Free at 649 kr or more.',
       stripeNote: 'When you click "Go to payment" you\'ll be taken to secure Stripe payment.',
       step2: 'Step 2', yourCart: 'Your cart', itemOne: 'item', itemMany: 'items',
       colProduct: 'Product', colPrice: 'Price', colQty: 'Qty', colSum: 'Sum', colAction: 'Action', remove: 'Remove',

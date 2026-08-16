@@ -111,8 +111,8 @@ export async function POST(req: NextRequest) {
         price_data: {
           currency: 'sek',
           product_data: {
-            name: 'Frakt 49 kr',
-            description: 'Fraktkostnad för beställningar under 700 kr',
+            name: 'Frakt 39 kr',
+            description: 'Fraktkostnad för beställningar under 649 kr',
             tax_code: 'txcd_92010001',
           },
           unit_amount: shippingAmountInCents,

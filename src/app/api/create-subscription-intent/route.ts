@@ -110,8 +110,8 @@ export async function POST(req: NextRequest) {
         ...(addressForStripe ? { address: addressForStripe, shipping: { name: customer.name || email, phone: customer.phone || undefined, address: addressForStripe } } : {}),
       }));
 
-    // Shipping — same rule as the one-time checkout (PostNord: free over 700 kr,
-    // otherwise 49 kr). Charged recurring, alongside the plan, every month.
+    // Shipping — same rule as the one-time checkout (PostNord: free over 649 kr,
+    // otherwise 39 kr). Charged recurring, alongside the plan, every month.
     const subtotal = monthly * quantity;
     const shippingCost = carrierCost(carrierId as string, country, subtotal, orderedUnits);
 

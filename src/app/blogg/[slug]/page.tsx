@@ -76,7 +76,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           {/* Soft CTA */}
           <div className="mt-12 rounded-2xl border border-border bg-muted p-6 text-center">
             <p className="font-bold text-foreground">Redo att testa Viking Fuel?</p>
-            <p className="mt-1 text-sm text-muted-foreground">Naturligt energitillskott — tillverkat i EU, fri frakt över 700 kr.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Naturligt energitillskott — tillverkat i EU, fri frakt över 649 kr.</p>
             <Link href="/products" className="mt-4 inline-flex rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 hover:brightness-95">
               Handla nu
             </Link>

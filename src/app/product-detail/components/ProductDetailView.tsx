@@ -135,7 +135,7 @@ export default function ProductDetailView({ initialBundle = 0 }: { initialBundle
         </div>
         <div>
           <p className="font-semibold text-foreground mb-1">{en ? 'Free shipping' : 'Fri frakt'}</p>
-          <p>{en ? 'Standard shipping is 49 kr within Sweden. Free shipping over 700 kr.' : 'Normalt frakt kostar 49 kr inom hela Sverige. Fri frakt över 700 kr.'}</p>
+          <p>{en ? 'Shipping from 39 kr within Sweden, by parcel weight. Free shipping over 649 kr.' : 'Frakt från 39 kr inom Sverige, beräknad efter vikt. Fri frakt över 649 kr.'}</p>
         </div>
         <div>
           <p className="font-semibold text-foreground mb-1">{en ? 'Returns' : 'Returer'}</p>
@@ -184,24 +184,24 @@ export default function ProductDetailView({ initialBundle = 0 }: { initialBundle
     ? [
         { label: 'Made in the EU', description: 'Guaranteed quality and standard.' },
         { label: 'GMP-certified', description: 'Produced to strict manufacturing standards.' },
-        { label: 'Free shipping >700 kr', description: 'Free delivery over 700 kr.' },
+        { label: 'Free shipping >649 kr', description: 'Free delivery over 649 kr.' },
       ]
     : [
         { label: 'Tillverkat i EU', description: 'Garanterad kvalitet och standard.' },
         { label: 'GMP-certifierat', description: 'Producerat enligt strikt tillverkningsstandard.' },
-        { label: 'Fri frakt >700 kr', description: 'Fri leverans över 700 kr.' },
+        { label: 'Fri frakt >649 kr', description: 'Fri leverans över 649 kr.' },
       ];
 
   const benefits = en
     ? [
         { title: 'Fast delivery', subtitle: '2-4 business days' },
-        { title: 'Free shipping', subtitle: 'Over 700 kr' },
+        { title: 'Free shipping', subtitle: 'Over 649 kr' },
         { title: '14-day returns', subtitle: 'Full refund' },
         { title: 'Secure payment', subtitle: 'SSL-encrypted' },
       ]
     : [
         { title: 'Snabb leverans', subtitle: '2-4 arbetsdagar' },
-        { title: 'Fri frakt', subtitle: 'Över 700 kr' },
+        { title: 'Fri frakt', subtitle: 'Över 649 kr' },
         { title: '14 dagar ångerrätt', subtitle: 'Full återbetalning' },
         { title: 'Säker betalning', subtitle: 'SSL-krypterad' },
       ];

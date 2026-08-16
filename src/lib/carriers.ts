@@ -49,8 +49,8 @@ export const CARRIERS: CarrierDef[] = [
     descEn: 'Delivered to your door in 2–4 business days.',
     needsAddress: true,
     seOnly: false,
-    price: 49,
-    freeOver: 700,
+    price: 39,
+    freeOver: 649,
   },
   {
     id: 'dhl',

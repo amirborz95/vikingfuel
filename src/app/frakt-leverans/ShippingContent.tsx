@@ -24,7 +24,7 @@ const content: Record<'sv' | 'en', Content> = {
       },
       {
         h: '💰 Fraktkostnader',
-        body: 'Fraktkostnaden beräknas automatiskt baserat på din leveransadress och visas i kassan.<br/><br/><strong>Fraktkostnadsöversikt:</strong><br/>• Normal frakt kostar 49 kr inom hela Sverige.<br/>• Fri frakt: På beställningar över 700 kr<br/>• Uthämtning på plats: alltid gratis',
+        body: 'Fraktkostnaden beräknas automatiskt baserat på din leveransadress och visas i kassan.<br/><br/><strong>Fraktkostnadsöversikt:</strong><br/>• Frakt från 39 kr inom hela Sverige, beräknad efter vikt.<br/>• Fri frakt: På beställningar över 649 kr<br/>• Uthämtning på plats: alltid gratis',
       },
       {
         h: '📍 Spårning av paket',
@@ -62,7 +62,7 @@ const content: Record<'sv' | 'en', Content> = {
       },
       {
         h: '💰 Shipping costs',
-        body: 'The shipping cost is calculated automatically based on your delivery address and shown at checkout.<br/><br/><strong>Shipping overview:</strong><br/>• Standard shipping within Sweden is 49 kr.<br/>• Free shipping: on orders over 700 kr<br/>• Local pickup: always free<br/>• International: calculated by destination country at checkout',
+        body: 'The shipping cost is calculated automatically based on your delivery address and shown at checkout.<br/><br/><strong>Shipping overview:</strong><br/>• Shipping within Sweden from 39 kr, by weight.<br/>• Free shipping: on orders over 649 kr<br/>• Local pickup: always free<br/>• International: calculated by destination country at checkout',
       },
       {
         h: '📍 Package tracking',

@@ -10,7 +10,7 @@ import { productListSchema } from '@/lib/seo';
 export const metadata: Metadata = {
   title: 'Köp kosttillskott för energi — Viking Fuel Testo-support',
   description:
-    'Handla Viking Fuel — naturligt energitillskott och testo-support med Maca, Ashwagandha och Ginseng. 1-, 3- och 6-pack. Fri frakt över 700 kr. Tillverkat i EU.',
+    'Handla Viking Fuel — naturligt energitillskott och testo-support med Maca, Ashwagandha och Ginseng. 1-, 3- och 6-pack. Fri frakt över 649 kr. Tillverkat i EU.',
   alternates: { canonical: '/products' },
 };
 

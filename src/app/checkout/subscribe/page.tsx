@@ -123,7 +123,7 @@ function SubscribeInner() {
   }, [carriers, carrierId]);
 
   // Monthly product subtotal, plus shipping computed exactly like the one-time
-  // checkout (weight-based PostNord; free over 700 kr). Shipping recurs with the
+  // checkout (weight-based PostNord; free over 649 kr). Shipping recurs with the
   // subscription and is charged every month alongside the plan.
   const monthlySubtotal = monthly * qty;
   const totalBottles = bottlesPerPack * qty;
@@ -472,7 +472,7 @@ function SubscribeInner() {
                 </div>
                 {carrier && shippingCost > 0 && (
                   <p className="text-xs text-muted-foreground">
-                    {en ? 'Free shipping on orders over 700 kr.' : 'Fri frakt vid order över 700 kr.'}
+                    {en ? 'Free shipping on orders over 649 kr.' : 'Fri frakt vid order över 649 kr.'}
                   </p>
                 )}
                 <div className="mt-2 flex items-baseline justify-between border-t border-border pt-4">

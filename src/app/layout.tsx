@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: 'Viking Fuel — Kosttillskott för Energi & Testo-support',
   description:
-    'Viking Fuel — naturligt energitillskott och testo-support för energi, uthållighet och fokus. Slut på att vara trött på eftermiddagen. Tillverkat i EU. Fri frakt över 700 kr.',
+    'Viking Fuel — naturligt energitillskott och testo-support för energi, uthållighet och fokus. Slut på att vara trött på eftermiddagen. Tillverkat i EU. Fri frakt över 649 kr.',
   keywords: [
     'energitillskott',
     'kosttillskott energi',
