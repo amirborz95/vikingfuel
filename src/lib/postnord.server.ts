@@ -18,18 +18,19 @@ const postNordApplicationName = process.env.POSTNORD_APPLICATION_NAME || 'PostNo
 const postNordApplicationVersion = process.env.POSTNORD_APPLICATION_VERSION || '1.0';
 const forceNoApplication = process.env.POSTNORD_FORCE_NO_APPLICATION === 'true';
 
-// PostNord basicServiceCodes (API still uses the old "MyPack" names; PostNord
-// now markets these simply as Home Small / Collect / Home):
-//   30 = Home Small — cheap letterbox home delivery, SE domestic, ≤3 kg
-//   19 = Collect — service point / ombud (pricier)
-//   17 = Home — door delivery
-// Small domestic parcels ship as Home Small (30); heavier (>3 kg) or non-domestic
+// PostNord basicServiceCodes (verified against the live servicecodes API, SE
+// issuer Z12):
+//   11 = PostNord Home Small — cheap letterbox home delivery (the CURRENT product)
+//   30 = MyPack Home Small   — legacy product; do NOT use
+//   19 = PostNord Collect    — service point / ombud (pricier)
+//   17 = PostNord Home       — door delivery, up to 20 kg
+// Small domestic parcels ship as Home Small (11); heavier (>3 kg) or non-domestic
 // fall back to Collect (19). Override everything with POSTNORD_SERVICE_CODE.
 export function postnordServiceCode(countryCode: string | undefined, weightKg: number): string {
   const override = (process.env.POSTNORD_SERVICE_CODE || '').trim();
   if (override) return override;
   const isDomesticSE = (countryCode || 'SE').toUpperCase() === 'SE';
-  return isDomesticSE && weightKg <= 3 ? '30' : '19';
+  return isDomesticSE && weightKg <= 3 ? '11' : '19';
 }
 
 if (!apiKey) {
