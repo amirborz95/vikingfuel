@@ -10,7 +10,6 @@ import { useLanguage } from '@/context/LanguageContext';
 import { availableCarriers, carrierCost, getCarrier, carrierBrand, type CarrierDef } from '@/lib/carriers';
 import { COUNTRIES } from '@/lib/countries';
 import { fbqTrack } from '@/lib/fbpixel';
-import { computeDiscount } from '@/lib/discount';
 import AppImage from '@/components/ui/AppImage';
 import PostNordLogo from '@/components/ui/PostNordLogo';
 import PaymentMethods from '@/components/ui/PaymentMethods';
@@ -101,7 +100,25 @@ export default function CheckoutPage() {
   }, [carriers, carrierId]);
 
   const [discountInput, setDiscountInput] = useState('');
-  const discount = useMemo(() => computeDiscount(discountInput, items), [discountInput, items]);
+  const [discount, setDiscount] = useState<{ valid: boolean; code: string; amount: number; isAffiliate?: boolean; reason?: string | null }>({ valid: false, code: '', amount: 0 });
+  useEffect(() => {
+    const code = discountInput.trim();
+    if (!code) { setDiscount({ valid: false, code: '', amount: 0 }); return; }
+    const ctrl = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/discount', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, items: items.map((it) => ({ name: it.name, price: it.price, quantity: it.quantity, units: it.units ?? 1 })) }),
+          signal: ctrl.signal,
+        });
+        const d = await res.json();
+        setDiscount({ valid: !!d.valid, code: d.code || code, amount: Number(d.amount) || 0, isAffiliate: !!d.isAffiliate, reason: d.reason });
+      } catch { /* aborted / offline — keep previous */ }
+    }, 400);
+    return () => { clearTimeout(timer); ctrl.abort(); };
+  }, [discountInput, items]);
   const discountAmount = discount.valid ? discount.amount : 0;
 
   const subtotal = totalPrice;
@@ -187,7 +204,7 @@ export default function CheckoutPage() {
           items: items.map((it) => ({ name: it.name, price: it.price, quantity: it.quantity, units: it.units ?? 1, image: it.image })),
           customer: { email: form.email, name: form.name, phone: form.phone },
           shipping: { carrier: carrierId, country, line1: form.line1, line2: form.line2, postcode: form.postcode, city: form.city },
-          discountCode: discount.valid ? discount.code : '',
+          discountCode: discountInput.trim(),
         }),
       });
       const data = await res.json();
@@ -429,7 +446,9 @@ export default function CheckoutPage() {
                 {discountInput.trim() && (
                   discount.valid ? (
                     <p className="mt-2 text-sm font-medium text-primary">
-                      ✓ {discount.code} {en ? 'applied' : 'tillagd'} — −{kr(discountAmount)}
+                      ✓ {discount.isAffiliate
+                        ? (en ? `Code ${discount.code} — 10% off` : `Kod ${discount.code} — 10% rabatt`)
+                        : `${discount.code} ${en ? 'applied' : 'tillagd'}`} — −{kr(discountAmount)}
                     </p>
                   ) : (
                     <p className="mt-2 text-sm text-amber-600">

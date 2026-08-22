@@ -5,7 +5,7 @@ import { getCarrier, carrierCost, type CarrierId } from '@/lib/carriers';
 import { totalUnits } from '@/lib/inventory';
 import { getInventoryState, reserveUnits } from '@/lib/inventory.server';
 import { savePendingOrder } from '@/lib/orders';
-import { computeDiscount } from '@/lib/discount';
+import { resolveDiscount } from '@/lib/discount.server';
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
 const stripe = new Stripe(stripeSecret);
@@ -56,12 +56,13 @@ export async function POST(req: NextRequest) {
     );
     const shippingCost = carrierCost(carrierId, country, subtotal, orderedUnits);
 
-    // Discount code (e.g. VIKING10 → 10% off single bottle only).
-    const discount = computeDiscount(String(body.discountCode || ''), items);
+    // Resolve the code — static promo (VIKING10) OR an affiliate code (10% off
+    // for the customer + commission for the affiliate).
+    const discount = await resolveDiscount(String(body.discountCode || ''), items);
     const discountAmount = discount.valid ? discount.amount : 0;
 
-    // Affiliate attribution — read the ref cookie set by the /<code> link.
-    const affiliateCode = req.cookies.get('vf_ref')?.value || null;
+    // Affiliate attribution — a typed affiliate code wins over the /<code> link cookie.
+    const affiliateCode = discount.affiliateCode || req.cookies.get('vf_ref')?.value || null;
 
     const total = Math.round((subtotal + shippingCost - discountAmount) * 100) / 100;
     const amountInCents = Math.round(Math.max(0, total) * 100);
