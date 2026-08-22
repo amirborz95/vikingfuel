@@ -3,6 +3,7 @@ import AnnouncementBar from '@/app/components/AnnouncementBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductDetailView from './components/ProductDetailView';
+import KnowledgeStrip from '@/app/components/KnowledgeStrip';
 
 export default function ProductDetailPage() {
   return (
@@ -11,6 +12,7 @@ export default function ProductDetailPage() {
       <Header />
       <main>
         <ProductDetailView />
+        <KnowledgeStrip />
       </main>
       <Footer />
     </div>

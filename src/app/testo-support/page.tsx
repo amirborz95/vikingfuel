@@ -4,6 +4,7 @@ import AnnouncementBar from '@/app/components/AnnouncementBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductDetailView from '@/app/product-detail/components/ProductDetailView';
+import KnowledgeStrip from '@/app/components/KnowledgeStrip';
 
 export const metadata: Metadata = {
   title: 'Testo-support (60 kapslar) — Viking Fuel',
@@ -18,6 +19,7 @@ export default function Page() {
       <Header />
       <main>
         <ProductDetailView initialBundle={0} />
+        <KnowledgeStrip />
       </main>
       <Footer />
     </div>
