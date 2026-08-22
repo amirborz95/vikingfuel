@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { POSTS } from '@/lib/blog';
+import { ARTICLES } from '@/lib/knowledge';
 
 // Required for static export
 export const dynamic = 'force-static';
@@ -13,6 +14,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/products`, lastModified: now, priority: 0.9, changeFrequency: 'weekly' },
     { url: `${base}/product-detail`, lastModified: now, priority: 0.8 },
     { url: `${base}/blogg`, lastModified: now, priority: 0.7, changeFrequency: 'weekly' },
+    { url: `${base}/knowledge`, lastModified: now, priority: 0.8, changeFrequency: 'weekly' },
+    { url: `${base}/testo-support`, lastModified: now, priority: 0.8 },
+    { url: `${base}/testo-support-3-pack`, lastModified: now, priority: 0.7 },
+    { url: `${base}/testo-support-6-pack`, lastModified: now, priority: 0.7 },
     { url: `${base}/about`, lastModified: now, priority: 0.5 },
     { url: `${base}/reviews`, lastModified: now, priority: 0.5 },
     { url: `${base}/faq`, lastModified: now, priority: 0.5 },
@@ -31,5 +36,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: 'monthly',
   }));
 
-  return [...staticPages, ...blogPages];
+  const knowledgePages: MetadataRoute.Sitemap = ARTICLES.map((a) => ({
+    url: `${base}/knowledge/${a.slug}`,
+    lastModified: now,
+    priority: 0.7,
+    changeFrequency: 'monthly',
+  }));
+
+  return [...staticPages, ...blogPages, ...knowledgePages];
 }

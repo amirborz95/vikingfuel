@@ -7,6 +7,7 @@ export const translations: Record<Lang, any> = {
     nav: {
       home: 'Hem',
       products: 'Produkter',
+      knowledge: 'Kunskap',
       faq: 'Vanliga frågor',
       contact: 'Kontakt',
       guest: 'Gäst',
@@ -299,6 +300,7 @@ export const translations: Record<Lang, any> = {
     nav: {
       home: 'Home',
       products: 'Products',
+      knowledge: 'Knowledge',
       faq: 'FAQ',
       contact: 'Contact',
       guest: 'Guest',
