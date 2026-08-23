@@ -4,7 +4,7 @@
 // credited their commission. Imports the affiliates store, so SERVER ONLY.
 
 import { computeDiscount, type DiscountItem, type DiscountResult } from './discount';
-import { getAffiliateByCode } from './affiliates';
+import { getAffiliateByCode, isActive } from './affiliates';
 
 export const AFFILIATE_DISCOUNT_PERCENT = 10; // % off the whole order for affiliate codes
 
@@ -24,7 +24,7 @@ export async function resolveDiscount(rawCode: string, items: DiscountItem[]): P
 
   // 2) Affiliate code → percentage off the whole order + attribution.
   const aff = await getAffiliateByCode(code);
-  if (aff) {
+  if (aff && isActive(aff)) {
     const subtotal = items.reduce((s, it) => s + Number(it.price) * Number(it.quantity || 1), 0);
     const amount = Math.round(subtotal * (AFFILIATE_DISCOUNT_PERCENT / 100) * 100) / 100;
     return { valid: amount > 0, code: aff.code, amount, affiliateCode: aff.code, isAffiliate: true };
