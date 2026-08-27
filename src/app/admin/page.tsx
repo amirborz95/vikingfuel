@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import AnnouncementBar from '@/app/components/AnnouncementBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -84,6 +84,8 @@ interface DashboardData {
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
+  // Held in a ref so background refreshes can authenticate too.
+  const passwordRef = useRef('');
   const [unlocked, setUnlocked] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -123,6 +125,7 @@ export default function AdminPage() {
       }
 
       setData(payload);
+      passwordRef.current = enteredPassword;
       setUnlocked(true);
 
       // fetch orders after unlocking
@@ -135,9 +138,14 @@ export default function AdminPage() {
   };
 
   async function fetchOrders() {
+    if (!passwordRef.current) return;
     setOrdersLoading(true);
     try {
-      const res = await fetch('/api/admin/orders');
+      const res = await fetch('/api/admin/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'list', password: passwordRef.current }),
+      });
       const json = await res.json();
       if (res.ok) {
         setOrders(json.orders || []);
@@ -157,7 +165,7 @@ export default function AdminPage() {
       const res = await fetch('/api/admin/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'setStatus', userEmail, orderId, status }),
+        body: JSON.stringify({ action: 'setStatus', userEmail, orderId, status, password: passwordRef.current }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || 'Failed');
@@ -470,7 +478,7 @@ export default function AdminPage() {
                                   )}
                                   {(o.postnordLabelUrl || o.shipmondoShipmentId) && (
                                     <a
-                                      href={`/api/admin/label?email=${encodeURIComponent(row.userEmail)}&order=${encodeURIComponent(o.id)}`}
+                                      href={`/api/admin/label?email=${encodeURIComponent(row.userEmail)}&order=${encodeURIComponent(o.id)}&t=${encodeURIComponent(row.labelToken || '')}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700 underline"

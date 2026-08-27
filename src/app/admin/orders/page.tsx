@@ -40,6 +40,7 @@ function kr(n: number) {
 
 export default function OrdersPage() {
   const [password, setPassword] = useState('');
+  const passwordRef = useRef('');
   const [unlocked, setUnlocked] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -81,8 +82,13 @@ export default function OrdersPage() {
   }, []);
 
   const fetchOrders = useCallback(async () => {
+    if (!passwordRef.current) return;
     try {
-      const res = await fetch('/api/admin/orders');
+      const res = await fetch('/api/admin/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'list', password: passwordRef.current }),
+      });
       const json = await res.json();
       if (res.ok) {
         const rows: Row[] = json.orders || [];
@@ -122,6 +128,9 @@ export default function OrdersPage() {
         setError(p?.error || 'Fel lösenord.');
         return;
       }
+      // Kept in a ref so the polling loop can authenticate without re-rendering.
+      passwordRef.current = password.trim();
+      setPassword(password.trim());
       setUnlocked(true);
       fetchOrders();
     } catch {
@@ -150,7 +159,7 @@ export default function OrdersPage() {
       const res = await fetch('/api/admin/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'printLabel', userEmail: row.userEmail, orderId: row.order.id }),
+        body: JSON.stringify({ action: 'printLabel', userEmail: row.userEmail, orderId: row.order.id, password }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || 'Misslyckades');
@@ -171,7 +180,7 @@ export default function OrdersPage() {
       const res = await fetch('/api/admin/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'setStatus', userEmail: row.userEmail, orderId: row.order.id, status }),
+        body: JSON.stringify({ action: 'setStatus', userEmail: row.userEmail, orderId: row.order.id, status, password }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || 'Misslyckades');

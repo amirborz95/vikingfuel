@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readUsers } from '@/lib/auth';
 import { getShipmondoLabelPdf } from '@/lib/shipmondo.server';
+import { verifyLabelToken } from '@/lib/adminAuth';
 
 /**
  * Serves a shipment's printable label to the admin panel.
  *
- *   GET /api/admin/label?email=<userEmail>&order=<orderId>
+ *   GET /api/admin/label?email=<userEmail>&order=<orderId>&t=<labelToken>
  *
  * PostNord labels are public URLs, so we redirect to them. Shipmondo labels are
  * auth-protected, so we fetch the PDF server-side (with the API credentials) and
@@ -19,6 +20,12 @@ export async function GET(req: NextRequest) {
 
     if (!email || !orderId) {
       return NextResponse.json({ error: 'email and order are required' }, { status: 400 });
+    }
+
+    // Labels carry the customer's name and address — only the admin panel's
+    // per-order token opens them.
+    if (!verifyLabelToken(orderId, searchParams.get('t'))) {
+      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
     }
 
     const users = await readUsers();

@@ -6,12 +6,12 @@ import { createShipmondoShipment } from '@/lib/shipmondo.server';
 import { getCarrier } from '@/lib/carriers';
 import { sendShippingNotificationForStoredOrder } from '@/lib/orderConfirmation';
 import { readBookedShipment } from '@/lib/orders';
+import { isAdminPassword, labelToken } from '@/lib/adminAuth';
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
 const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: '2026-04-22.dahlia' }) : null;
 
 const VALID_STATUSES = ['not_shipped', 'progress', 'shipped'];
-const ADMIN_PASSWORD = process.env.ADMIN_PANEL_PASSWORD || 'Viking2026Fuel!';
 
 /**
  * Book the shipping label for an order if one hasn't been created yet.
@@ -90,29 +90,37 @@ async function bookLabelIfMissing(order: any, user: any): Promise<string | null>
   return null;
 }
 
-export async function GET(req: NextRequest) {
-  try {
-    const users = await readUsers();
+/** Every order with its customer, newest first. Callers must be authenticated. */
+async function listOrders() {
+  const users = await readUsers();
 
-    const orders: Array<any> = [];
-    users.forEach((u: any) => {
-      (u.orders || []).forEach((o: any) => {
-        orders.push({ userEmail: u.email, userName: u.name || null, order: o });
+  const orders: Array<any> = [];
+  users.forEach((u: any) => {
+    (u.orders || []).forEach((o: any) => {
+      orders.push({
+        userEmail: u.email,
+        userName: u.name || null,
+        order: o,
+        // Capability token so the label link works without a password in the URL.
+        labelToken: labelToken(o.id),
       });
     });
+  });
 
-    // sort by createdAt desc
-    orders.sort((a, b) => {
-      const da = a.order?.createdAt ? new Date(a.order.createdAt).getTime() : 0;
-      const db = b.order?.createdAt ? new Date(b.order.createdAt).getTime() : 0;
-      return db - da;
-    });
+  // sort by createdAt desc
+  orders.sort((a, b) => {
+    const da = a.order?.createdAt ? new Date(a.order.createdAt).getTime() : 0;
+    const db = b.order?.createdAt ? new Date(b.order.createdAt).getTime() : 0;
+    return db - da;
+  });
 
-    return NextResponse.json({ orders });
-  } catch (error: any) {
-    console.error('Admin orders GET error:', error);
-    return NextResponse.json({ error: error.message || 'Failed to read orders' }, { status: 500 });
-  }
+  return orders;
+}
+
+// This response contains every customer's name, address, phone and order
+// history, so it is password-gated like the rest of the admin panel.
+export async function GET() {
+  return NextResponse.json({ error: 'Use POST with password in body.' }, { status: 405 });
 }
 
 /**
@@ -129,8 +137,18 @@ export async function POST(req: NextRequest) {
     const requestedStatus = String(body.status || '').trim();
     const act = action || 'setStatus';
 
-    if (act !== 'setStatus' && act !== 'printLabel' && act !== 'delete') {
+    if (act !== 'list' && act !== 'setStatus' && act !== 'printLabel' && act !== 'delete') {
       return NextResponse.json({ error: 'Unsupported action' }, { status: 400 });
+    }
+
+    // Reading orders exposes customer PII and the other actions change or delete
+    // real orders — all of them require the admin password.
+    if (!isAdminPassword(body.password)) {
+      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+    }
+
+    if (act === 'list') {
+      return NextResponse.json({ orders: await listOrders() });
     }
 
     // ── Delete order(s) — destructive, requires the admin password. Accepts a
@@ -138,9 +156,6 @@ export async function POST(req: NextRequest) {
     //    in ONE read-modify-write so concurrent writes can't resurrect deletions
     //    on eventually-consistent storage (Netlify Blobs). ──
     if (act === 'delete') {
-      if (String(body.password || '') !== ADMIN_PASSWORD) {
-        return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-      }
       const ids: string[] = Array.isArray(body.orderIds) && body.orderIds.length
         ? body.orderIds.map(String)
         : (orderId ? [String(orderId)] : []);
@@ -187,7 +202,7 @@ export async function POST(req: NextRequest) {
       }
       await writeUsers(users);
       const labelUrl = hasLabel
-        ? `/api/admin/label?email=${encodeURIComponent(userEmail)}&order=${encodeURIComponent(order.id)}`
+        ? `/api/admin/label?email=${encodeURIComponent(userEmail)}&order=${encodeURIComponent(order.id)}&t=${labelToken(order.id)}`
         : null;
       return NextResponse.json({ success: true, order, labelUrl, warning });
     }
