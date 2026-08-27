@@ -67,3 +67,74 @@ export async function writeData(name: string, data: unknown): Promise<void> {
     'utf-8'
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// ONE-SHOT CLAIMS
+//
+// The Stripe webhook and the success page both finalize the same order, at
+// almost the same moment. A plain "does the order exist yet?" check can't stop
+// that: both read before either writes, so both booked a PostNord label and
+// both mailed the owner. A claim lets exactly one of them do each side effect.
+//
+// Locally that's an atomic exclusive file create. On Blobs (no conditional
+// writes in @netlify/blobs v8) we write our token, let a concurrent writer
+// land, then read back with STRONG consistency — only the caller whose token
+// survived owns the claim, everyone else backs off.
+// ─────────────────────────────────────────────────────────────────────────
+
+const CLAIM_SETTLE_MS = 1200;
+/** How long a claim blocks retries. After this a failed attempt may retry. */
+const CLAIM_TTL_MS = 10 * 60 * 1000;
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Try to claim `name` exactly once. Returns true for the single winner, false
+ * for every other caller racing for the same claim.
+ */
+export async function claimOnce(name: string, ttlMs: number = CLAIM_TTL_MS): Promise<boolean> {
+  const key = `claim_${name}.json`;
+  const token = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+  if (!useBlobs) {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    const file = path.join(DATA_DIR, key);
+    try {
+      // 'wx' fails if the file exists — atomic, so only one caller gets through.
+      await fs.writeFile(file, JSON.stringify({ token, ts: Date.now() }), { flag: 'wx' });
+      return true;
+    } catch (err: any) {
+      if (err?.code !== 'EEXIST') throw err;
+      try {
+        const prev = JSON.parse(await fs.readFile(file, 'utf-8'));
+        if (Date.now() - (prev?.ts || 0) > ttlMs) {
+          await fs.writeFile(file, JSON.stringify({ token, ts: Date.now() }), 'utf-8');
+          return true;
+        }
+      } catch {
+        /* unreadable claim — treat as held */
+      }
+      return false;
+    }
+  }
+
+  try {
+    const store = await getBlobStore();
+    const held = await store
+      .get(key, { type: 'json', consistency: 'strong' })
+      .catch(() => null);
+    if (held && Date.now() - (held.ts || 0) < ttlMs) return false;
+
+    await store.setJSON(key, { token, ts: Date.now() });
+    await sleep(CLAIM_SETTLE_MS);
+
+    const after = await store
+      .get(key, { type: 'json', consistency: 'strong' })
+      .catch(() => null);
+    return !!after && after.token === token;
+  } catch (err) {
+    // Never let claim bookkeeping break an order: fall through and do the work.
+    console.error(`[dataStore] claim "${name}" failed, proceeding:`, err);
+    return true;
+  }
+}

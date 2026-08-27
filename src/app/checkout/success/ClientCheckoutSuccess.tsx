@@ -55,6 +55,14 @@ export default function ClientCheckoutSuccess({ sessionId, paymentIntentId, isSu
 
   useEffect(() => {
     if (!sessionId && !paymentIntentId && !subscriptionId) return;
+    // One confirmation call per order — a reload of this page (or React's
+    // double-invoked effect in dev) must not ask the server to finalize again.
+    const postedKey = `conf_posted_${paymentIntentId || subscriptionId || sessionId}`;
+    if (sessionStorage.getItem(postedKey)) {
+      setConfirmationStatus(t('checkoutResult.confOk'));
+      return;
+    }
+    sessionStorage.setItem(postedKey, '1');
     async function sendConfirmation() {
       try {
         const payload = isSubscription && subscriptionId

@@ -5,6 +5,7 @@ import { createPostNordShipment } from '@/lib/postnord.server';
 import { createShipmondoShipment } from '@/lib/shipmondo.server';
 import { getCarrier } from '@/lib/carriers';
 import { sendShippingNotificationForStoredOrder } from '@/lib/orderConfirmation';
+import { readBookedShipment } from '@/lib/orders';
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
 const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: '2026-04-22.dahlia' }) : null;
@@ -19,6 +20,19 @@ const ADMIN_PASSWORD = process.env.ADMIN_PANEL_PASSWORD || 'Viking2026Fuel!';
  */
 async function bookLabelIfMissing(order: any, user: any): Promise<string | null> {
   if (!order.shippingAddress?.address) return null;
+
+  // A label may already have been booked at order time even if this order copy
+  // lost its ids — reuse it instead of buying a second one.
+  const booked = await readBookedShipment(order.id);
+  if (booked && (booked.postnordShipmentId || booked.shipmondoShipmentId)) {
+    order.postnordShipmentId = order.postnordShipmentId || booked.postnordShipmentId || null;
+    order.postnordTracking = order.postnordTracking || booked.postnordTracking || null;
+    order.postnordLabelUrl = order.postnordLabelUrl || booked.postnordLabelUrl || null;
+    order.postnordLabelPdfUrl = order.postnordLabelPdfUrl || booked.postnordLabelPdfUrl || null;
+    order.shipmondoShipmentId = order.shipmondoShipmentId || booked.shipmondoShipmentId || null;
+    order.shipmondoTracking = order.shipmondoTracking || booked.shipmondoTracking || null;
+    return null;
+  }
 
   const carrier = getCarrier(order.carrier);
   const optLower = String(order.shippingOption || '').toLowerCase();

@@ -47,3 +47,6 @@ turbo/
 
 # netlify dev / edge runtime artifact
 deno.lock
+
+# Local one-shot claim markers (see src/lib/dataStore.ts claimOnce)
+data/claim_*.json

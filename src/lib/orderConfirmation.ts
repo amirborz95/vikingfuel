@@ -7,6 +7,7 @@ import {
   type EmailItem,
 } from './emailTemplates';
 import { buildReceiptPdf } from './receipt';
+import { claimOnce } from './dataStore';
 
 /**
  * Carrier-aware view of a stored order: is it a pickup, what's the brand label
@@ -269,6 +270,13 @@ export async function sendOrderConfirmationEmailForStoredOrder(order: any, recip
     throw new Error('Recipient email is required for order confirmation');
   }
 
+  // The webhook and the success page can both reach this for the same order —
+  // the customer should still get exactly one confirmation.
+  if (!(await claimOnce(`custmail_${order.id}`))) {
+    console.log(`Order confirmation for ${order.id} already sent — skipping duplicate.`);
+    return { sent: false, skipped: true };
+  }
+
   const method = normalizeShippingOption(order.shippingOption);
 
   // Generate the kvitto PDF and attach it. Non-fatal — the confirmation still
@@ -301,7 +309,7 @@ export async function sendOrderConfirmationEmailForStoredOrder(order: any, recip
     }),
     ...(attachments ? { attachments } : {}),
   });
-  return { sent: true };
+  return { sent: true, skipped: false };
 }
 
 export function buildShippingNotificationTextFromStoredOrder(order: any, recipientEmail: string, tracking?: string) {

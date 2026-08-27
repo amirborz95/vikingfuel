@@ -5,7 +5,7 @@ import { createShipmondoShipment } from './shipmondo.server';
 import { getCarrier, type CarrierId } from './carriers';
 import { commissionForItems } from './affiliates';
 import { sendNewOrderAdminNotification } from './orderConfirmation';
-import { readData, writeData } from './dataStore';
+import { readData, writeData, claimOnce } from './dataStore';
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
 const stripe = new Stripe(stripeSecret, { apiVersion: '2026-04-22.dahlia' });
@@ -144,6 +144,40 @@ function makeOrderRecord(
   return { order, carrier, provider, needsAddress, email };
 }
 
+export interface BookedShipment {
+  postnordShipmentId?: string | null;
+  postnordTracking?: string | null;
+  postnordLabelUrl?: string | null;
+  postnordLabelPdfUrl?: string | null;
+  shipmondoShipmentId?: string | null;
+  shipmondoTracking?: string | null;
+}
+
+/**
+ * Record a booked shipment under its own key. The users store can lose a write
+ * when two requests save the same order at once; this record can't, so we never
+ * book a second physical label just because the first one's id went missing.
+ */
+async function rememberShipment(order: any): Promise<void> {
+  try {
+    await writeData(`shipment_${order.id}.json`, {
+      postnordShipmentId: order.postnordShipmentId || null,
+      postnordTracking: order.postnordTracking || null,
+      postnordLabelUrl: order.postnordLabelUrl || null,
+      postnordLabelPdfUrl: order.postnordLabelPdfUrl || null,
+      shipmondoShipmentId: order.shipmondoShipmentId || null,
+      shipmondoTracking: order.shipmondoTracking || null,
+    });
+  } catch (e) {
+    console.error(`Could not record shipment for order ${order.id} (non-fatal):`, e);
+  }
+}
+
+/** The shipment already booked for this order, if any. */
+export async function readBookedShipment(orderId: string): Promise<BookedShipment | null> {
+  return readData<BookedShipment | null>(`shipment_${orderId}.json`, null);
+}
+
 /**
  * Auto-book the shipment/label for an order at order time so it's ready to
  * print. Mutates `order`. Non-fatal: the order is still valid if this fails and
@@ -157,6 +191,12 @@ async function autoBookShipment(
   email: string
 ) {
   if (!(needsAddress && order.shippingAddress?.address)) return;
+  // One label per order, ever — the webhook and the success page both get here
+  // for the same order and PostNord happily books a second shipment.
+  if (!(await claimOnce(`label_${order.id}`))) {
+    console.log(`Shipment for order ${order.id} already booked by another request — skipping.`);
+    return;
+  }
   try {
     if (provider === 'postnord') {
       const shipment = await createPostNordShipment({
@@ -176,6 +216,7 @@ async function autoBookShipment(
         order.postnordTracking = shipment.trackingNumber || null;
         order.postnordLabelUrl = shipment.labelUrl || null;
         order.postnordLabelPdfUrl = shipment.labelPdfUrl || null;
+        await rememberShipment(order);
       }
     } else if (provider === 'shipmondo') {
       const productCode = carrier?.productEnv ? process.env[carrier.productEnv] || '' : '';
@@ -192,11 +233,45 @@ async function autoBookShipment(
       if (shipment) {
         order.shipmondoShipmentId = shipment.shipmentId;
         order.shipmondoTracking = shipment.trackingNumber || null;
+        await rememberShipment(order);
       }
     }
   } catch (e) {
     console.error(`Shipment auto-booking (${provider}) failed for order ${order.id} (non-fatal):`, e);
   }
+}
+
+/** Notify the owner about a new order — at most once per order. */
+async function notifyOwnerOnce(order: any, email: string) {
+  if (!(await claimOnce(`adminmail_${order.id}`))) return;
+  try {
+    await sendNewOrderAdminNotification(order, email);
+  } catch (e) {
+    console.error(`Failed to send new-order notification for ${order.id}:`, e);
+  }
+}
+
+/** Look up an already-saved order across all users. */
+async function findSavedOrder(orderId: string): Promise<{ order: any; email: string } | null> {
+  const users = await readUsers();
+  for (const u of users as any[]) {
+    const found = (u.orders || []).find((o: any) => o.id === orderId || o.sessionId === orderId);
+    if (found) return { order: found, email: u.email };
+  }
+  return null;
+}
+
+/**
+ * We lost the race for this order — another request is finalizing it right now.
+ * Wait for its order to show up so the caller still gets the real order back.
+ */
+async function waitForSavedOrder(orderId: string, tries = 6, delayMs = 1000) {
+  for (let i = 0; i < tries; i++) {
+    await new Promise((r) => setTimeout(r, delayMs));
+    const found = await findSavedOrder(orderId);
+    if (found) return found;
+  }
+  return null;
 }
 
 /**
@@ -209,6 +284,18 @@ export async function finalizeOrderFromPaymentIntent(
 ): Promise<{ order: any | null; created: boolean; email: string | null }> {
   const draft = await readPendingOrder(piId);
   if (!draft) return { order: null, created: false, email: null };
+
+  // The webhook and the success page both land here within a second of each
+  // other. Only the caller that wins the claim finalizes; the other one waits
+  // for that order and reports it as already existing (no second label, no
+  // second email).
+  if (!(await claimOnce(`finalize_${piId}`))) {
+    const found = await waitForSavedOrder(piId);
+    if (found) return { order: found.order, created: false, email: found.email };
+    // The winner never produced an order (crash/timeout) — fall through and do
+    // it ourselves. The label + email claims still keep side effects single.
+    console.warn(`Lost finalize claim for ${piId} but no order appeared — finalizing anyway.`);
+  }
 
   const email = draft.customer.email;
   const users = await readUsers();
@@ -231,11 +318,7 @@ export async function finalizeOrderFromPaymentIntent(
   user.orders.push(order);
   await writeUsers(users);
 
-  try {
-    await sendNewOrderAdminNotification(order, email);
-  } catch (e) {
-    console.error(`Failed to send new-order notification for ${order.id}:`, e);
-  }
+  await notifyOwnerOnce(order, email);
 
   return { order, created: true, email };
 }
@@ -258,6 +341,15 @@ export async function finalizeSubscriptionOrderFromInvoice(
   if (!draft) return { order: null, created: false, email: null };
 
   const orderId = invoice.id as string;
+
+  // Same race as the one-off flow: invoice.paid (webhook) and the success page
+  // both finalize this invoice. Only one of them may do the work.
+  if (!(await claimOnce(`finalize_${orderId}`))) {
+    const found = await waitForSavedOrder(orderId);
+    if (found) return { order: found.order, created: false, email: found.email };
+    console.warn(`Lost finalize claim for invoice ${orderId} but no order appeared — finalizing anyway.`);
+  }
+
   const email = draft.customer.email;
   const users = await readUsers();
   let user: any = users.find((u: any) => u.email === email);
@@ -285,11 +377,7 @@ export async function finalizeSubscriptionOrderFromInvoice(
   user.orders.push(order);
   await writeUsers(users);
 
-  try {
-    await sendNewOrderAdminNotification(order, email);
-  } catch (e) {
-    console.error(`Failed to send new-order notification for subscription order ${order.id}:`, e);
-  }
+  await notifyOwnerOnce(order, email);
 
   return { order, created: true, email };
 }
@@ -340,6 +428,13 @@ export async function saveOrderForSession(sessionId: string): Promise<SaveOrderR
     return { order: existing, created: false, email };
   }
 
+  // Webhook + success page both call this for the same session.
+  if (!(await claimOnce(`finalize_${session.id}`))) {
+    const found = await waitForSavedOrder(session.id);
+    if (found) return { order: found.order, created: false, email: found.email };
+    console.warn(`Lost finalize claim for session ${session.id} but no order appeared — finalizing anyway.`);
+  }
+
   const shippingDetails = getShippingDetails(session);
   const order: any = {
     id: session.id,
@@ -378,7 +473,7 @@ export async function saveOrderForSession(sessionId: string): Promise<SaveOrderR
   // "Mina försändelser" ready to print. Non-fatal if it fails — the order is
   // still created and the admin can retry from the panel.
   const isPostNord = String(order.shippingOption || '').toLowerCase().includes('postnord');
-  if (isPostNord && order.shippingAddress?.address) {
+  if (isPostNord && order.shippingAddress?.address && (await claimOnce(`label_${order.id}`))) {
     try {
       const shipment = await createPostNordShipment({
         orderId: order.id,
@@ -408,12 +503,7 @@ export async function saveOrderForSession(sessionId: string): Promise<SaveOrderR
   await writeUsers(users);
 
   // Notify the business owner of the new order (once, on creation). Non-fatal.
-  try {
-    await sendNewOrderAdminNotification(order, email);
-    console.log(`New-order notification sent to business owner for order ${order.id}`);
-  } catch (e) {
-    console.error(`Failed to send new-order notification for ${order.id} (non-fatal):`, e);
-  }
+  await notifyOwnerOnce(order, email);
 
   return { order, created: true, email };
 }
