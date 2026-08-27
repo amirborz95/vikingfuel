@@ -50,3 +50,6 @@ deno.lock
 
 # Local one-shot claim markers (see src/lib/dataStore.ts claimOnce)
 data/claim_*.json
+
+# Original product renders (source art, not needed by the site)
+design-source/
