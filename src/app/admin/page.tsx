@@ -864,7 +864,8 @@ export default function AdminPage() {
                         <p className="mt-3 text-xs text-slate-500">
                           Totalt {data?.metrics.totalPageViews ?? 0} sidvisningar registrerade sedan{' '}
                           {data?.metrics.firstPageView ? new Date(data.metrics.firstPageView).toLocaleDateString('sv-SE') : '—'}.
-                          Listan visar de 500 senaste.
+                          Listan visar de 500 senaste. Besökare räknas per webbläsare (cookie); besök som loggades
+                          innan den räkningen fanns uppskattas per 30-minutersfönster.
                         </p>
                       </div>
                     </>

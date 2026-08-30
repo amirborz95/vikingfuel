@@ -44,9 +44,17 @@ export interface RecentVisit {
   referrer: string | null;
 }
 
-/** One browser: the cookie id when we have it, otherwise the login/ip-less fallback. */
+/**
+ * One browser. Visits recorded before the visitor cookie existed have no id, so
+ * they fall back to the logged-in email, and anonymous ones are approximated by
+ * their 30-minute window — otherwise every old visit would collapse into a
+ * single "visitor" and the historic numbers would read as 1.
+ */
 function visitorKey(v: AnalyticsVisit): string {
-  return v.visitorId || (v.email && v.email !== 'anonymous' ? `email:${v.email}` : 'okänd');
+  if (v.visitorId) return v.visitorId;
+  if (v.email && v.email !== 'anonymous') return `email:${v.email}`;
+  const bucket = Math.floor(new Date(v.timestamp).getTime() / SESSION_GAP_MS);
+  return `anon:${bucket}`;
 }
 
 function dayKey(iso: string): string {
