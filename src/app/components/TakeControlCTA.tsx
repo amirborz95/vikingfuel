@@ -10,17 +10,17 @@ export default function TakeControlCTA() {
   const { lang } = useLanguage();
   const en = lang === 'en';
   return (
-    <section className="relative overflow-hidden bg-[#12100b]">
+    <section className="relative overflow-hidden bg-[#080c10]">
       {/* Background */}
       <div className="absolute inset-0 z-0">
         <img
-          src="/assets/images/cta-warrior.png"
+          src="/assets/images/cta-mountains.jpg"
           alt=""
-          className="h-full w-full object-cover object-center opacity-70"
+          className="h-full w-full object-cover object-center opacity-80"
           loading="lazy"
-          onError={(e) => { if (!e.currentTarget.src.endsWith('cta-viking.png')) e.currentTarget.src = '/assets/images/cta-viking.png'; }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0d0b07] via-[#0d0b07]/85 to-[#0d0b07]/40" />
+        {/* Darkened from the left so the headline keeps its contrast */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#070a0e] via-[#070a0e]/80 to-[#070a0e]/30" />
       </div>
 
       <div className="relative z-10 mx-auto flex max-w-6xl flex-col items-center gap-8 px-6 py-16 md:flex-row md:justify-between md:py-24">
@@ -39,7 +39,7 @@ export default function TakeControlCTA() {
               <>Ta kontrollen.<br />Bli din starkaste version.</>
             )}
           </h2>
-          <p className="mt-5 max-w-md text-base leading-relaxed text-[#cfc7b6]">
+          <p className="mt-5 max-w-md text-base leading-relaxed text-[#c3ccd2]">
             {en
               ? '+Testo-Support is your daily partner for strength, balance and performance.'
               : '+Testo-Support är din dagliga partner för styrka, balans och prestation.'}

@@ -3,7 +3,8 @@
 import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 
-const GOLD = '#c9a24a';
+// Brand green, lifted a little so it reads on the dark strip.
+const ACCENT = '#5fb083';
 
 const items = [
   {
@@ -48,20 +49,20 @@ export default function HomeFeatures4() {
   const { lang } = useLanguage();
   const en = lang === 'en';
   return (
-    <section className="bg-[#17150f] py-14 lg:py-16">
+    <section className="bg-[#0d1114] py-14 lg:py-16">
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-y-10 px-6 lg:grid-cols-4 lg:divide-x lg:divide-white/10 lg:gap-y-0 lg:px-0">
         {items.map((it) => (
           <div key={it.title} className="px-6 text-center">
             <div
               className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border"
-              style={{ borderColor: `${GOLD}55`, color: GOLD }}
+              style={{ borderColor: `${ACCENT}55`, color: ACCENT }}
             >
               <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
                 {it.icon}
               </svg>
             </div>
-            <h3 className="mb-2 text-[13px] font-bold uppercase tracking-[0.15em]" style={{ color: GOLD }}>{en ? it.titleEn : it.title}</h3>
-            <p className="mx-auto max-w-[230px] text-[13px] leading-relaxed text-[#9c9483]">{en ? it.descEn : it.desc}</p>
+            <h3 className="mb-2 text-[13px] font-bold uppercase tracking-[0.15em] text-[#f3efe6]">{en ? it.titleEn : it.title}</h3>
+            <p className="mx-auto max-w-[230px] text-[13px] leading-relaxed text-[#98a3aa]">{en ? it.descEn : it.desc}</p>
           </div>
         ))}
       </div>

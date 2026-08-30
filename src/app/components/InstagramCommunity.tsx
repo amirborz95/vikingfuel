@@ -18,7 +18,7 @@ export default function InstagramCommunity() {
   return (
     <section className="bg-white py-16 lg:py-20">
       <div className="mx-auto max-w-3xl px-6 text-center">
-        <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#c9a24a]">@vikingfuel.se</p>
+        <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary">@vikingfuel.se</p>
         <h2 className="mt-3 text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">{en ? 'Join our community' : 'Gå med i vår community'}</h2>
         <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
           {en
