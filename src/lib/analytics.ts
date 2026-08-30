@@ -4,12 +4,19 @@ import { readData, writeData } from './dataStore';
 const dataDir = path.join(process.cwd(), 'data');
 const analyticsFile = path.join(dataDir, 'analytics.json');
 
+/** Keep the log bounded — old visits are already summarised in the dashboard. */
+const MAX_VISITS = 50000;
+
 export interface AnalyticsVisit {
   type: 'page-view';
   page: string;
   path: string;
   email: string;
   timestamp: string;
+  /** Anonymous per-browser id (cookie) so unique visitors can be counted. */
+  visitorId?: string;
+  referrer?: string;
+  device?: 'mobile' | 'tablet' | 'desktop';
   country?: string;
   region?: string;
   city?: string;
@@ -32,5 +39,5 @@ export async function readAnalytics(): Promise<AnalyticsVisit[]> {
 export async function appendAnalyticsVisit(entry: AnalyticsVisit) {
   const visits = await readAnalytics();
   visits.push(entry);
-  await writeJson(analyticsFile, visits);
+  await writeJson(analyticsFile, visits.length > MAX_VISITS ? visits.slice(-MAX_VISITS) : visits);
 }

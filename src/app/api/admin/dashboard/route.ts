@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readSessions, readUsers, readAuthLogs } from '@/lib/auth';
+import { readUsers } from '@/lib/auth';
 import { readAnalytics } from '@/lib/analytics';
+import { buildAnalyticsSummary } from '@/lib/analyticsSummary';
 import { readWaitlistEmails } from '@/lib/waitlist';
 import { readSubscribers } from '@/lib/newsletter';
-
-const ADMIN_PASSWORD = process.env.ADMIN_PANEL_PASSWORD || 'Viking2026Fuel!';
+import { isAdminPassword } from '@/lib/adminAuth';
 
 export async function GET() {
   return NextResponse.json({ error: 'Use POST with password in body.' }, { status: 405 });
@@ -13,15 +13,11 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const password = String(body.password || '');
-
-    if (password !== ADMIN_PASSWORD) {
+    if (!isAdminPassword(body.password)) {
       return NextResponse.json({ error: 'Fel lösenord' }, { status: 403 });
     }
 
     const users = await readUsers();
-    const logs = await readAuthLogs();
-    const sessions = await readSessions();
     const analytics = await readAnalytics();
 
     const safeUsers = users.map((user) => ({
@@ -35,74 +31,27 @@ export async function POST(req: NextRequest) {
       orderCount: (user.orders || []).length,
       latestOrder: (user.orders || []).slice(-1)[0]?.createdAt || null,
     }));
-    const safeSessions = sessions.map((session) => ({
-      email: session.email,
-      createdAt: session.createdAt,
-      expiresAt: session.expiresAt,
-    }));
 
-    const orderedLogs = [...logs].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-    const totalLogins = logs.filter((entry) => entry.action === 'login').length;
-    const totalRegistrations = logs.filter((entry) => entry.action === 'register').length;
-    const uniqueLoginEmails = new Set(logs.filter((entry) => entry.action === 'login').map((entry) => entry.email)).size;
+    const analyticsSummary = buildAnalyticsSummary(analytics);
 
-    const pageViews = analytics.filter((entry) => entry.type === 'page-view');
-    const pageViewCounts = pageViews.reduce<Record<string, number>>((memo, entry) => {
-      memo[entry.path] = (memo[entry.path] || 0) + 1;
-      return memo;
-    }, {});
-    const pageViewUsers = pageViews.reduce<Record<string, number>>((memo, entry) => {
-      memo[entry.email] = (memo[entry.email] || 0) + 1;
-      return memo;
-    }, {});
+    // Orders per range, so traffic can be read next to what it actually sold.
+    const allOrders = users.flatMap((u: any) => (u.orders || []) as any[]);
+    const ordersSince = (from: string | null) => {
+      const list = from ? allOrders.filter((o) => o.createdAt && new Date(o.createdAt) >= new Date(from)) : allOrders;
+      return {
+        count: list.length,
+        revenue: Math.round(list.reduce((s, o) => s + (Number(o.totalAmount) || 0), 0)),
+      };
+    };
 
-    const pageViewsByPage = Object.entries(pageViewCounts)
-      .map(([path, count]) => ({ path, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
-
-    const pageViewsByUser = Object.entries(pageViewUsers)
-      .map(([email, count]) => ({ email, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
-
-    const countryCounts = pageViews.reduce<Record<string, number>>((memo, entry) => {
-      if (!entry.country) {
-        return memo;
-      }
-      memo[entry.country] = (memo[entry.country] || 0) + 1;
-      return memo;
-    }, {});
-
-    const pageViewsByCountry = Object.entries(countryCounts)
-      .map(([country, count]) => ({ country, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
-
-    const latestLogin = logs.filter((entry) => entry.action === 'login')[0]?.timestamp || null;
-    const totalPageViews = pageViews.length;
-    const uniquePages = new Set(pageViews.map((visit) => visit.path)).size;
-    const uniquePageViewUsers = new Set(pageViews.map((visit) => visit.email)).size;
-    const latestPageView = pageViews[0]?.timestamp || null;
-    const geoPageViews = pageViews.filter((entry) => entry.country || entry.region || entry.city).length;
-    const geoCountries = new Set(pageViews.filter((entry) => entry.country).map((entry) => entry.country)).size;
-
-    const totalOrders = users.reduce((count, user) => count + ((user.orders || []).length), 0);
+    const totalOrders = allOrders.length;
     const metrics = {
       totalUsers: safeUsers.length,
-      totalLogins,
-      totalRegistrations,
       totalOrders,
-      activeSessions: safeSessions.length,
-      uniqueLoginEmails,
-      latestLogin,
-      latestSession: safeSessions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]?.createdAt || null,
-      totalPageViews,
-      uniquePages,
-      uniquePageViewUsers,
-      latestPageView,
-      geoPageViews,
-      geoCountries,
+      totalRevenue: Math.round(allOrders.reduce((s, o) => s + (Number(o.totalAmount) || 0), 0)),
+      totalPageViews: analyticsSummary.totalVisits,
+      latestPageView: analyticsSummary.lastVisit,
+      firstPageView: analyticsSummary.firstVisit,
     };
 
     const waitlistEmails = await readWaitlistEmails();
@@ -110,13 +59,14 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       users: safeUsers,
-      logs: orderedLogs,
-      sessions: safeSessions,
       metrics,
-      pageViews: pageViews.slice(-20).reverse(),
-      pageViewsByPage,
-      pageViewsByUser,
-      pageViewsByCountry,
+      analytics: analyticsSummary,
+      orderStats: {
+        today: ordersSince(analyticsSummary.ranges.today.from),
+        week: ordersSince(analyticsSummary.ranges.week.from),
+        month: ordersSince(analyticsSummary.ranges.month.from),
+        all: ordersSince(null),
+      },
       waitlistEmails,
       newsletterSubscribers,
     });

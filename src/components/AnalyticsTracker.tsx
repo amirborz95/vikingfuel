@@ -74,6 +74,8 @@ export default function AnalyticsTracker() {
         page: pageTitle,
         path: pathname,
         email,
+        // Only the first hit of a visit carries a referrer worth recording.
+        referrer: document.referrer || '',
         ...geo,
       };
 

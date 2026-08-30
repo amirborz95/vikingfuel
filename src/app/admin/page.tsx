@@ -18,68 +18,91 @@ interface DashboardUser {
   latestOrder: string | null;
 }
 
-interface DashboardSession {
-  email: string;
-  createdAt: string;
-  expiresAt: string;
+interface CountRow {
+  key: string;
+  views: number;
+  visitors: number;
 }
 
-interface DashboardLog {
-  action: string;
-  email: string;
+interface RangeSummary {
+  key: 'today' | 'week' | 'month' | 'all';
+  label: string;
+  from: string | null;
+  visits: number;
+  visitors: number;
+  sessions: number;
+  pages: CountRow[];
+  entryPages: CountRow[];
+  countries: CountRow[];
+  referrers: CountRow[];
+  devices: CountRow[];
+  daily: { date: string; visits: number; visitors: number }[];
+}
+
+interface RecentVisit {
   timestamp: string;
-}
-
-interface DashboardPageView {
+  path: string;
   page: string;
-  path: string;
   email: string;
-  timestamp: string;
+  visitor: string;
+  country: string | null;
+  city: string | null;
+  device: string | null;
+  referrer: string | null;
 }
 
-interface PageViewSummary {
-  path: string;
-  count: number;
-}
-
-interface VisitorSummary {
-  email: string;
-  count: number;
+interface AnalyticsSummary {
+  ranges: Record<'today' | 'week' | 'month' | 'all', RangeSummary>;
+  recent: RecentVisit[];
+  totalVisits: number;
+  firstVisit: string | null;
+  lastVisit: string | null;
 }
 
 interface DashboardMetrics {
   totalUsers: number;
-  totalLogins: number;
-  totalRegistrations: number;
   totalOrders: number;
-  activeSessions: number;
-  uniqueLoginEmails: number;
-  latestLogin: string | null;
-  latestSession: string | null;
+  totalRevenue: number;
   totalPageViews: number;
-  uniquePages: number;
-  uniquePageViewUsers: number;
   latestPageView: string | null;
-  geoPageViews: number;
-  geoCountries: number;
+  firstPageView: string | null;
 }
 
-interface CountrySummary {
-  country: string;
+interface OrderStat {
   count: number;
+  revenue: number;
 }
 
 interface DashboardData {
   users: DashboardUser[];
-  sessions: DashboardSession[];
-  logs: DashboardLog[];
   metrics: DashboardMetrics;
-  pageViews: DashboardPageView[];
-  pageViewsByPage: PageViewSummary[];
-  pageViewsByUser: VisitorSummary[];
-  pageViewsByCountry: CountrySummary[];
+  analytics: AnalyticsSummary;
+  orderStats: Record<'today' | 'week' | 'month' | 'all', OrderStat>;
   waitlistEmails: string[];
   newsletterSubscribers?: { email: string; subscribedAt: string }[];
+}
+
+type RangeKey = 'today' | 'week' | 'month' | 'all';
+
+const RANGE_TABS: { key: RangeKey; label: string; hint: string }[] = [
+  { key: 'today', label: 'Idag', hint: 'sedan midnatt' },
+  { key: 'week', label: '7 dagar', hint: 'senaste veckan' },
+  { key: 'month', label: '30 dagar', hint: 'senaste månaden' },
+  { key: 'all', label: 'Allt', hint: 'hela historiken' },
+];
+
+function kr(n: number) {
+  return `${(n || 0).toLocaleString('sv-SE')} kr`;
+}
+
+function timeAgo(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const min = Math.round(diff / 60000);
+  if (min < 1) return 'nyss';
+  if (min < 60) return `${min} min sedan`;
+  const h = Math.round(min / 60);
+  if (h < 24) return `${h} tim sedan`;
+  return `${Math.round(h / 24)} d sedan`;
 }
 
 export default function AdminPage() {
@@ -238,29 +261,33 @@ export default function AdminPage() {
     return { label: brand, detail: 'Ingen adress behövs – kunden hämtar själv', needsLabel: false };
   };
 
-  const authEvents = useMemo(() => {
-    if (!data) return [];
-    return data.logs
-      .filter((log) => log.action === 'login' || log.action === 'register')
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  }, [data]);
+  // ── Analytics: one range at a time, everything derived from the summary ──
+  const [range, setRange] = useState<RangeKey>('today');
+  const [visitQuery, setVisitQuery] = useState('');
+  const [showAllPages, setShowAllPages] = useState(false);
 
-  const uniqueAuthEvents = useMemo(() => {
-    const latestByEmail = new Map<string, DashboardLog>();
-    authEvents.forEach((log) => {
-      if (!latestByEmail.has(log.email)) {
-        latestByEmail.set(log.email, log);
-      }
-    });
-    return Array.from(latestByEmail.values());
-  }, [authEvents]);
+  const summary = data?.analytics.ranges[range] || null;
+  const orderStat = data?.orderStats?.[range] || null;
 
-  const recentAuthEvents = uniqueAuthEvents.slice(0, 10);
+  const rangeVisits = useMemo(() => {
+    if (!data) return [] as RecentVisit[];
+    const from = data.analytics.ranges[range].from;
+    const list = from
+      ? data.analytics.recent.filter((v) => new Date(v.timestamp) >= new Date(from))
+      : data.analytics.recent;
+    const q = visitQuery.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((v) =>
+      [v.path, v.email, v.country, v.city, v.device, v.referrer]
+        .filter(Boolean)
+        .some((field) => String(field).toLowerCase().includes(q))
+    );
+  }, [data, range, visitQuery]);
 
-  const loginEmails = useMemo(() => {
-    if (!data) return [];
-    return Array.from(new Set(data.logs.filter((log) => log.action === 'login').map((log) => log.email))).sort();
-  }, [data]);
+  const maxDaily = useMemo(
+    () => (summary ? Math.max(1, ...summary.daily.map((d) => d.visits)) : 1),
+    [summary]
+  );
 
   const pageSize = 10;
   const totalPages = Math.max(1, Math.ceil(orders.length / pageSize));
@@ -324,11 +351,9 @@ export default function AdminPage() {
                       <a href="#overview" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Overview</a>
                       <a href="#orders" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Orders</a>
                       <a href="#users" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Users</a>
-                      <a href="#auth-history" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Auth</a>
-                      <a href="#live-users" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Live</a>
                       <a href="#waitlist" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Waitlist</a>
                       <a href="#newsletter" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Nyhetsbrev</a>
-                      <a href="#insights" className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white">Insights</a>
+                      <a href="#insights" className="rounded-lg border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">Analytics</a>
                     </div>
                   </div>
 
@@ -346,9 +371,9 @@ export default function AdminPage() {
                     <div className="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-slate-300">
                       <div className="flex items-center justify-between gap-4">
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Logins</p>
-                          <p className="mt-4 text-4xl font-bold text-slate-900">{data ? data.metrics.totalLogins : '—'}</p>
-                          <p className="mt-2 text-xs text-slate-500">Authenticated</p>
+                          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Besökare idag</p>
+                          <p className="mt-4 text-4xl font-bold text-slate-900">{data ? data.analytics.ranges.today.visitors : '—'}</p>
+                          <p className="mt-2 text-xs text-slate-500">{data ? data.analytics.ranges.today.sessions + ' besök' : 'unika browsers'}</p>
                         </div>
                         <div className="text-3xl rounded-full bg-slate-100 p-3 text-slate-700 transition">📊</div>
                       </div>
@@ -356,9 +381,9 @@ export default function AdminPage() {
                     <div className="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-slate-300">
                       <div className="flex items-center justify-between gap-4">
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Active</p>
-                          <p className="mt-4 text-4xl font-bold text-slate-900">{data ? data.metrics.activeSessions : '—'}</p>
-                          <p className="mt-2 text-xs text-slate-500">Sessions</p>
+                          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Sidvisningar idag</p>
+                          <p className="mt-4 text-4xl font-bold text-slate-900">{data ? data.analytics.ranges.today.visits : '—'}</p>
+                          <p className="mt-2 text-xs text-slate-500">{data ? data.analytics.ranges.week.visitors + ' besökare senaste 7 dagarna' : 'sidvisningar'}</p>
                         </div>
                         <div className="text-3xl rounded-full bg-slate-100 p-3 text-slate-700 transition">⚡</div>
                       </div>
@@ -366,9 +391,9 @@ export default function AdminPage() {
                     <div className="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-slate-300">
                       <div className="flex items-center justify-between gap-4">
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Orders</p>
+                          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Ordrar</p>
                           <p className="mt-4 text-4xl font-bold text-slate-900">{data ? data.metrics.totalOrders : '—'}</p>
-                          <p className="mt-2 text-xs text-slate-500">Total</p>
+                          <p className="mt-2 text-xs text-slate-500">{data ? kr(data.metrics.totalRevenue) + ' totalt' : 'Total'}</p>
                         </div>
                         <div className="text-3xl rounded-full bg-slate-100 p-3 text-slate-700 transition">📦</div>
                       </div>
@@ -581,29 +606,6 @@ export default function AdminPage() {
                     )}
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
-                    <h2 className="text-2xl font-semibold text-slate-900 mb-4">Autentiseringshändelser</h2>
-                    <p className="mb-4 text-sm text-slate-600">Visar de senaste unika registreringarna och inloggningarna per användare.</p>
-                    <div className="list-scroll space-y-3 text-sm text-slate-700">
-                      {loading ? (
-                        <p className="text-sm text-slate-600">Laddar...</p>
-                      ) : !data ? (
-                        <p className="text-sm text-slate-600">Inga loggar tillgängliga.</p>
-                      ) : recentAuthEvents.length === 0 ? (
-                        <p className="text-sm text-slate-600">Inga autentiseringshändelser.</p>
-                      ) : (
-                        recentAuthEvents.map((item, index) => (
-                          <div key={index} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <div className="flex items-center justify-between gap-3">
-                              <p className="font-medium text-slate-900">{item.email}</p>
-                              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs uppercase tracking-[0.2em] text-slate-600">{item.action === 'register' ? 'Registrering' : 'Inloggning'}</span>
-                            </div>
-                            <p className="mt-2 text-slate-600 text-xs">{new Date(item.timestamp).toLocaleString('sv-SE')}</p>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
                 </div>
 
                 <div id="waitlist" className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
@@ -697,164 +699,259 @@ export default function AdminPage() {
                   )}
                 </div>
 
-                <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-                  <div id="auth-history" className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
-                    <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Track</p>
-                    <h2 className="text-2xl font-bold text-slate-900 mt-1">Authentication History</h2>
-                    <p className="text-sm text-slate-600 mt-3">Registrations and logins, unique per user.</p>
-                    <div className="list-scroll overflow-x-auto rounded-3xl border border-slate-200 bg-slate-50 p-2 mt-6">
-                      <table className="w-full text-left text-sm border-separate border-spacing-0">
-                        <thead>
-                          <tr className="border-b border-slate-200 text-slate-600 uppercase tracking-[0.15em] text-xs">
-                            <th className="px-4 py-3">Typ</th>
-                            <th className="px-4 py-3">E-post</th>
-                            <th className="px-4 py-3">Tid</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {uniqueAuthEvents.map((log, index) => (
-                            <tr key={index} className="border-b border-slate-200 bg-white">
-                              <td className="px-4 py-3 font-semibold text-slate-900">{log.action === 'register' ? 'Registrering' : 'Inloggning'}</td>
-                              <td className="px-4 py-3 text-slate-600">{log.email}</td>
-                              <td className="px-4 py-3 text-slate-600">{new Date(log.timestamp).toLocaleString('sv-SE')}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  <div id="live-users" className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl space-y-8">
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
-                      <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Real-time</p>
-                      <h2 className="text-2xl font-bold text-slate-900 mt-1">Active Sessions</h2>
-                      <p className="mt-2 text-sm text-slate-600">Sessions currently stored in the system.</p>
-                      <div className="list-scroll mt-4 space-y-3 text-sm text-slate-700">
-                        {data?.sessions.length ? (
-                          data.sessions.map((session, index) => (
-                            <div key={index} className="rounded-2xl border border-slate-200 bg-white p-4">
-                              <p className="font-semibold text-slate-900">{session.email}</p>
-                              <p className="text-slate-600 text-xs">Created: {new Date(session.createdAt).toLocaleString('en-US')}</p>
-                              <p className="text-slate-600 text-xs">Expires: {new Date(session.expiresAt).toLocaleString('en-US')}</p>
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-sm text-slate-600">No active sessions.</p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
-                      <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Connected</p>
-                      <h2 className="text-2xl font-bold text-slate-900 mt-1">Logged In Emails</h2>
-                      <div className="mt-4 space-y-2 text-sm text-slate-700">
-                        {loginEmails.length ? (
-                          loginEmails.map((email) => (
-                            <div key={email} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-700">{email}</div>
-                          ))
-                        ) : (
-                          <p className="text-sm text-slate-600">No logged-in emails found.</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
                 <div id="insights" className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Analytics</p>
-                  <h2 className="text-2xl font-bold text-slate-900 mt-1">Insights</h2>
-                  <div className="grid gap-4 md:grid-cols-2 mt-6">
-                        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
-                      <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Geografi</p>
-                      {data?.metrics.geoPageViews ? (
-                        <>
-                          <p className="mt-3 text-sm text-slate-700">
-                            {data.metrics.geoPageViews} platsbaserade besök från {data.metrics.geoCountries} länder.
-                          </p>
-                          <div className="mt-4 space-y-2 text-sm text-slate-700">
-                            {data.pageViewsByCountry.length ? (
-                              data.pageViewsByCountry.map((item) => (
-                                <div key={item.country} className="flex items-center justify-between border-t border-slate-200 py-2">
-                                  <span className="text-slate-700">{item.country}</span>
-                                  <span className="font-semibold text-slate-900">{item.count} visningar</span>
-                                </div>
-                              ))
-                            ) : (
-                              <p className="text-sm text-slate-400">Inga landdata hittades ännu.</p>
-                            )}
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Analytics</p>
+                      <h2 className="mt-1 text-2xl font-bold text-slate-900">Trafik &amp; besökare</h2>
+                      <p className="mt-2 text-sm text-slate-600">
+                        Välj period — allt nedanför räknas om: hur många som kom in, vilka sidor de var på och var de kom ifrån.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {RANGE_TABS.map((tab) => (
+                        <button
+                          key={tab.key}
+                          onClick={() => setRange(tab.key)}
+                          className={RANGE_BTN(range === tab.key)}
+                        >
+                          {tab.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {!summary ? (
+                    <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-12 text-center text-sm text-slate-500">
+                      Laddar besöksdata…
+                    </div>
+                  ) : (
+                    <>
+                      {/* Headline numbers for the chosen period */}
+                      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+                        <StatCard
+                          label="Besökare"
+                          value={summary.visitors}
+                          hint={'unika ' + (RANGE_TABS.find((t) => t.key === range)?.hint || '')}
+                          accent
+                        />
+                        <StatCard label="Besök" value={summary.sessions} hint="separata sessioner" />
+                        <StatCard
+                          label="Sidvisningar"
+                          value={summary.visits}
+                          hint={(summary.visitors ? (summary.visits / summary.visitors).toFixed(1) : '0') + ' per besökare'}
+                        />
+                        <StatCard label="Ordrar" value={orderStat?.count ?? 0} hint={orderStat ? kr(orderStat.revenue) : '—'} />
+                        <StatCard
+                          label="Konvertering"
+                          value={summary.visitors ? (((orderStat?.count ?? 0) / summary.visitors) * 100).toFixed(1) + ' %' : '—'}
+                          hint="ordrar per besökare"
+                        />
+                      </div>
+
+                      {/* Visits per day */}
+                      {summary.daily.length > 1 && (
+                        <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-6">
+                          <p className="text-sm font-semibold text-slate-700">Besök per dag</p>
+                          <div className="mt-4 flex h-40 items-end gap-1">
+                            {summary.daily.map((d) => (
+                              <div key={d.date} className="group relative flex flex-1 flex-col items-center justify-end">
+                                <div
+                                  className="w-full rounded-t bg-slate-900/80 transition group-hover:bg-slate-900"
+                                  style={{ height: Math.max(3, (d.visits / maxDaily) * 100) + '%' }}
+                                />
+                                <span className="pointer-events-none absolute -top-9 hidden whitespace-nowrap rounded-lg bg-slate-900 px-2 py-1 text-xs font-semibold text-white group-hover:block">
+                                  {new Date(d.date).toLocaleDateString('sv-SE')}: {d.visits} visningar · {d.visitors} besökare
+                                </span>
+                              </div>
+                            ))}
                           </div>
-                        </>
-                      ) : (
-                        <p className="mt-3 text-sm text-slate-600">Ingen plats- eller landsspårning är aktiverad ännu.</p>
+                          <div className="mt-2 flex justify-between text-xs text-slate-500">
+                            <span>{new Date(summary.daily[0].date).toLocaleDateString('sv-SE')}</span>
+                            <span>{new Date(summary.daily[summary.daily.length - 1].date).toLocaleDateString('sv-SE')}</span>
+                          </div>
+                        </div>
                       )}
-                    </div>
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
-                      <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Sidvisningar</p>
-                      <p className="mt-3 text-sm text-slate-700">
-                        Totalt <span className="font-semibold text-slate-100">{data ? data.metrics.totalPageViews : '...'}</span> sidvisningar från <span className="font-semibold text-slate-100">{data ? data.metrics.uniquePageViewUsers : '...'}</span> besökare över <span className="font-semibold text-slate-100">{data ? data.metrics.uniquePages : '...'}</span> unika sidor.
-                      </p>
-                      <p className="mt-3 text-sm text-slate-400">
-                        Senaste besöket: {data ? (data.metrics.latestPageView ? new Date(data.metrics.latestPageView).toLocaleString('sv-SE') : 'Ingen data ännu') : '...'}.
-                      </p>
-                      <div className="mt-4 text-sm text-slate-700 space-y-3">
-                        {data?.pageViewsByPage.length ? (
-                          data.pageViewsByPage.slice(0, 5).map((item) => (
-                            <div key={item.path} className="flex items-center justify-between border-t border-slate-200 py-2">
-                              <span className="text-slate-700">{item.path}</span>
-                              <span className="font-semibold text-slate-900">{item.count} visningar</span>
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-sm text-slate-400">Inga sidvisningsdata ännu.</p>
-                        )}
+
+                      {/* Which pages they saw, and which one they came in on */}
+                      <div className="mt-6 grid gap-4 xl:grid-cols-2">
+                        <BreakdownCard
+                          title="Sidor"
+                          note="Alla sidor som visades i perioden."
+                          rows={showAllPages ? summary.pages : summary.pages.slice(0, 8)}
+                          unit="visningar"
+                          footer={
+                            summary.pages.length > 8 ? (
+                              <button
+                                onClick={() => setShowAllPages((v) => !v)}
+                                className="mt-3 text-sm font-semibold text-slate-700 underline hover:text-slate-900"
+                              >
+                                {showAllPages ? 'Visa färre' : 'Visa alla ' + summary.pages.length + ' sidor'}
+                              </button>
+                            ) : null
+                          }
+                        />
+                        <BreakdownCard
+                          title="Ingångssidor"
+                          note="Sidan besöket började på — alltså var de kom in."
+                          rows={summary.entryPages.slice(0, 8)}
+                          unit="besök"
+                          primary="visitors"
+                        />
                       </div>
-                    </div>
-                  </div>
+
+                      <div className="mt-4 grid gap-4 xl:grid-cols-3">
+                        <BreakdownCard title="Källa" note="Var trafiken kom ifrån." rows={summary.referrers.slice(0, 6)} unit="visningar" />
+                        <BreakdownCard title="Land" note="Enligt IP-uppslag." rows={summary.countries.slice(0, 6)} unit="visningar" />
+                        <BreakdownCard title="Enhet" note="Mobil, surfplatta eller dator." rows={summary.devices} unit="visningar" />
+                      </div>
+
+                      {/* Every visit in the period — scroll the card to see them all */}
+                      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <p className="text-sm font-semibold text-slate-900">Senaste besök</p>
+                            <p className="text-xs text-slate-500">
+                              {rangeVisits.length} besök i listan{visitQuery ? ' (filtrerat)' : ''} · scrolla för att se alla
+                            </p>
+                          </div>
+                          <input
+                            value={visitQuery}
+                            onChange={(e) => setVisitQuery(e.target.value)}
+                            placeholder="Sök sida, land, e-post…"
+                            className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-slate-400 focus:outline-none sm:w-72"
+                          />
+                        </div>
+
+                        <div className="mt-4 max-h-[26rem] overflow-y-auto rounded-xl border border-slate-200">
+                          {rangeVisits.length === 0 ? (
+                            <p className="p-8 text-center text-sm text-slate-500">Inga besök i den här perioden.</p>
+                          ) : (
+                            <table className="w-full text-left text-sm">
+                              <thead className="sticky top-0 bg-slate-100 text-xs uppercase tracking-wider text-slate-600">
+                                <tr>
+                                  <th className="px-4 py-3">Tid</th>
+                                  <th className="px-4 py-3">Sida</th>
+                                  <th className="px-4 py-3">Plats</th>
+                                  <th className="px-4 py-3">Källa</th>
+                                  <th className="px-4 py-3">Besökare</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {rangeVisits.map((v, i) => (
+                                  <tr key={v.visitor + v.timestamp + i} className="border-t border-slate-100 bg-white">
+                                    <td className="whitespace-nowrap px-4 py-2 text-slate-500">
+                                      {range === 'today'
+                                        ? new Date(v.timestamp).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })
+                                        : new Date(v.timestamp).toLocaleString('sv-SE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                                      <span className="ml-2 text-xs text-slate-400">{timeAgo(v.timestamp)}</span>
+                                    </td>
+                                    <td className="px-4 py-2 font-medium text-slate-900">{v.path}</td>
+                                    <td className="px-4 py-2 text-slate-600">
+                                      {[v.city, v.country].filter(Boolean).join(', ') || '—'}
+                                    </td>
+                                    <td className="px-4 py-2 text-slate-600">{v.referrer || '—'}</td>
+                                    <td className="px-4 py-2 text-slate-600">
+                                      {v.email !== 'anonymous' ? v.email : <span className="text-slate-400">anonym</span>}
+                                      {v.device ? <span className="ml-2 text-xs text-slate-400">{v.device}</span> : null}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          )}
+                        </div>
+                        <p className="mt-3 text-xs text-slate-500">
+                          Totalt {data?.metrics.totalPageViews ?? 0} sidvisningar registrerade sedan{' '}
+                          {data?.metrics.firstPageView ? new Date(data.metrics.firstPageView).toLocaleDateString('sv-SE') : '—'}.
+                          Listan visar de 500 senaste.
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-6 mt-6 shadow-xl">
-                  <h2 className="text-2xl font-semibold text-slate-900 mb-4">Per person</h2>
-                  <div className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                      <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Toppbesökare</p>
-                      <div className="mt-4 space-y-2 text-sm text-slate-700">
-                        {data?.pageViewsByUser.length ? (
-                          data.pageViewsByUser.map((item) => (
-                            <div key={item.email} className="flex items-center justify-between border-t border-slate-200 py-2">
-                              <span className="text-slate-700">{item.email}</span>
-                              <span className="font-semibold text-slate-900">{item.count} visningar</span>
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-sm text-slate-400">Inga besöksdata per användare ännu.</p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                      <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Senaste sidbesök</p>
-                      <div className="mt-4 space-y-3 text-sm text-slate-700">
-                        {data?.pageViews.length ? (
-                          data.pageViews.slice(0, 6).map((visit, index) => (
-                            <div key={`${visit.email}-${index}`} className="border-t border-slate-200 py-2">
-                              <p className="font-medium text-slate-900">{visit.email}</p>
-                              <p className="text-slate-600 text-xs">{visit.path}</p>
-                              <p className="text-slate-600 text-xs">{new Date(visit.timestamp).toLocaleString('sv-SE')}</p>
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-sm text-slate-400">Inga sidbesök registrerade ännu.</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             )}
           </div>
         </div>
       </main>
       <Footer />
+    </div>
+  );
+}
+
+
+const RANGE_BTN = (active: boolean) =>
+  'rounded-xl border px-4 py-2 text-sm font-bold transition ' +
+  (active
+    ? 'border-slate-900 bg-slate-900 text-white'
+    : 'border-slate-200 bg-slate-100 text-slate-700 hover:bg-white');
+
+function StatCard({
+  label,
+  value,
+  hint,
+  accent,
+}: {
+  label: string;
+  value: number | string;
+  hint?: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className={accent ? 'rounded-2xl border border-slate-900 bg-slate-900 p-5 text-white' : 'rounded-2xl border border-slate-200 bg-slate-50 p-5'}>
+      <p className={accent ? 'text-xs font-semibold uppercase tracking-widest text-slate-300' : 'text-xs font-semibold uppercase tracking-widest text-slate-500'}>{label}</p>
+      <p className={accent ? 'mt-2 text-3xl font-bold text-white' : 'mt-2 text-3xl font-bold text-slate-900'}>{value}</p>
+      {hint ? <p className={accent ? 'mt-1 text-xs text-slate-300' : 'mt-1 text-xs text-slate-500'}>{hint}</p> : null}
+    </div>
+  );
+}
+
+function BreakdownCard({
+  title,
+  note,
+  rows,
+  unit,
+  primary = 'views',
+  footer,
+}: {
+  title: string;
+  note?: string;
+  rows: CountRow[];
+  unit: string;
+  primary?: 'views' | 'visitors';
+  footer?: React.ReactNode;
+}) {
+  const max = Math.max(1, ...rows.map((r) => (primary === 'views' ? r.views : r.visitors)));
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
+      <p className="text-sm font-semibold text-slate-900">{title}</p>
+      {note ? <p className="mt-1 text-xs text-slate-500">{note}</p> : null}
+      <div className="mt-4 space-y-2">
+        {rows.length === 0 ? (
+          <p className="text-sm text-slate-400">Ingen data i perioden.</p>
+        ) : (
+          rows.map((row) => {
+            const value = primary === 'views' ? row.views : row.visitors;
+            return (
+              <div key={row.key} className="relative overflow-hidden rounded-lg bg-white px-3 py-2">
+                <div className="absolute inset-y-0 left-0 bg-slate-900/10" style={{ width: (value / max) * 100 + '%' }} />
+                <div className="relative flex items-center justify-between gap-3 text-sm">
+                  <span className="truncate text-slate-700">{row.key}</span>
+                  <span className="whitespace-nowrap font-semibold text-slate-900">
+                    {value} {unit}
+                    {primary === 'views' && row.visitors ? (
+                      <span className="ml-2 text-xs font-normal text-slate-500">{row.visitors} besökare</span>
+                    ) : null}
+                  </span>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+      {footer}
     </div>
   );
 }
