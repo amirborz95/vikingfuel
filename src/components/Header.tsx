@@ -43,10 +43,11 @@ export default function Header() {
     };
   }, [mobileOpen]);
 
+  // /knowledge and its articles stay live (and linked from the product pages
+  // and the sitemap) — they're just not in the top nav.
   const navItems = [
     { label: t('nav.home'), href: '/' },
     { label: t('nav.products'), href: '/products', hasMega: true },
-    { label: t('nav.knowledge'), href: '/knowledge' },
     { label: t('nav.faq'), href: '/faq' },
     { label: t('nav.contact'), href: '/contact' },
   ];
