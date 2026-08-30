@@ -15,7 +15,7 @@ export default function TestoSupportSection() {
         {/* Bottle — full-bleed on the left */}
         <div className="relative min-h-[340px] lg:min-h-[560px]">
           <img
-            src="/assets/images/testo-bottle.png"
+            src="/assets/images/testo-bottle.jpg"
             alt="Viking Fuel +Testo Support"
             className="absolute inset-0 h-full w-full object-cover"
             loading="lazy"

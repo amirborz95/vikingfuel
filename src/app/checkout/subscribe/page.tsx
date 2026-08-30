@@ -19,9 +19,9 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
 
 // Pack artwork by number of bottles — matches the product page bundles.
 const PACK_IMG: Record<number, string> = {
-  1: 'https://i.postimg.cc/5t5mBGsQ/neuralpony.png',
-  3: 'https://i.postimg.cc/pdQBf7sR/neuralpony3.png',
-  6: 'https://i.postimg.cc/zfwkCMxg/neuralpony6.png',
+  1: '/assets/images/viking-energy-1e.png',
+  3: '/assets/images/viking-energy-3e.png',
+  6: '/assets/images/viking-energy-6e.png',
 };
 
 function kr(n: number) {

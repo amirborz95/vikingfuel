@@ -24,8 +24,8 @@ export default function CategoryBanners() {
       subtitle: t('banners.bundlesSub'),
       btnLabel: t('banners.bundlesBtn'),
       btnHref: '/products',
-      image: 'https://i.postimg.cc/RFPBsggt/Chat-GPT-Image-Jun-4-2026-01-54-11-PM.png',
-      alt: 'Multiple supplement bottles arranged on dark slate surface, moody dim lighting, deep shadows',
+      image: '/assets/images/bundles-banner.jpg',
+      alt: 'Viking Fuel +Testo-Support 3-pack tray on dark stone, moody lighting',
       accent: 'from-foreground/70 via-foreground/40 to-transparent',
     },
     {

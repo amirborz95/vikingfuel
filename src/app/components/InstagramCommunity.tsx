@@ -7,9 +7,9 @@ const IG_URL = 'https://www.instagram.com/vikingfuel.se/';
 
 const photos = [
   '/assets/images/community-1.png',
-  '/assets/images/community-2.png',
+  '/assets/images/community-2.jpg',
   '/assets/images/community-3.png',
-  '/assets/images/community-4.png',
+  '/assets/images/community-4.jpg',
 ];
 
 export default function InstagramCommunity() {
