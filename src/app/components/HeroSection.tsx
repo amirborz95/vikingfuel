@@ -25,12 +25,13 @@ export default function HeroSection() {
     <>
       {/* ── HERO ── */}
       <section className="relative overflow-hidden min-h-[88vh] flex flex-col justify-between">
-        {/* Full-width background image */}
+        {/* Full-width background image. Narrow screens crop the wide shot, so the
+            focal point shifts right to keep the athlete in frame. */}
         <div className="absolute inset-0 z-0">
           <img
-            src="/assets/images/hero-bottle.jpg"
-            alt="Viking Fuel hero background"
-            className="w-full h-full object-cover object-center"
+            src="/assets/images/hero-training.jpg"
+            alt="Man som tränar med battle ropes i ett mörkt gym"
+            className="w-full h-full object-cover object-[70%_center] md:object-center"
             loading="eager"
             onError={(e) => { const fb = '/assets/images/viking-energy-1e.png'; if (e.currentTarget.src !== fb) e.currentTarget.src = fb; }}
           />
