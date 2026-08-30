@@ -15,6 +15,8 @@ export interface AnalyticsVisit {
   timestamp: string;
   /** Anonymous per-browser id (cookie) so unique visitors can be counted. */
   visitorId?: string;
+  /** Our own browsing (admin device or /admin pages) — kept, never counted. */
+  internal?: boolean;
   referrer?: string;
   device?: 'mobile' | 'tablet' | 'desktop';
   country?: string;

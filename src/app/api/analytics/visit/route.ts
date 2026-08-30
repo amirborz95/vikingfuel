@@ -4,6 +4,8 @@ import { appendAnalyticsVisit } from '@/lib/analytics';
 
 const VISITOR_COOKIE = 'vf_vid';
 const VISITOR_MAX_AGE = 60 * 60 * 24 * 365; // a year
+/** Set when the admin panel is unlocked — that browser is us, not a customer. */
+const STAFF_COOKIE = 'vf_staff';
 
 /** Rough device class from the user agent — enough for "mobile vs desktop". */
 function deviceFrom(ua: string): 'mobile' | 'tablet' | 'desktop' {
@@ -48,12 +50,17 @@ export async function POST(req: NextRequest) {
     const existingId = req.cookies.get(VISITOR_COOKIE)?.value;
     const visitorId = existingId && /^[a-f0-9-]{10,40}$/i.test(existingId) ? existingId : crypto.randomUUID();
 
+    // Our own browsing never counts: the admin's device carries a staff cookie,
+    // and /admin pages are ours by definition.
+    const internal = req.cookies.get(STAFF_COOKIE)?.value === '1' || path.startsWith('/admin');
+
     await appendAnalyticsVisit({
       type: 'page-view',
       page,
       path,
       email,
       visitorId,
+      internal,
       referrer: referrerFrom(String(body.referrer || ''), req.nextUrl.hostname),
       device: deviceFrom(req.headers.get('user-agent') || ''),
       timestamp: new Date().toISOString(),

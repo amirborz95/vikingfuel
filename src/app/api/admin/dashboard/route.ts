@@ -6,6 +6,10 @@ import { readWaitlistEmails } from '@/lib/waitlist';
 import { readSubscribers } from '@/lib/newsletter';
 import { isAdminPassword } from '@/lib/adminAuth';
 
+/** Marks this browser as ours, so its visits stay out of the customer numbers. */
+const STAFF_COOKIE = 'vf_staff';
+const STAFF_MAX_AGE = 60 * 60 * 24 * 365;
+
 export async function GET() {
   return NextResponse.json({ error: 'Use POST with password in body.' }, { status: 405 });
 }
@@ -57,10 +61,13 @@ export async function POST(req: NextRequest) {
     const waitlistEmails = await readWaitlistEmails();
     const newsletterSubscribers = await readSubscribers();
 
-    return NextResponse.json({
+    const staffExcluded = req.cookies.get(STAFF_COOKIE)?.value === '1';
+
+    const res = NextResponse.json({
       users: safeUsers,
       metrics,
       analytics: analyticsSummary,
+      staffExcluded: true,
       orderStats: {
         today: ordersSince(analyticsSummary.ranges.today.from),
         week: ordersSince(analyticsSummary.ranges.week.from),
@@ -70,6 +77,18 @@ export async function POST(req: NextRequest) {
       waitlistEmails,
       newsletterSubscribers,
     });
+
+    // Unlocking the panel is proof this is the owner's browser — from now on its
+    // visits are recorded as internal and left out of the dashboard.
+    if (!staffExcluded) {
+      res.cookies.set(STAFF_COOKIE, '1', {
+        maxAge: STAFF_MAX_AGE,
+        path: '/',
+        sameSite: 'lax',
+        httpOnly: true,
+      });
+    }
+    return res;
   } catch (err: any) {
     console.error('Admin dashboard error:', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

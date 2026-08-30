@@ -55,6 +55,7 @@ interface AnalyticsSummary {
   ranges: Record<'today' | 'week' | 'month' | 'all', RangeSummary>;
   recent: RecentVisit[];
   totalVisits: number;
+  excludedVisits: number;
   firstVisit: string | null;
   lastVisit: string | null;
 }
@@ -76,6 +77,7 @@ interface OrderStat {
 interface DashboardData {
   users: DashboardUser[];
   metrics: DashboardMetrics;
+  staffExcluded: boolean;
   analytics: AnalyticsSummary;
   orderStats: Record<'today' | 'week' | 'month' | 'all', OrderStat>;
   waitlistEmails: string[];
@@ -265,6 +267,27 @@ export default function AdminPage() {
   const [range, setRange] = useState<RangeKey>('today');
   const [visitQuery, setVisitQuery] = useState('');
   const [showAllPages, setShowAllPages] = useState(false);
+  const [countingSelf, setCountingSelf] = useState(false);
+  const [trackingBusy, setTrackingBusy] = useState(false);
+
+  // "Don't count my own visits" is on by default from the moment the panel is
+  // unlocked; this lets it be switched back for testing.
+  async function setOwnTracking(exclude: boolean) {
+    setTrackingBusy(true);
+    try {
+      const res = await fetch('/api/admin/tracking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: passwordRef.current, exclude }),
+      });
+      if (!res.ok) throw new Error('Misslyckades');
+      setCountingSelf(!exclude);
+    } catch (e: any) {
+      alert(e?.message || 'Kunde inte ändra inställningen');
+    } finally {
+      setTrackingBusy(false);
+    }
+  }
 
   const summary = data?.analytics.ranges[range] || null;
   const orderStat = data?.orderStats?.[range] || null;
@@ -867,6 +890,25 @@ export default function AdminPage() {
                           Listan visar de 500 senaste. Besökare räknas per webbläsare (cookie); besök som loggades
                           innan den räkningen fanns uppskattas per 30-minutersfönster.
                         </p>
+                        <div className="mt-4 flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs sm:flex-row sm:items-center sm:justify-between">
+                          <p className="text-slate-600">
+                            {countingSelf ? (
+                              <>Dina egna besök <span className="font-semibold text-slate-900">räknas just nu</span> i siffrorna ovan.</>
+                            ) : (
+                              <>
+                                Dina egna besök från den här enheten räknas <span className="font-semibold text-slate-900">inte</span> — bara
+                                kunder. {data?.analytics.excludedVisits ? `${data.analytics.excludedVisits} egna sidvisningar är dolda.` : ''}
+                              </>
+                            )}
+                          </p>
+                          <button
+                            onClick={() => setOwnTracking(countingSelf)}
+                            disabled={trackingBusy}
+                            className="whitespace-nowrap rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                          >
+                            {trackingBusy ? '…' : countingSelf ? 'Sluta räkna mina besök' : 'Räkna med mina besök igen'}
+                          </button>
+                        </div>
                       </div>
                     </>
                   )}

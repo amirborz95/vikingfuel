@@ -142,12 +142,22 @@ export interface AnalyticsSummary {
   ranges: Record<RangeKey, RangeSummary>;
   recent: RecentVisit[];
   totalVisits: number;
+  /** Our own visits, recorded but left out of every number above. */
+  excludedVisits: number;
   firstVisit: string | null;
   lastVisit: string | null;
 }
 
+/** Our own browsing: flagged by the staff cookie, or anything under /admin. */
+function isInternal(v: AnalyticsVisit): boolean {
+  return v.internal === true || (v.path || '').startsWith('/admin');
+}
+
 export function buildAnalyticsSummary(visits: AnalyticsVisit[], recentLimit = 500): AnalyticsSummary {
-  const pageViews = visits.filter((v) => v.type === 'page-view' && v.timestamp);
+  const all = visits.filter((v) => v.type === 'page-view' && v.timestamp);
+  // The dashboard should show customers only — never the owner's own clicking.
+  const pageViews = all.filter((v) => !isInternal(v));
+  const excludedVisits = all.length - pageViews.length;
 
   const now = new Date();
   const startOfToday = new Date(now);
@@ -180,6 +190,7 @@ export function buildAnalyticsSummary(visits: AnalyticsVisit[], recentLimit = 50
       referrer: v.referrer || null,
     })),
     totalVisits: pageViews.length,
+    excludedVisits,
     firstVisit: ordered.length ? ordered[ordered.length - 1].timestamp : null,
     lastVisit: ordered.length ? ordered[0].timestamp : null,
   };
