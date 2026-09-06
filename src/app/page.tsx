@@ -6,7 +6,7 @@ import Header from '@/components/Header';
 import HeroSection from './components/HeroSection';
 import ProductsSection from './components/ProductsSection';
 import HomeFeatures4 from './components/HomeFeatures4';
-import TakeControlCTA from './components/TakeControlCTA';
+import KnowledgePosts from './components/KnowledgePosts';
 import InstagramCommunity from './components/InstagramCommunity';
 import Footer from '@/components/Footer';
 
@@ -19,7 +19,7 @@ export default function HomePage() {
         <HeroSection />
         <ProductsSection />
         <HomeFeatures4 />
-        <TakeControlCTA />
+        <KnowledgePosts />
         <InstagramCommunity />
       </main>
       <Footer />

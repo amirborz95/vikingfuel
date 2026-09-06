@@ -249,13 +249,21 @@ export default function ProductDetailView({ initialBundle = 0 }: { initialBundle
                 {en ? 'New' : 'Ny'}
               </span>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-3 leading-tight">{bundle.label}</h1>
-              <div className="flex items-center gap-2 mb-6">
+              {/* Ratings link straight to the reviews page */}
+              <Link
+                href="/reviews"
+                className="group mb-6 inline-flex items-center gap-2 rounded-lg -mx-2 px-2 py-1 transition hover:bg-muted"
+                aria-label={en ? 'Read all reviews' : 'Läs alla recensioner'}
+              >
                 <div className="flex text-yellow-400">
                   {[...Array(5)].map((_, i) => (<Icon key={i} name="StarIcon" size={16} variant="solid" />))}
                 </div>
                 <span className="text-sm font-bold text-foreground">4.9</span>
-                <span className="text-sm text-muted-foreground">(45 {en ? 'reviews' : 'recensioner'})</span>
-              </div>
+                <span className="text-sm text-muted-foreground underline-offset-4 group-hover:text-primary group-hover:underline">
+                  (45 {en ? 'reviews' : 'recensioner'})
+                </span>
+                <svg className="h-3.5 w-3.5 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+              </Link>
               <div className="mb-6">
                 {purchaseMode === 'subscribe' && subPlan ? (
                   <p className="text-4xl font-extrabold text-foreground mb-2">
