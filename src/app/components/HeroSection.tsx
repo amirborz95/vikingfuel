@@ -30,7 +30,7 @@ export default function HeroSection() {
         <div className="absolute inset-0 z-0">
           <img
             src="/assets/images/hero-training.jpg"
-            alt="Man som tränar med battle ropes i ett mörkt gym"
+            alt="Man som skjuter en tyngdsläde i ett mörkt gym"
             className="w-full h-full object-cover object-[70%_center] md:object-center"
             loading="eager"
             onError={(e) => { const fb = '/assets/images/viking-energy-1e.png'; if (e.currentTarget.src !== fb) e.currentTarget.src = fb; }}

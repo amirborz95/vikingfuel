@@ -28,7 +28,7 @@ export const FEATURED_POSTS: FeaturedPost[] = [
       'Always tired even though you sleep? Here are the most common causes of chronic fatigue — and what you can do about them.',
     minutes: 5,
     image: '/assets/images/post-trotthet.jpg',
-    imageAlt: 'Man i fjällandskap i gryningsljus',
+    imageAlt: 'Trött man på sängkanten tidigt på morgonen',
   },
   {
     slug: 'naturligt-oka-testosteron',
@@ -42,6 +42,6 @@ export const FEATURED_POSTS: FeaturedPost[] = [
       'How to support a normal testosterone level naturally — through sleep, training, weight, diet and nutrients like zinc.',
     minutes: 5,
     image: '/assets/images/post-testosteron.jpg',
-    imageAlt: 'Man som tränar hårt i ett mörkt gym',
+    imageAlt: 'Man på fjälltopp i soluppgång',
   },
 ];

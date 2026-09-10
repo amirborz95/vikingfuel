@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Metadata, Viewport } from 'next';
-import { Plus_Jakarta_Sans } from 'next/font/google';
+import { Plus_Jakarta_Sans, Instrument_Serif, Inter_Tight } from 'next/font/google';
 declare module '../styles/tailwind.css';
 import '../styles/tailwind.css';
 import { AuthProvider } from '@/context/AuthContext';
@@ -16,6 +16,22 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800'],
   variable: '--font-plus-jakarta-sans',
+  display: 'swap',
+});
+
+// Display + UI faces for the new homepage build (/v2).
+const instrumentSerif = Instrument_Serif({
+  subsets: ['latin', 'latin-ext'],
+  weight: ['400'],
+  style: ['normal', 'italic'],
+  variable: '--font-display',
+  display: 'swap',
+});
+
+const interTight = Inter_Tight({
+  subsets: ['latin', 'latin-ext'],
+  weight: ['400', '500', '600'],
+  variable: '--font-ui',
   display: 'swap',
 });
 
@@ -59,7 +75,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sv" className={plusJakartaSans.variable}>
+    <html lang="sv" className={`${plusJakartaSans.variable} ${instrumentSerif.variable} ${interTight.variable}`}>
       <body className={plusJakartaSans.className}>
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <LanguageProvider>

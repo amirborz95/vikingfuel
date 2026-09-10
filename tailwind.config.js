@@ -11,6 +11,16 @@ module.exports = {
     },
     extend: {
       colors: {
+        // ── Nordic green & white — the /v2 brand system ──
+        forest: '#0C2A1E',
+        pine: '#14432F',
+        moss: '#1F6B47',
+        fern: '#3E9B6C',
+        birch: '#F6F7F3',
+        mist: '#E7EBE5',
+        stone: '#6F7C72',
+        gold: '#C8A45C',
+        ink: '#0A1410',
         background: 'var(--background)',
         foreground: 'var(--foreground)',
         primary: {
@@ -46,6 +56,8 @@ module.exports = {
       },
       fontFamily: {
         sans: ['var(--font-plus-jakarta-sans)', 'sans-serif'],
+        display: ['var(--font-display)', 'Georgia', 'serif'],
+        ui: ['var(--font-ui)', 'system-ui', 'sans-serif'],
       },
       animation: {
         'fade-up': 'fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards',
@@ -62,6 +74,8 @@ module.exports = {
         },
       },
       boxShadow: {
+        ambient: '0 30px 60px -40px rgba(12,42,30,.35)',
+        'ambient-lift': '0 40px 80px -40px rgba(12,42,30,.45)',
         'product': '0 4px 24px rgba(0,0,0,0.06)',
         'product-hover': '0 12px 40px rgba(0,0,0,0.12)',
         'card': '0 2px 12px rgba(0,0,0,0.04)',
