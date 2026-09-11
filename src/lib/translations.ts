@@ -163,10 +163,14 @@ export const translations: Record<Lang, any> = {
     newsletter: {
       badge: 'Nyhetsbrev', title: 'Gå med i Viking-klanen',
       desc: 'Var först att veta om nya produkter, lanseringar och exklusiva erbjudanden.',
-      placeholder: 'din.email@example.com', subscribe: 'Prenumerera', sending: 'Skickar...',
+      placeholder: 'din.email@example.com', emailLabel: 'Din e-postadress', subscribe: 'Prenumerera', sending: 'Skickar...',
       noThanks: 'Nej tack, kanske senare', noSpam: 'Ingen spam – avsluta när du vill.',
       success: 'Tack för att du prenumererar!', inbox: 'Håll utkik i din inkorg.',
       invalid: 'Ange en giltig e-postadress.', error: 'Något gick fel. Försök igen.', close: 'Stäng',
+      perk: '10% rabatt direkt', already: 'Du prenumererar redan – här är din kod',
+      codeLabel: 'Din rabattkod', copy: 'Kopiera kod', copied: 'Kopierad!',
+      codeNote: 'Klistra in koden i rutan "Rabattkod" i kassan. Ger 10% på enstaka flaska.',
+      shopNow: 'Handla nu',
     },
     waitlist: {
       title: 'Produkten kommer snart', subtitle: 'Låt oss veta när du vill köpa',
@@ -456,10 +460,14 @@ export const translations: Record<Lang, any> = {
     newsletter: {
       badge: 'Newsletter', title: 'Join the Viking clan',
       desc: 'Be first to know about new products, launches and exclusive offers.',
-      placeholder: 'your.email@example.com', subscribe: 'Subscribe', sending: 'Sending...',
+      placeholder: 'your.email@example.com', emailLabel: 'Your email address', subscribe: 'Subscribe', sending: 'Sending...',
       noThanks: 'No thanks, maybe later', noSpam: 'No spam – unsubscribe anytime.',
       success: 'Thanks for subscribing!', inbox: 'Keep an eye on your inbox.',
       invalid: 'Enter a valid email address.', error: 'Something went wrong. Please try again.', close: 'Close',
+      perk: '10% off right away', already: 'You are already subscribed – here is your code',
+      codeLabel: 'Your discount code', copy: 'Copy code', copied: 'Copied!',
+      codeNote: 'Paste it into the "Discount code" box at checkout. Gives 10% off a single bottle.',
+      shopNow: 'Shop now',
     },
     waitlist: {
       title: 'Product coming soon', subtitle: 'Let us know when you want to buy',

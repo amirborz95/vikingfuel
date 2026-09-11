@@ -31,6 +31,8 @@ export default function HistorySection({
   userEmail,
   refreshTrigger,
 }: HistorySectionProps) {
+  const { lang } = useLanguage();
+  const en = lang === 'en';
   const [orders, setOrders] = React.useState<Order[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
@@ -136,10 +138,10 @@ export default function HistorySection({
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                         <div>
                           <h3 className="font-bold text-lg text-foreground">
-                            Beställning #{order.id.slice(-8).toUpperCase()}
+                            {en ? 'Order' : 'Beställning'} #{order.id.slice(-8).toUpperCase()}
                           </h3>
                           <p className="text-sm text-muted-foreground mt-1">
-                            {new Date(order.createdAt).toLocaleDateString('sv-SE', {
+                            {new Date(order.createdAt).toLocaleDateString(en ? 'en-GB' : 'sv-SE', {
                               weekday: 'long',
                               year: 'numeric',
                               month: 'long',
@@ -188,7 +190,7 @@ export default function HistorySection({
                         </p>
                         {order.shippingAddress?.name && (
                           <p>
-                            <span className="font-semibold">{en ? 'Recipient:' : 'Mottakare:'}</span> {order.shippingAddress.name}
+                            <span className="font-semibold">{en ? 'Recipient:' : 'Mottagare:'}</span> {order.shippingAddress.name}
                           </p>
                         )}
                       </div>

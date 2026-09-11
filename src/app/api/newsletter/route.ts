@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readSubscribers, addSubscriber } from '@/lib/newsletter';
+import { NEWSLETTER_CODE, NEWSLETTER_CODE_PERCENT } from '@/lib/discount';
 
 export async function GET() {
   try {
@@ -24,6 +25,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       alreadySubscribed: !added,
+      // The welcome discount. Handed out on every successful subscribe — also
+      // to someone already on the list, so nobody is left without their code.
+      discountCode: NEWSLETTER_CODE,
+      discountPercent: NEWSLETTER_CODE_PERCENT,
       message: added
         ? 'Tack för att du prenumererar!'
         : 'Du prenumererar redan – tack!',

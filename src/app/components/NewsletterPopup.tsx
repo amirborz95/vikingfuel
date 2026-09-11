@@ -6,6 +6,7 @@ import Icon from '@/components/ui/AppIcon';
 import { useLanguage } from '@/context/LanguageContext';
 
 const STORAGE_KEY = 'vf_newsletter_seen';
+const CODE_KEY = 'vf_newsletter_code';
 const SHOW_DELAY_MS = 500; // appear right as the site opens, after the first paint
 const HIDDEN_PATHS = ['/admin', '/checkout', '/login', '/register'];
 
@@ -17,6 +18,8 @@ export default function NewsletterPopup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState('');
+  const [code, setCode] = useState('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -29,21 +32,65 @@ export default function NewsletterPopup() {
 
   // Allow other components (e.g. the "Subscribe" button on the accessories
   // card) to re-open the popup on demand, even after it has been dismissed.
+  // Someone who already subscribed gets their code straight back instead of
+  // having to type their address again.
   useEffect(() => {
     function openHandler() {
-      setDone('');
       setError('');
+      setCopied(false);
+      let saved = '';
+      try {
+        saved = localStorage.getItem(CODE_KEY) || '';
+      } catch {}
+      if (saved) {
+        setCode(saved);
+        setDone(t('newsletter.success'));
+      } else {
+        setDone('');
+        setCode('');
+      }
       setOpen(true);
     }
     window.addEventListener('open-newsletter', openHandler);
     return () => window.removeEventListener('open-newsletter', openHandler);
-  }, []);
+  }, [t]);
 
   function dismiss() {
     setOpen(false);
     try {
       localStorage.setItem(STORAGE_KEY, '1');
     } catch {}
+  }
+
+  function copyCode() {
+    if (!code) return;
+
+    // The synchronous path runs first and on its own is enough: it works in
+    // every browser, over plain http, and on a page that does not have focus —
+    // cases where navigator.clipboard either rejects or never settles, which
+    // would leave the button stuck without feedback.
+    try {
+      const el = document.createElement('textarea');
+      el.value = code;
+      el.setAttribute('readonly', '');
+      el.style.position = 'fixed';
+      el.style.top = '0';
+      el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.select();
+      el.setSelectionRange(0, code.length);
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    } catch {}
+
+    // Then the modern API, for browsers that have already dropped execCommand.
+    // Same string either way, so whichever lands last is still correct.
+    try {
+      navigator.clipboard?.writeText(code).catch(() => {});
+    } catch {}
+
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2200);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -63,11 +110,14 @@ export default function NewsletterPopup() {
       });
       const payload = await res.json();
       if (!res.ok) throw new Error(payload?.error || 'Något gick fel');
-      setDone(t('newsletter.success'));
+      const granted = String(payload?.discountCode || '');
+      setCode(granted);
+      setDone(payload?.alreadySubscribed ? t('newsletter.already') : t('newsletter.success'));
       try {
         localStorage.setItem(STORAGE_KEY, '1');
+        if (granted) localStorage.setItem(CODE_KEY, granted);
       } catch {}
-      setTimeout(() => setOpen(false), 2600);
+      // No auto-close here — the code stays up until they close the popup.
     } catch (err: any) {
       setError(err?.message || t('newsletter.error'));
     } finally {
@@ -94,12 +144,48 @@ export default function NewsletterPopup() {
         </button>
 
         {done ? (
-          <div className="py-4">
+          <div className="py-2">
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
               <Icon name="CheckIcon" size={32} className="text-emerald-600" />
             </div>
             <p className="text-xl font-bold text-neutral-900">{done}</p>
-            <p className="mt-1.5 text-sm text-neutral-500">{t('newsletter.inbox')}</p>
+
+            {code ? (
+              <>
+                <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
+                  {t('newsletter.codeLabel')}
+                </p>
+                <div className="mt-2 rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50 px-4 py-4">
+                  <span className="select-all font-mono text-2xl font-bold tracking-[0.15em] text-emerald-700">
+                    {code}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={copyCode}
+                  className={`mt-3 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-semibold text-white shadow-sm transition ${
+                    copied
+                      ? 'bg-emerald-700 shadow-emerald-700/20'
+                      : 'bg-emerald-600 shadow-emerald-600/20 hover:bg-emerald-700'
+                  }`}
+                >
+                  <Icon name={copied ? 'CheckIcon' : 'ClipboardIcon'} size={18} />
+                  {copied ? t('newsletter.copied') : t('newsletter.copy')}
+                </button>
+                <p className="mt-3 text-xs leading-relaxed text-neutral-500">
+                  {t('newsletter.codeNote')}
+                </p>
+                <a
+                  href="/products"
+                  onClick={dismiss}
+                  className="mt-4 inline-block text-xs font-semibold text-emerald-700 underline underline-offset-4 transition hover:text-emerald-800"
+                >
+                  {t('newsletter.shopNow')}
+                </a>
+              </>
+            ) : (
+              <p className="mt-1.5 text-sm text-neutral-500">{t('newsletter.inbox')}</p>
+            )}
           </div>
         ) : (
           <>
@@ -112,6 +198,10 @@ export default function NewsletterPopup() {
             <h2 className="mt-2 text-2xl font-bold tracking-tight text-neutral-900">{t('newsletter.title')}</h2>
             <p className="mx-auto mt-2.5 max-w-xs text-sm leading-relaxed text-neutral-500">
               {t('newsletter.desc')}
+            </p>
+            <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-bold text-emerald-700 ring-1 ring-emerald-100">
+              <Icon name="TagIcon" size={16} />
+              {t('newsletter.perk')}
             </p>
 
             <form onSubmit={handleSubmit} className="mt-6 space-y-3">

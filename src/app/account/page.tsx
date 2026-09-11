@@ -77,7 +77,7 @@ export default function AccountPage() {
                             : 'text-foreground hover:bg-muted'
                         }`}
                       >
-                        Beställningar
+                        {t('account.orders')}
                       </button>
                       <button
                         onClick={() => setActiveTab('history')}
@@ -87,7 +87,7 @@ export default function AccountPage() {
                             : 'text-foreground hover:bg-muted'
                         }`}
                       >
-                        Historik
+                        {t('account.history')}
                       </button>
                     </nav>
 
@@ -97,7 +97,7 @@ export default function AccountPage() {
                         onClick={logout}
                         className="w-full rounded-xl bg-rose-500 px-4 py-3 text-sm font-bold text-white hover:bg-rose-600 transition-colors"
                       >
-                        Logga ut
+                        {t('account.logout')}
                       </button>
                     </div>
                   </div>

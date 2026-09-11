@@ -21,6 +21,10 @@ const CODES: Record<string, { percent: number; singleBottleOnly: boolean; label:
   VIKING10: { percent: 10, singleBottleOnly: true, label: '10% på enstaka flaska' },
 };
 
+/** The code handed out in the newsletter popup. Must exist in CODES above. */
+export const NEWSLETTER_CODE = 'VIKING10';
+export const NEWSLETTER_CODE_PERCENT = CODES[NEWSLETTER_CODE].percent;
+
 /** Compute the discount for a code against the cart. Always safe to call. */
 export function computeDiscount(rawCode: string, items: DiscountItem[]): DiscountResult {
   const code = (rawCode || '').trim().toUpperCase();
